@@ -20,9 +20,9 @@ public class Event {
     @Column(name = "CREATE_AT")
     private Date createAt;
 
-    @Lob
+    /*@Lob
     @Column(name = "PICTURE_PATH")
-    private byte[] picturePath;
+    private byte[] picturePath;*/
 
     @Column(name = "START_DATE")
     private Date startDate;

@@ -21,13 +21,13 @@ public class Post {
     @Column(name = "CREATED_AT")
     private Date createdAt;
 
-    @Lob
+    /*@Lob
     @Column(name = "HTML_CONTENT")
     private String htmlContent;
 
     @Lob
     @Column(name = "IMAGE")
-    private byte[] image;
+    private byte[] image;*/
 
     @Column(name = "OUTSTANDING")
     private Boolean outstanding;

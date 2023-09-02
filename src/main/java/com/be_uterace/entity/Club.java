@@ -39,9 +39,9 @@ public class Club {
     @Column(name = "MAX_PACE")
     private Double maxPace;
 
-    @Lob
+    /*@Lob
     @Column(name = "PICTURE_PATH")
-    private byte[] picturePath;
+    private byte[] picturePath;*/
 
     @ManyToOne
     @JoinColumn(name = "CREATOR_ID", referencedColumnName = "USER_ID")

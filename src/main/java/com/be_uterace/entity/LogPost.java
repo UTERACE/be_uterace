@@ -18,24 +18,24 @@ public class LogPost {
     @Column(name = "TITLE_BEFORE")
     private String titleBefore;
 
-    @Lob
+    /*@Lob
     @Column(name = "CONTENT_BEFORE")
     private String contentBefore;
 
     @Lob
     @Column(name = "IMAGE_BEFORE")
-    private byte[] imageBefore;
+    private byte[] imageBefore;*/
 
     @Column(name = "TITLE_AFTER")
     private String titleAfter;
 
-    @Lob
+    /*@Lob
     @Column(name = "CONTENT_AFTER")
     private String contentAfter;
 
     @Lob
     @Column(name = "IMAGE_AFTER")
-    private byte[] imageAfter;
+    private byte[] imageAfter;*/
 
     @ManyToOne
     @JoinColumn(name = "USER_MODIFY", referencedColumnName = "USER_ID")

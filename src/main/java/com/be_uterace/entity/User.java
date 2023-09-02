@@ -1,18 +1,29 @@
 package com.be_uterace.entity;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.Date;
+import java.util.Set;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "\"USER\"") // Specify the table name with double quotes
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "USER_ID")
     private Long userId;
 
     @Column(name = "USER_NAME")
-    private String userName;
+    private String username;
 
     @Column(name = "PASSWORD")
     private String password;
@@ -23,8 +34,11 @@ public class User {
     @Column(name = "CREATED_AT")
     private Date createdAt;
 
-    @Column(name = "FULL_NAME")
-    private String fullName;
+    @Column(name = "FIRSTNAME")
+    private String firstName;
+
+    @Column(name = "LASTNAME")
+    private String lastName;
 
     @Column(name = "DATE_OF_BIRTH")
     private Date dateOfBirth;
@@ -55,13 +69,19 @@ public class User {
     private Area area;
 
     @ManyToOne
-    @JoinColumn(name = "SIZE_ID", referencedColumnName = "SIZE_ID")
-    private ShirtSize shirtSize;
-
-    @ManyToOne
     @JoinColumn(name = "ORG_ID", referencedColumnName = "ORG_ID")
     private Organization organization;
 
+    @ManyToOne
+    @JoinColumn(name = "ORG_CHILD_ID", referencedColumnName = "ORG_ID")
+    private Organization organization_child;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "USER_ROLE",
+            joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID"),
+            inverseJoinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ROLE_ID")
+    )
+    private Set<Role> roles;
     // Other fields, getters, and setters
 }
 
