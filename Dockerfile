@@ -4,6 +4,6 @@ LABEL mentainer="sinhhung"
 
 WORKDIR /app
 
-COPY target/be_uterace-0.0.1-SNAPSHOT.jar.jar /app/be_uterace.jar
+COPY target/be_uterace-0.0.1-SNAPSHOT.jar /app/be_uterace.jar
 
 ENTRYPOINT ["java", "-jar", "be_uterace.jar"]
