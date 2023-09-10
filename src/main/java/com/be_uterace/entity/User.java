@@ -1,11 +1,10 @@
 package com.be_uterace.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Set;
 
@@ -13,6 +12,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "\"USER\"") // Specify the table name with double quotes
 public class User {
@@ -31,8 +31,9 @@ public class User {
     @Column(name = "EMAIL")
     private String email;
 
+    @CreationTimestamp
     @Column(name = "CREATED_AT")
-    private Date createdAt;
+    private Timestamp createdAt;
 
     @Column(name = "FIRSTNAME")
     private String firstName;
@@ -48,6 +49,9 @@ public class User {
 
     @Column(name = "TEL_NUM")
     private String telNum;
+
+    @Column(name = "AVATAR_PATH")
+    private String avatarPath;
 
     @Column(name = "TOTAL_DISTANCE")
     private Double totalDistance;

@@ -13,20 +13,17 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterDto {
-    private String userName;
+    private String username;
     private String password;
+    private String firstname;
+    private String lastname;
     private String email;
-    private Date createdAt;
-    private String firstName;
-    private String lastName;
-    private Date dateOfBirth;
+    private String telNumber;
+    private String birthday;
     private String gender;
-    private String telNum;
-    private Double totalDistance;
-    private Integer ranking;
-    private String status;
-    private String linkFb;
-    private String homeNumber;
-    private Area area;
-
+    private String address;
+    private String province;
+    private String district;
+    private String ward;
+    //private String recaptcha_token;
 }

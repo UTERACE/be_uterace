@@ -1,8 +1,13 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.LoginDto;
+import com.be_uterace.payload.request.RegisterDto;
 import com.be_uterace.payload.response.JWTAuthResponse;
+import com.be_uterace.payload.response.LoginResponse;
+import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.AuthService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private AuthService authService;
+    private UserRepository userRepository;
 
     public AuthController(AuthService authService) {
         this.authService = authService;
@@ -21,14 +27,14 @@ public class AuthController {
 
     // Build Login REST API
     @PostMapping(value = {"/login", "/signin"})
-    public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto){
-        String token = authService.login(loginDto);
-
-        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        jwtAuthResponse.setAccessToken(token);
-
-        return ResponseEntity.ok(jwtAuthResponse);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginDto loginDto){
+        LoginResponse loginResponse = authService.login(loginDto);
+        return ResponseEntity.ok(loginResponse);
     }
 
-
+    @PostMapping(value = {"/register", "/signup"})
+    public ResponseEntity<ResponseObject> register(@RequestBody RegisterDto registerDto){
+        ResponseObject loginResponse = authService.register(registerDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
+    }
 }
