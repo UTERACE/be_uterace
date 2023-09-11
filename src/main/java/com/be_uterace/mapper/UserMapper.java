@@ -1,7 +1,9 @@
 package com.be_uterace.mapper;
 
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.AreaDto;
 import com.be_uterace.payload.request.RegisterDto;
+import com.be_uterace.payload.response.UserResponse;
 import com.be_uterace.repository.AreaRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import static com.be_uterace.utils.DateConverter.convertDateToString;
 import static com.be_uterace.utils.DateConverter.convertStringToDate;
 
 @Component
@@ -20,7 +23,7 @@ public class UserMapper {
 
 
     public static User convertFromRegisterDtoToUser(RegisterDto registerDto) {
-        User user = User.builder()
+        return User.builder()
                 .username(registerDto.getUsername())
                 .password(registerDto.getPassword())
                 .firstName(registerDto.getFirstname())
@@ -31,6 +34,20 @@ public class UserMapper {
                 .gender(registerDto.getGender())
                 .homeNumber(registerDto.getAddress())
                 .build();
-        return user;
+    }
+
+    public static UserResponse convertFromUserToUserResponse(User user) {
+        return UserResponse.builder()
+                .firstname(user.getFirstName())
+                .lastname(user.getLastName())
+                .email(user.getEmail())
+                .telNumber(user.getTelNum())
+                .birthday(convertDateToString(user.getDateOfBirth()))
+                .gender(user.getGender())
+                .address(user.getHomeNumber())
+                .province(user.getArea().getProvince())
+                .district(user.getArea().getDistrict())
+                .ward(user.getArea().getPrecinct())
+                .build();
     }
 }
