@@ -1,13 +1,12 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.payload.request.ChangePasswordDto;
+import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.UserResponse;
 import com.be_uterace.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -22,9 +21,15 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping(value = {"/a"})
+    @GetMapping()
     public ResponseEntity<UserResponse> getUserInfoController(Authentication authentication) {
         UserResponse userResponse = userService.getUserInfo(authentication);
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @PutMapping(value = {"/change-password"})
+    public ResponseEntity<ResponseObject> changePasswordController(@RequestBody ChangePasswordDto changePasswordDto, Authentication authentication) {
+        ResponseObject userResponse = userService.changePassword(changePasswordDto,authentication);
         return ResponseEntity.ok(userResponse);
     }
 
