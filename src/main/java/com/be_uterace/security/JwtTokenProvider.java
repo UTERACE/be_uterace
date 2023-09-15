@@ -41,9 +41,38 @@ public class JwtTokenProvider {
         return token;
     }
 
+    public String generateAccessToken(String username){
+
+        Date currentDate = new Date();
+
+        Date expireDate = new Date(currentDate.getTime() + jwtAccessTokenExpirationDate);
+
+        String token = Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(expireDate)
+                .signWith(key())
+                .compact();
+        return token;
+    }
+
     public String generateRefreshToken(Authentication authentication){
         String username = authentication.getName();
 
+        Date currentDate = new Date();
+
+        Date expireDate = new Date(currentDate.getTime() + jwtRefreshTokenExpirationDate);
+
+        String token = Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(expireDate)
+                .signWith(key())
+                .compact();
+        return token;
+    }
+
+    public String generateRefreshToken(String username){
         Date currentDate = new Date();
 
         Date expireDate = new Date(currentDate.getTime() + jwtRefreshTokenExpirationDate);

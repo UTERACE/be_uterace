@@ -5,6 +5,7 @@ import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.RegisterDto;
 import com.be_uterace.payload.response.LoginResponse;
+import com.be_uterace.payload.response.RefreshTokenResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.repository.AreaRepository;
 import com.be_uterace.repository.RoleRepository;
@@ -17,9 +18,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private AreaRepository areaRepository;
     private PasswordEncoder passwordEncoder;
     private JwtTokenProvider jwtTokenProvider;
+    private UserDetailsService userDetailsService;
 
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
@@ -41,13 +47,15 @@ public class AuthServiceImpl implements AuthService {
                            RoleRepository roleRepository,
                            AreaRepository areaRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtTokenProvider jwtTokenProvider) {
+                           JwtTokenProvider jwtTokenProvider,
+                           UserDetailsService userDetailsService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.areaRepository = areaRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -72,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
                 })
                 .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
                 .collect(Collectors.toList());
-        LoginResponse loginResponse = LoginResponse.builder()
+        return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .firstname(user.getFirstName())
@@ -81,7 +89,6 @@ public class AuthServiceImpl implements AuthService {
                 .image(user.getAvatarPath())
                 .roles(roleInfoList)
                 .build();
-        return loginResponse;
     }
 
     @Override
@@ -95,5 +102,30 @@ public class AuthServiceImpl implements AuthService {
         return ResponseObject.builder().status(201)
                 .message(Constant.SUCCESS_REGISTER)
                 .build();
+    }
+
+    @Override
+    public RefreshTokenResponse refreshToken(String refreshToken) {
+        if(StringUtils.hasText(refreshToken) && jwtTokenProvider.validateToken(refreshToken)) {
+
+            // get username from token
+            String username = jwtTokenProvider.getUsername(refreshToken);
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            User user = userOptional.get();
+
+            String access_Token = jwtTokenProvider.generateAccessToken(user.getUsername());
+            String refresh_Token = jwtTokenProvider.generateRefreshToken(user.getUsername());
+
+            return RefreshTokenResponse.builder()
+                    .accessToken(access_Token)
+                    .refreshToken(refresh_Token)
+                    .build();
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseObject resetPassword(RegisterDto registerDto) {
+        return null;
     }
 }
