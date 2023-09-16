@@ -4,6 +4,8 @@ import com.be_uterace.entity.Role;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.RegisterDto;
+import com.be_uterace.payload.request.ResetPasswordDto;
+import com.be_uterace.payload.response.EmailDetails;
 import com.be_uterace.payload.response.LoginResponse;
 import com.be_uterace.payload.response.RefreshTokenResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -12,24 +14,24 @@ import com.be_uterace.repository.RoleRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.security.JwtTokenProvider;
 import com.be_uterace.service.AuthService;
+import com.be_uterace.service.EmailService;
 import com.be_uterace.utils.Constant;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.be_uterace.mapper.UserMapper.convertFromRegisterDtoToUser;
+import static com.be_uterace.utils.RandomPasswordGenerator.generateRandomPassword;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -40,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
     private JwtTokenProvider jwtTokenProvider;
     private UserDetailsService userDetailsService;
+    private EmailService emailService;
 
 
     public AuthServiceImpl(AuthenticationManager authenticationManager,
@@ -48,7 +51,8 @@ public class AuthServiceImpl implements AuthService {
                            AreaRepository areaRepository,
                            PasswordEncoder passwordEncoder,
                            JwtTokenProvider jwtTokenProvider,
-                           UserDetailsService userDetailsService) {
+                           UserDetailsService userDetailsService,
+                           EmailService emailService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -56,40 +60,46 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
+        this.emailService = emailService;
     }
 
     @Override
     public LoginResponse login(LoginDto loginDto) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    loginDto.getUsername(), loginDto.getPassword()));
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginDto.getUsername(), loginDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String accessToken = jwtTokenProvider.generateAccessToken(authentication);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-        Optional<User> userOptional = userRepository.findByUsername(loginDto.getUsername());
-        User user = userOptional.get();
-        Set<Role> roles = user.getRoles();
-        List<Map<String, Object>> roleInfoList = roles.stream()
-                .map(role -> {
-                    Map<String, Object> roleInfo = new HashMap<>();
-                    roleInfo.put("roleId", role.getRoleId());
-                    roleInfo.put("roleName", role.getRoleName());
-                    return roleInfo;
-                })
-                .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
-                .collect(Collectors.toList());
-        return LoginResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .firstname(user.getFirstName())
-                .lastname(user.getLastName())
-                .email(user.getEmail())
-                .image(user.getAvatarPath())
-                .roles(roleInfoList)
-                .build();
+            String accessToken = jwtTokenProvider.generateAccessToken(authentication);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+            Optional<User> userOptional = userRepository.findByUsername(loginDto.getUsername());
+            User user = userOptional.get();
+            Set<Role> roles = user.getRoles();
+            List<Map<String, Object>> roleInfoList = roles.stream()
+                    .map(role -> {
+                        Map<String, Object> roleInfo = new HashMap<>();
+                        roleInfo.put("roleId", role.getRoleId());
+                        roleInfo.put("roleName", role.getRoleName());
+                        return roleInfo;
+                    })
+                    .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
+                    .collect(Collectors.toList());
+            return LoginResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .firstname(user.getFirstName())
+                    .lastname(user.getLastName())
+                    .email(user.getEmail())
+                    .image(user.getAvatarPath())
+                    .roles(roleInfoList)
+                    .build();
+        } catch (AuthenticationException ex) {
+            // Xử lý lỗi xác thực (tên người dùng hoặc mật khẩu không đúng)
+            throw new BadCredentialsException("Tên người dùng hoặc mật khẩu không đúng");
+        }
     }
+
 
     @Override
     public ResponseObject register(RegisterDto registerDto) {
@@ -125,7 +135,30 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseObject resetPassword(RegisterDto registerDto) {
-        return null;
+    public ResponseObject resetPassword(ResetPasswordDto registerDto) {
+        Boolean userBoolean = userRepository.existsByUsername(registerDto.getUsername());
+        Boolean email = userRepository.existsByEmail(registerDto.getEmail());
+
+        int passwordLength = 12;
+        String randomPassword = generateRandomPassword(passwordLength);
+        String randomPasswordEncoder = passwordEncoder.encode(randomPassword);
+
+        Optional<User> userOptional = userRepository.findByUsername(registerDto.getUsername());
+        User user = userOptional.get();
+        user.setPassword(randomPasswordEncoder);
+        userRepository.save(user);
+
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(registerDto.getEmail())
+                .subject("Password Reset Request")
+                .msgBody("New password:" + randomPassword)
+                .build();
+        Boolean status
+                = emailService.sendSimpleMail(emailDetails);
+
+        return ResponseObject.builder()
+                .status(200)
+                .message("Reset mật khẩu thành công")
+                .build();
     }
 }

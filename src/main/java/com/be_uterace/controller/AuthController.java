@@ -48,10 +48,10 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(refreshTokenResponse);
     }
 
-//    @PostMapping(value = {"/reset-password"})
-//    public ResponseEntity<ResponseObject> resetPasswordController(@RequestBody ResetPasswordDto resetPasswordDto){
-//        ResponseObject loginResponse = authService.register(registerDto);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
-//    }
+    @PostMapping(value = {"/reset-password"})
+    public ResponseEntity<ResponseObject> resetPasswordController(@RequestBody ResetPasswordDto resetPasswordDto){
+        ResponseObject responseObject = authService.resetPassword(resetPasswordDto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
 
 }

@@ -26,7 +26,7 @@ public class EmailServiceImpl implements EmailService {
 
     // Method 1
     // To send a simple email
-    public String sendSimpleMail(EmailDetails details)
+    public Boolean sendSimpleMail(EmailDetails details)
     {
 
         // Try block to check for exceptions
@@ -44,12 +44,12 @@ public class EmailServiceImpl implements EmailService {
 
             // Sending the mail
             javaMailSender.send(mailMessage);
-            return "Mail Sent Successfully...";
+            return Boolean.TRUE;
         }
 
         // Catch block to handle the exceptions
         catch (Exception e) {
-            return "Error while Sending Mail";
+            return Boolean.FALSE;
         }
     }
 

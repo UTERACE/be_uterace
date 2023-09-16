@@ -2,6 +2,7 @@ package com.be_uterace.payload.response;
 
 // Importing required classes
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
+@Builder
 // Class
 public class EmailDetails {
 
