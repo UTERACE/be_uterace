@@ -5,10 +5,7 @@ import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.RegisterDto;
 import com.be_uterace.payload.request.ResetPasswordDto;
-import com.be_uterace.payload.response.EmailDetails;
-import com.be_uterace.payload.response.LoginResponse;
-import com.be_uterace.payload.response.RefreshTokenResponse;
-import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.response.*;
 import com.be_uterace.repository.AreaRepository;
 import com.be_uterace.repository.RoleRepository;
 import com.be_uterace.repository.UserRepository;
@@ -16,6 +13,7 @@ import com.be_uterace.security.JwtTokenProvider;
 import com.be_uterace.service.AuthService;
 import com.be_uterace.service.EmailService;
 import com.be_uterace.utils.Constant;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,7 +43,8 @@ public class AuthServiceImpl implements AuthService {
     private UserDetailsService userDetailsService;
     private EmailService emailService;
 
-
+    @Value("${google.recaptcha.key.secret}")
+    String recaptchaSecret;
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            RoleRepository roleRepository,
@@ -103,14 +103,25 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseObject register(RegisterDto registerDto) {
-        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        User user = convertFromRegisterDtoToUser(registerDto);
-        user.setArea(areaRepository.findArea(registerDto.getProvince(),
-                registerDto.getDistrict(),
-                registerDto.getWard()));
-        userRepository.save(user);
-        return ResponseObject.builder().status(201)
-                .message(Constant.SUCCESS_REGISTER)
+        String url = "https://www.google.com/recaptcha/api/siteverify";
+        String params = "?secret=" + recaptchaSecret + "&response=" + registerDto.getRecaptcha_token();
+        RestTemplate restTemplate = new RestTemplate();
+        RecaptchaResponse response = restTemplate.getForObject(url + params, RecaptchaResponse.class);
+
+        if(response.isSuccess()&&response.getScore()>=0.5) {
+            // CAPTCHA xác thực thành công
+            registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+            User user = convertFromRegisterDtoToUser(registerDto);
+            user.setArea(areaRepository.findArea(registerDto.getProvince(),
+                    registerDto.getDistrict(),
+                    registerDto.getWard()));
+            userRepository.save(user);
+            return ResponseObject.builder().status(201)
+                    .message(Constant.SUCCESS_REGISTER)
+                    .build();
+        }
+        return ResponseObject.builder().status(400)
+                .message(Constant.REGISTER_FAIL)
                 .build();
     }
 

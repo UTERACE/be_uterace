@@ -25,5 +25,5 @@ public class RegisterDto {
     private String province;
     private String district;
     private String ward;
-    //private String recaptcha_token;
+    private String recaptcha_token;
 }
