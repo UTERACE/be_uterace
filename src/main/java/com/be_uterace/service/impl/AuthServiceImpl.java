@@ -5,6 +5,7 @@ import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.RegisterDto;
 import com.be_uterace.payload.request.ResetPasswordDto;
+import com.be_uterace.payload.request.ThirdPartyDto;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.repository.AreaRepository;
 import com.be_uterace.repository.RoleRepository;
@@ -14,6 +15,9 @@ import com.be_uterace.service.AuthService;
 import com.be_uterace.service.EmailService;
 import com.be_uterace.utils.Constant;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -100,6 +104,96 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public ThirdPartyResponse thirdParty(ThirdPartyDto thirdPartyDto) {
+        String urlLoginGoogle = "https://www.googleapis.com/oauth2/v2/userinfo";
+        String urlLoginFacebook = "https://graph.facebook.com/me?fields=id,first_name,last_name,email,picture&access_token=";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + thirdPartyDto.getAccessToken());
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        RestTemplate restTemplate = new RestTemplate();
+        if (thirdPartyDto.getType().equals("google")) {
+            GoogleResponse response = restTemplate.exchange(urlLoginGoogle, HttpMethod.GET, entity, GoogleResponse.class).getBody();
+            assert response != null;
+            User user = userRepository.findByUsername(response.getEmail()).orElse(null);
+            if (user == null) {
+                return ThirdPartyResponse.builder()
+                        .id(response.getId())
+                        .accessToken(null)
+                        .refreshToken(null)
+                        .isNewUser(true)
+                        .firstname(response.getGiven_name())
+                        .lastname(response.getFamily_name())
+                        .email(response.getEmail())
+                        .image(response.getPicture())
+                        .roles(null)
+                        .build();
+            }else {
+                Set<Role> roles = user.getRoles();
+                List<Map<String, Object>> roleInfoList = roles.stream()
+                        .map(role -> {
+                            Map<String, Object> roleInfo = new HashMap<>();
+                            roleInfo.put("roleId", role.getRoleId());
+                            roleInfo.put("roleName", role.getRoleName());
+                            return roleInfo;
+                        })
+                        .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
+                        .collect(Collectors.toList());
+                return ThirdPartyResponse.builder()
+                        .accessToken(jwtTokenProvider.generateAccessToken(user.getUsername()))
+                        .refreshToken(jwtTokenProvider.generateRefreshToken(user.getUsername()))
+                        .isNewUser(false)
+                        .firstname(user.getFirstName())
+                        .lastname(user.getLastName())
+                        .email(user.getEmail())
+                        .image(user.getAvatarPath())
+                        .roles(roleInfoList)
+                        .build();
+            }
+        } else if (thirdPartyDto.getType().equals("facebook")) {
+            FacebookResponse response = restTemplate.exchange(urlLoginFacebook + thirdPartyDto.getAccessToken(), HttpMethod.GET, entity, FacebookResponse.class).getBody();
+            assert response != null;
+            User user = userRepository.findByUsername(response.getId()+"-fb").orElse(null);
+            if (user == null) {
+                return ThirdPartyResponse.builder()
+                        .id(response.getId())
+                        .accessToken(null)
+                        .refreshToken(null)
+                        .isNewUser(true)
+                        .firstname(response.getFirst_name())
+                        .lastname(response.getLast_name())
+                        .email(response.getEmail())
+                        .image(response.getPictureUrl())
+                        .roles(null)
+                        .build();
+            }else {
+                Set<Role> roles = user.getRoles();
+                List<Map<String, Object>> roleInfoList = roles.stream()
+                        .map(role -> {
+                            Map<String, Object> roleInfo = new HashMap<>();
+                            roleInfo.put("roleId", role.getRoleId());
+                            roleInfo.put("roleName", role.getRoleName());
+                            return roleInfo;
+                        })
+                        .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
+                        .collect(Collectors.toList());
+                return ThirdPartyResponse.builder()
+                        .accessToken(jwtTokenProvider.generateAccessToken(user.getUsername()))
+                        .refreshToken(jwtTokenProvider.generateRefreshToken(user.getUsername()))
+                        .isNewUser(false)
+                        .firstname(user.getFirstName())
+                        .lastname(user.getLastName())
+                        .email(user.getEmail())
+                        .image(user.getAvatarPath())
+                        .roles(roleInfoList)
+                        .build();
+            }
+        }
+
+
+        return null;
+    }
+
 
     @Override
     public ResponseObject register(RegisterDto registerDto) {
@@ -115,6 +209,21 @@ public class AuthServiceImpl implements AuthService {
             user.setArea(areaRepository.findArea(registerDto.getProvince(),
                     registerDto.getDistrict(),
                     registerDto.getWard()));
+            if (registerDto.getType_account().equals("google")) {
+                user.setTypeAccount("google");
+                user.setPassword(registerDto.getPassword());
+                user.setUsername(registerDto.getEmail());
+                user.setAvatarPath(registerDto.getImage());
+            }
+            else if (registerDto.getType_account().equals("facebook")) {
+                user.setTypeAccount("facebook");
+                user.setUsername(registerDto.getUsername()+"-fb");
+                user.setPassword(registerDto.getPassword());
+                user.setAvatarPath(registerDto.getImage());
+            }
+            else if (registerDto.getType_account().equals("default")) {
+                user.setTypeAccount("default");
+            }
             userRepository.save(user);
             return ResponseObject.builder().status(201)
                     .message(Constant.SUCCESS_REGISTER)

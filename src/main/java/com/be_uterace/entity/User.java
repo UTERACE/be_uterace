@@ -68,6 +68,9 @@ public class User {
     @Column(name = "HOME_NUMBER")
     private String homeNumber;
 
+    @Column(name = "TYPE_ACCOUNT")
+    private String typeAccount;
+
     @ManyToOne
     @JoinColumn(name = "AREA_ID", referencedColumnName = "AREA_ID")
     private Area area;

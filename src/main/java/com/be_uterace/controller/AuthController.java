@@ -3,9 +3,11 @@ package com.be_uterace.controller;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.RegisterDto;
 import com.be_uterace.payload.request.ResetPasswordDto;
+import com.be_uterace.payload.request.ThirdPartyDto;
 import com.be_uterace.payload.response.LoginResponse;
 import com.be_uterace.payload.response.RefreshTokenResponse;
 import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.response.ThirdPartyResponse;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,12 @@ public class AuthController {
     public ResponseEntity<LoginResponse> loginController(@RequestBody LoginDto loginDto){
         LoginResponse loginResponse = authService.login(loginDto);
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping(value = {"/login/third-party"})
+    public ResponseEntity<ThirdPartyResponse> thirdPartyController(@RequestBody ThirdPartyDto thirdPartyDto){
+        ThirdPartyResponse thirdPartyResponse = authService.thirdParty(thirdPartyDto);
+        return ResponseEntity.ok(thirdPartyResponse);
     }
 
     @PostMapping(value = {"/register", "/signup"})

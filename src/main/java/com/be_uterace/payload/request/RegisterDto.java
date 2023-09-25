@@ -18,6 +18,8 @@ public class RegisterDto {
     private String firstname;
     private String lastname;
     private String email;
+    private String image;
+    private String type_account;
     private String telNumber;
     private String birthday;
     private String gender;
