@@ -40,7 +40,7 @@ public class Event {
     private Date endDate;
 
     @Column(name = "STATUS")
-    private Integer status;
+    private String status;
 
     @Column(name = "RUNNING_CATEGORY")
     private Double runningCategory;
@@ -50,6 +50,9 @@ public class Event {
 
     @Column(name = "NUM_OF_RUNNER")
     private Integer numOfRunner;
+
+    @Column(name = "NUM_OF_CLUBS")
+    private Integer numOfClubs;
 
     @Column(name = "TOTAL_DISTANCE")
     private Double totalDistance;

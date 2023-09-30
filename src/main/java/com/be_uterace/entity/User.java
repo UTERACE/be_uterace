@@ -56,6 +56,9 @@ public class User {
     @Column(name = "TOTAL_DISTANCE")
     private Double totalDistance;
 
+    @Column(name = "PACE")
+    private Double pace;
+
     @Column(name = "RANKING")
     private Integer ranking;
 

@@ -1,6 +1,7 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.ChangePasswordDto;
+import com.be_uterace.payload.request.UpdateDto;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.UserResponse;
 import com.be_uterace.service.UserService;
@@ -30,6 +31,12 @@ public class UserController {
     @PutMapping(value = {"/change-password"})
     public ResponseEntity<ResponseObject> changePasswordController(@RequestBody ChangePasswordDto changePasswordDto, Authentication authentication) {
         ResponseObject userResponse = userService.changePassword(changePasswordDto,authentication);
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @PutMapping(value = {"/update"})
+    public ResponseEntity<ResponseObject> updateUserController(@RequestBody UpdateDto updateDto, Authentication authentication) {
+        ResponseObject userResponse = userService.updateUser(updateDto,authentication);
         return ResponseEntity.ok(userResponse);
     }
 

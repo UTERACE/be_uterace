@@ -36,7 +36,7 @@ public class Club {
     private Integer clubRanking;
 
     @Column(name = "STATUS")
-    private Integer status;
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "ADMIN", referencedColumnName = "USER_ID")
@@ -57,6 +57,12 @@ public class Club {
     private User creatorUser;
 
     // Getters and setters
+
+    @Transient // Không ánh xạ trực tiếp từ cơ sở dữ liệu
+    private Long memberCount;
+
+    @Transient // Không ánh xạ trực tiếp từ cơ sở dữ liệu
+    private Long eventCount;
 }
 
 

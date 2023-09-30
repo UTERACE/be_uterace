@@ -18,9 +18,6 @@ import static com.be_uterace.utils.DateConverter.convertStringToDate;
 @Transactional
 public class UserMapper {
     private final ModelMapper modelMapper = new ModelMapper();
-    private static AreaRepository areaRepository;
-
-
 
     public static User convertFromRegisterDtoToUser(RegisterDto registerDto) {
         return User.builder()
