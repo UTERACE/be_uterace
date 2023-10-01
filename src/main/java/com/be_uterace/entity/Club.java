@@ -48,21 +48,13 @@ public class Club {
     @Column(name = "MAX_PACE")
     private Double maxPace;
 
-    /*@Lob
     @Column(name = "PICTURE_PATH")
-    private byte[] picturePath;*/
+    private String picturePath;
 
     @ManyToOne
     @JoinColumn(name = "CREATOR_ID", referencedColumnName = "USER_ID")
     private User creatorUser;
 
-    // Getters and setters
-
-    @Transient // Không ánh xạ trực tiếp từ cơ sở dữ liệu
-    private Long memberCount;
-
-    @Transient // Không ánh xạ trực tiếp từ cơ sở dữ liệu
-    private Long eventCount;
 }
 
 

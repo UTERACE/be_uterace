@@ -12,7 +12,7 @@ import java.util.Map;
 @Builder
 public class HomePageResponse {
     List<Map<String, Object>> overview;
-    List<Map<String, Object>> ranking_club;
+    List<ClubRankingResponse> ranking_club;
     List<Map<String, Object>> ranking_user;
     List<Map<String, Object>> events;
     List<Map<String, Object>> clubs;

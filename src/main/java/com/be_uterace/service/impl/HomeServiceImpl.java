@@ -1,8 +1,8 @@
 package com.be_uterace.service.impl;
 
-import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Event;
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.response.ClubRankingResponse;
 import com.be_uterace.payload.response.HomePageResponse;
 import com.be_uterace.projection.ClubRankingProjection;
 import com.be_uterace.repository.ClubRepository;
@@ -40,20 +40,21 @@ public class HomeServiceImpl implements HomeService {
             overviewList.add(overviewItem);
         }
         List<ClubRankingProjection> clubList = clubRepository.findTop8ClubsWithMemberAndEventCount();
-        List<Map<String, Object>> rankingClubList = new ArrayList<>();
+        List<ClubRankingResponse> rankingClubList = new ArrayList<>();
 
         for (ClubRankingProjection club : clubList) {
-            Map<String, Object> rankingClubItem = new HashMap<>();
+            ClubRankingResponse rankingClubItem = new ClubRankingResponse();
+            rankingClubItem.setClub_id(club.getClubId());
+            rankingClubItem.setRanking(club.getClubRanking());
+            rankingClubItem.setName(club.getClubName());
+            rankingClubItem.setImage(club.getPicturePath());
+            rankingClubItem.setTotal_distance(club.getClubTotalDistance());
+            rankingClubItem.setTotal_members(club.getMemberCount());
+            rankingClubItem.setTotal_activities(club.getTotalActivities());
 
-            rankingClubItem.put("club_id", club.getClubId());
-            rankingClubItem.put("ranking", club.getClubRanking());
-            rankingClubItem.put("name", club.getClubName());
-            rankingClubItem.put("image", null);
-            rankingClubItem.put("total_distance", club.getClubTotalDistance());
-            rankingClubItem.put("total_members", club.getMemberCount());
-            rankingClubItem.put("total_activities", club.getEventCount());
             rankingClubList.add(rankingClubItem);
         }
+
 
         List<User> userList = userRepository.findTop8ByOrderByRankingAsc();
         List<Map<String, Object>> userRanking = new ArrayList<>();

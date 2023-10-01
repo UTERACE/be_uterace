@@ -1,11 +1,12 @@
 package com.be_uterace.projection;
 
-public interface ClubRankingProjection {
+public interface ScoreboardClubProjection {
     Long getClubId();
-    Integer getClubRanking();
     String getClubName();
     String getPicturePath();
-    Double getClubTotalDistance();
-    Long getMemberCount();
+    Double getTotalDistance();
+    Long getTotalMembers();
     Long getTotalActivities();
+    Integer getRanking();
 }
+
