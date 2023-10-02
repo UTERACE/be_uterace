@@ -1,13 +1,10 @@
 package com.be_uterace.controller;
 
-import com.be_uterace.payload.request.ScoreboardDto;
-import com.be_uterace.payload.response.HomePageResponse;
 import com.be_uterace.payload.response.ScoreboardResponse;
 import com.be_uterace.service.ScoreboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -21,15 +18,21 @@ public class ScoreboardController {
     }
 
     @GetMapping
-    public ResponseEntity<ScoreboardResponse> getScoreboardController(@RequestParam String ranking, @RequestBody ScoreboardDto scoreboardDto) {
+    public ResponseEntity<ScoreboardResponse> getScoreboardController(
+            @RequestParam String ranking,
+            @RequestParam int month,
+            @RequestParam int year,
+            @RequestParam int current_page,
+            @RequestParam int per_page
+    ) {
         if (Objects.equals(ranking, "club")){
             ScoreboardResponse scoreboardResponse = scoreboardService.getScoreboardClub(
-                    scoreboardDto.getMonth(),scoreboardDto.getYear(),
-                    scoreboardDto.getCurrent_page(),scoreboardDto.getPer_page()
-            );
+                    month,year,current_page,per_page);
             return ResponseEntity.ok(scoreboardResponse);
         } else if (Objects.equals(ranking, "user")) {
-            return null;
+            ScoreboardResponse scoreboardResponse = scoreboardService.getScoreboardUser(
+                    month,year,current_page,per_page);
+            return ResponseEntity.ok(scoreboardResponse);
         }
         else return null;
     }

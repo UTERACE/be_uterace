@@ -2,7 +2,6 @@ package com.be_uterace.repository;
 
 import com.be_uterace.entity.Club;
 import com.be_uterace.projection.ClubRankingProjection;
-import com.be_uterace.projection.ScoreboardClubProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

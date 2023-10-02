@@ -1,11 +1,12 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.payload.response.ClubRankingResponse;
-import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.ScoreboardResponse;
+import com.be_uterace.payload.response.UserRankingResponse;
 import com.be_uterace.projection.ClubRankingProjection;
-import com.be_uterace.projection.ScoreboardClubProjection;
+import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.ClubRepository;
+import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.ScoreboardService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,17 +14,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ScoreboardServiceImpl implements ScoreboardService {
 
     private ClubRepository clubRepository;
 
-    public ScoreboardServiceImpl(ClubRepository clubRepository) {
+    private UserRepository userRepository;
+
+    public ScoreboardServiceImpl(ClubRepository clubRepository, UserRepository userRepository) {
         this.clubRepository = clubRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -49,10 +51,39 @@ public class ScoreboardServiceImpl implements ScoreboardService {
 
         return ScoreboardResponse.builder()
                 .perPage(scoreboardClubProjections.getSize())
-                .totalClub(content.size())
+                .totalClub((int) scoreboardClubProjections.getTotalElements())
                 .currentPage(scoreboardClubProjections.getNumber())
                 .totalPage(scoreboardClubProjections.getTotalPages())
                 .ranking_club(rankingClubList)
+                .build();
+    }
+
+    @Override
+    public ScoreboardResponse getScoreboardUser(int month, int year, int current_page, int per_page) {
+        Pageable pageable = PageRequest.of(current_page, per_page);
+        Page<UserRankingProjection> userRankingResponsePage = userRepository.findScoreboardUser(month,year,pageable);
+        List<UserRankingProjection> userRankingResponseList = userRankingResponsePage.getContent();
+
+        List<UserRankingResponse> rankingUserList = new ArrayList<>();
+        for (UserRankingProjection userRankingResponse : userRankingResponseList){
+            UserRankingResponse userRanking = new UserRankingResponse();
+            userRanking.setUser_id(userRankingResponse.getUserId());
+            userRanking.setRanking(userRankingResponse.getRanking());
+            userRanking.setFirst_name(userRankingResponse.getFirstName());
+            userRanking.setLast_name(userRankingResponse.getLastName());
+            userRanking.setGender(userRankingResponse.getGender());
+            userRanking.setPace(userRankingResponse.getPace());
+            userRanking.setOrganization(userRankingResponse.getOrganization());
+            userRanking.setImage(userRankingResponse.getAvatarPath());
+            userRanking.setTotal_distance(userRankingResponse.getTotalDistance());
+            rankingUserList.add(userRanking);
+        }
+        return ScoreboardResponse.builder()
+                .perPage(userRankingResponsePage.getSize())
+                .totalUser((int) userRankingResponsePage.getTotalElements())
+                .currentPage(userRankingResponsePage.getNumber())
+                .totalPage(userRankingResponsePage.getTotalPages())
+                .ranking_user(rankingUserList)
                 .build();
     }
 }
