@@ -37,6 +37,4 @@ public class ScoreboardResponse {
     @JsonProperty("ranking_user")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<UserRankingResponse> ranking_user;
-
-
 }
