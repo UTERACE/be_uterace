@@ -7,5 +7,4 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:20-jdk
 WORKDIR /app
 COPY --from=build /app/target/be_uterace-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 0.0.0.0
 ENTRYPOINT ["java","-jar","app.jar"]
