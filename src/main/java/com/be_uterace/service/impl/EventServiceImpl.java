@@ -1,10 +1,7 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Event;
-import com.be_uterace.payload.response.EventPaginationResponse;
-import com.be_uterace.payload.response.EventResponse;
-import com.be_uterace.payload.response.ScoreboardResponse;
-import com.be_uterace.payload.response.UserRankingResponse;
+import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.EventRepository;
 import com.be_uterace.service.EventService;
@@ -48,5 +45,26 @@ public class EventServiceImpl implements EventService {
                 .totalPage(eventPage.getTotalPages())
                 .events(eventResponses)
                 .build();
+    }
+
+    @Override
+    public EventDetailResponse getEventDetail(Long event_id) {
+        Event event = eventRepository.findEventWithDistances(event_id);
+        return null;
+
+//        return EventDetailResponse.builder()
+//                .event_id(event.getEventId())
+//                .image(event.getPicturePath())
+//                .name(event.getTitle())
+//                .description(event.getDescription())
+//                .from_date(event.getStartDate())
+//                .to_date(event.getEndDate())
+//                .distance(categoryResponse)
+//                .total_member(event.getNumOfAttendee())
+//                .total_distance(event.getTotalDistance())
+//                .total_activities(event.getTotalActivities())
+//                .total_clubs(event.getNumOfClubs())
+//                .completed(event.getC)
+//                .build();
     }
 }

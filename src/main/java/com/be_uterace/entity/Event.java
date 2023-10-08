@@ -41,9 +41,6 @@ public class Event {
     @Column(name = "STATUS")
     private String status;
 
-    @Column(name = "RUNNING_CATEGORY")
-    private Double runningCategory;
-
     @Column(name = "NUM_OF_ATTENDEE")
     private Integer numOfAttendee;
 
@@ -52,6 +49,12 @@ public class Event {
 
     @Column(name = "NUM_OF_CLUBS")
     private Integer numOfClubs;
+
+    @Column(name = "NUM_OF_COMPLETED")
+    private Integer completed;
+
+    @Column(name = "NUM_OF_NOT_COMPLETED")
+    private Integer notCompleted;
 
     @Column(name = "TOTAL_DISTANCE")
     private Double totalDistance;
@@ -75,6 +78,25 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "ADMIN", referencedColumnName = "USER_ID")
     private User adminUser;
+
+    @Column(name = "NUM_OF_MALES")
+    private Integer numOfMales;
+
+    @Column(name = "NUM_OF_FEMALES")
+    private Integer numOfFemales;
+
+    @Column(name = "TOTAL_ACTIVITIES")
+    private Integer totalActivities;
+
+    @Column(name = "DETAILS")
+    private String details;
+
+    @Column(name = "REGULATIONS")
+    private String regulations;
+
+    @Column(name = "PRIZE")
+    private String prize;
+
 
     // Getters and setters
 }

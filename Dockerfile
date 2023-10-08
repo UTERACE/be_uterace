@@ -1,16 +1,5 @@
-#
-# Build stage
-#
-FROM maven:3.8.3-openjdk-17 AS build
+FROM eclipse-temurin:20-jdk
 WORKDIR /app
-COPY . /app/
-RUN mvn clean package
-
-#
-# Package stage
-#
-FROM openjdk:17-alpine
-WORKDIR /app
-COPY --from=build /app/target/*.jar /app/app.jar
+COPY /target/be_uterace-0.0.1-SNAPSHOT.jar /app/app.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","app.jar"]

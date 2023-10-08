@@ -1,6 +1,7 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.LoginDto;
+import com.be_uterace.payload.response.EventDetailResponse;
 import com.be_uterace.payload.response.EventPaginationResponse;
 import com.be_uterace.payload.response.LoginResponse;
 import com.be_uterace.service.EventService;
@@ -24,5 +25,12 @@ public class EventController {
         EventPaginationResponse eventPaginationResponse = eventService.getEventPaginationEvent(
                 current_page,per_page,ongoing);
         return ResponseEntity.ok(eventPaginationResponse);
+    }
+
+    @GetMapping(value = {"/event-detail/{eventId}"})
+    public ResponseEntity<EventDetailResponse> eventPaginationController(@PathVariable Long eventId){
+        EventDetailResponse eventDetailResponse = eventService.getEventDetail(eventId);
+
+        return ResponseEntity.ok(eventDetailResponse);
     }
 }

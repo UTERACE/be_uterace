@@ -20,7 +20,7 @@ public class EventDto {
     private Date startDate;
     private Date endDate;
     private String status;
-    private Double runningCategory;
+    private Integer runningCategoryId;
     private Integer numOfAttendee;
     private Integer numOfRunner;
     private Double totalDistance;
