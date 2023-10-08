@@ -3,6 +3,7 @@ package com.be_uterace.payload.response;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,7 +18,7 @@ public class EventDetailResponse {
     private String description;
     private Date from_date;
     private Date to_date;
-    private RunningCategoryResponse distance;
+    private List<RunningCategoryResponse> distance;
     private int total_member;
     private Double total_distance;
     private int total_activities;

@@ -1,9 +1,11 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Event;
+import com.be_uterace.entity.RunningCategory;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.EventRepository;
+import com.be_uterace.repository.RunningCategoryRepository;
 import com.be_uterace.service.EventService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,8 +20,11 @@ public class EventServiceImpl implements EventService {
 
     private EventRepository eventRepository;
 
-    public EventServiceImpl(EventRepository eventRepository) {
+    private RunningCategoryRepository runningCategoryRepository;
+
+    public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository) {
         this.eventRepository = eventRepository;
+        this.runningCategoryRepository = runningCategoryRepository;
     }
 
     @Override
@@ -49,22 +54,37 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDetailResponse getEventDetail(Long event_id) {
-        Event event = eventRepository.findEventWithDistances(event_id);
-        return null;
-
-//        return EventDetailResponse.builder()
-//                .event_id(event.getEventId())
-//                .image(event.getPicturePath())
-//                .name(event.getTitle())
-//                .description(event.getDescription())
-//                .from_date(event.getStartDate())
-//                .to_date(event.getEndDate())
-//                .distance(categoryResponse)
-//                .total_member(event.getNumOfAttendee())
-//                .total_distance(event.getTotalDistance())
-//                .total_activities(event.getTotalActivities())
-//                .total_clubs(event.getNumOfClubs())
-//                .completed(event.getC)
-//                .build();
+        Event event = eventRepository.findEventByEventId(event_id);
+        List<RunningCategory> runningCategory = runningCategoryRepository.findRunningCategoriesByEvent(event);
+        List<RunningCategoryResponse> categoryResponse = new ArrayList<>();
+        for (RunningCategory item : runningCategory){
+            RunningCategoryResponse response = new RunningCategoryResponse();
+            response.setId(item.getRunningCategoryID());
+            response.setName(item.getRunningCategoryName());
+            response.setDistance(item.getRunningCategoryDistance());
+            categoryResponse.add(response);
+        }
+        return EventDetailResponse.builder()
+                .event_id(event.getEventId())
+                .image(event.getPicturePath())
+                .name(event.getTitle())
+                .description(event.getDescription())
+                .from_date(event.getStartDate())
+                .to_date(event.getEndDate())
+                .distance(categoryResponse)
+                .total_member(event.getNumOfAttendee())
+                .total_distance(event.getTotalDistance())
+                .total_activities(event.getTotalActivities())
+                .total_clubs(event.getNumOfClubs())
+                .completed(event.getCompleted())
+                .not_completed(event.getNotCompleted())
+                .male(event.getNumOfMales())
+                .female(event.getNumOfFemales())
+                .min_pace(event.getMinPace())
+                .max_pace(event.getMaxPace())
+                .details(event.getDetails())
+                .regulations(event.getRegulations())
+                .prize(event.getPrize())
+                .build();
     }
 }

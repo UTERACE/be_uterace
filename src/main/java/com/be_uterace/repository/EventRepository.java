@@ -17,8 +17,7 @@ public interface EventRepository extends JpaRepository<Event,Long> {
     @Query("SELECT e FROM Event e WHERE e.status = :status AND e.endDate > CURRENT_TIMESTAMP")
     Page<Event> findAllByStatusAndEndDate(String status, Pageable pageable);
 
-    @Query("SELECT e FROM Event e LEFT JOIN FETCH RunningCategory rc WHERE e.eventId = :eventId")
-    Event findEventWithDistances(@Param("eventId") Long eventId);
+    Event findEventByEventId(Long eventId);
 
 
 }
