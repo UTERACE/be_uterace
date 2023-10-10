@@ -93,5 +93,17 @@ public class User {
     )
     private Set<Role> roles;
     // Other fields, getters, and setters
+    @Column(name = "STRAVA_ID")
+    private Long stravaId;
+    @Column(name = "STRAVA_ACCESS_TOKEN")
+    private String stravaAccessToken;
+    @Column(name = "STRAVA_REFRESH_TOKEN")
+    private String stravaRefreshToken;
+    @Column(name = "STRAVA_FULL_NAME")
+    private String stravaFullName;
+    @Column(name = "STRAVA_IMAGE")
+    private String stravaImage;
+    @Column(name = "SYNC_STATUS")
+    private Integer syncStatus;
 }
 
