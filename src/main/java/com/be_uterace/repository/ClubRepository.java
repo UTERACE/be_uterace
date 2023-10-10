@@ -1,6 +1,7 @@
 package com.be_uterace.repository;
 
 import com.be_uterace.entity.Club;
+import com.be_uterace.projection.ClubProjection;
 import com.be_uterace.projection.ClubRankingProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,5 +40,17 @@ public interface ClubRepository extends JpaRepository<Club,Long> {
             @Param("year") int year,
             Pageable pageable
     );
+
+    @Query("SELECT c.clubId AS clubId, " +
+            "c.clubName AS clubName," +
+            "c.picturePath AS picturePath, " +
+            "c.clubTotalDistance, " +
+            "COUNT(uc.user.userId) AS memberCount " +
+            "FROM Club c " +
+            "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "GROUP BY c.clubId")
+    Page<ClubProjection> findAllClubPagination(Pageable pageable);
+
+
 
 }
