@@ -25,7 +25,6 @@ public class AreaController {
     @GetMapping(value = {"/district"})
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> getDistrictController(@RequestParam String province) {
-        System .out.println(province);
         List<Map<String, Object>> areaResponseList = areaService.getDistrictByProvince(province);
         return ResponseEntity.ok(areaResponseList);
     }
