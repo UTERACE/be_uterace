@@ -4,4 +4,6 @@ import com.be_uterace.payload.response.ConnectStravaResponse;
 
 public interface StravaService {
     ConnectStravaResponse connectStrava(String code);
+    ConnectStravaResponse disconnectStrava();
+    ConnectStravaResponse statusStrava();
 }

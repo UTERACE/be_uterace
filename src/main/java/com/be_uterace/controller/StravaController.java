@@ -1,11 +1,8 @@
 package com.be_uterace.controller;
 
-import com.be_uterace.payload.request.LoginDto;
+import com.be_uterace.payload.request.ConnectStravaRequest;
 import com.be_uterace.payload.response.ConnectStravaResponse;
-import com.be_uterace.payload.response.LoginResponse;
-import com.be_uterace.payload.response.StravaOauthResponse;
 import com.be_uterace.service.StravaService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +12,16 @@ public class StravaController {
     public StravaController(StravaService stravaService) {
         this.stravaService = stravaService;
     }
-    @PostMapping(value = {"/connect?state=&code={code}&scope={scope}&activity={activity}"})
-    public ConnectStravaResponse connect(@PathVariable String code, @PathVariable String scope, @PathVariable String activity) {
-        return stravaService.connectStrava(code);
+    @PostMapping(value = {"/connect"})
+    public ConnectStravaResponse connect(@RequestBody ConnectStravaRequest connectStravaRequest) {
+        return stravaService.connectStrava(connectStravaRequest.getCode());
+    }
+    @PostMapping(value = {"/disconnect"})
+    public ConnectStravaResponse disconnect() {
+        return stravaService.disconnectStrava();
+    }
+    @GetMapping(value = {"/status"})
+    public ConnectStravaResponse status() {
+        return stravaService.statusStrava();
     }
 }
