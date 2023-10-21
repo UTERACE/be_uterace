@@ -1,13 +1,12 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
 import com.be_uterace.payload.response.EventPaginationResponse;
 import com.be_uterace.service.ClubService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/clubs")
@@ -25,5 +24,15 @@ public class ClubController {
         ClubPaginationResponse clubPaginationResponse = clubService.getAllClub(
                 current_page,per_page);
         return ResponseEntity.ok(clubPaginationResponse);
+    }
+
+    @GetMapping("/club-detail/{clubId}")
+    public ResponseEntity<ClubDetailResponse> getClubDetail(@PathVariable Integer clubId) {
+        ClubDetailResponse clubDetail = clubService.getClubDetail(clubId);
+        if (clubDetail != null) {
+            return new ResponseEntity<>(clubDetail, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

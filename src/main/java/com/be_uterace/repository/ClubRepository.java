@@ -1,6 +1,7 @@
 package com.be_uterace.repository;
 
 import com.be_uterace.entity.Club;
+import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
 import com.be_uterace.projection.ClubRankingProjection;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ClubRepository extends JpaRepository<Club,Long> {
+public interface ClubRepository extends JpaRepository<Club,Integer> {
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubRanking AS clubRanking, " +
             "c.clubName AS clubName, " +
@@ -50,6 +51,35 @@ public interface ClubRepository extends JpaRepository<Club,Long> {
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
             "GROUP BY c.clubId")
     Page<ClubProjection> findAllClubPagination(Pageable pageable);
+
+
+    @Query("SELECT c.clubId AS clubId, " +
+            "c.picturePath AS picturePath, " +
+            "c.clubName AS clubName, " +
+            "c.description AS description, " +
+            "COUNT(uc.user.userId) AS totalMember, " +
+            "c.clubTotalDistance AS totalDistance, " +
+            "c.totalActivities AS totalActivities, " +
+            "c.createdAt AS createdAt, " +
+            "CONCAT(u.firstName, ' ', u.lastName) AS admin, " +
+            "c.numOfMales AS numMales, " +
+            "c.numOfFemales AS numFemales, " +
+            "c.minPace AS minPace, " +
+            "c.maxPace AS maxPace, " +
+            "c.details AS details " +
+            "FROM Club c " +
+            "INNER JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "INNER JOIN User u ON c.adminUser.userId = u.userId " +
+            "WHERE c.clubId = :clubId " +
+            "GROUP BY c.clubId, " +
+            "c.picturePath, " +
+            "c.clubName, " +
+            "c.description, " +
+            "c.clubTotalDistance, " +
+            "c.totalActivities, " +
+            "c.createdAt, " +
+            "u.firstName, u.lastName")
+    ClubDetailProjection getClubDetails(@Param("clubId") int clubId);
 
 
 

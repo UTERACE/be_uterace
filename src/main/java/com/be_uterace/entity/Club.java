@@ -18,7 +18,7 @@ public class Club {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CLUB_ID")
-    private Long clubId;
+    private Integer clubId;
 
     @Column(name = "CLUB_NAME")
     private String clubName;
@@ -26,8 +26,8 @@ public class Club {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @Column(name = "CREATE_AT")
-    private Date createAt;
+    @Column(name = "CREATED_AT")
+    private Date createdAt;
 
     @Column(name = "CLUB_TOTAL_DISTANCE")
     private Double clubTotalDistance;
@@ -54,6 +54,18 @@ public class Club {
     @ManyToOne
     @JoinColumn(name = "CREATOR_ID", referencedColumnName = "USER_ID")
     private User creatorUser;
+
+    @Column(name = "NUM_OF_MALES")
+    private Integer numOfMales;
+
+    @Column(name = "NUM_OF_FEMALES")
+    private Integer numOfFemales;
+
+    @Column(name = "TOTAL_ACTIVITIES")
+    private Integer totalActivities;
+
+    @Column(name = "DETAILS")
+    private String details;
 
 }
 

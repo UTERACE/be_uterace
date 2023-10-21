@@ -1,10 +1,15 @@
 package com.be_uterace.service.impl;
 
+import com.be_uterace.entity.Post;
+import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
 import com.be_uterace.payload.response.ClubResponse;
+import com.be_uterace.payload.response.PostResponse;
+import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.ClubRepository;
+import com.be_uterace.repository.PostRepository;
 import com.be_uterace.service.ClubService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,8 +24,11 @@ public class ClubServiceImpl implements ClubService {
 
     private ClubRepository clubRepository;
 
-    public ClubServiceImpl(ClubRepository clubRepository) {
+    private PostRepository postRepository;
+
+    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository) {
         this.clubRepository = clubRepository;
+        this.postRepository = postRepository;
     }
 
     @Override
@@ -45,5 +53,39 @@ public class ClubServiceImpl implements ClubService {
                 .totalPage(clubProjectionPage.getTotalPages())
                 .total_clubs((int) clubProjectionPage.getTotalElements())
                 .clubs(clubResponseList).build();
+    }
+
+    @Override
+    public ClubDetailResponse getClubDetail(int club_id) {
+        ClubDetailProjection clubDetailProjection = clubRepository.getClubDetails(club_id);
+        List<Post> postList = postRepository.findPostsCreatedByClubAdmin(club_id);
+        List<PostResponse> postResponses = new ArrayList<>();
+        for (Post item : postList){
+            PostResponse response = new PostResponse();
+            response.setNew_id(item.getPostId());
+            response.setName(item.getTitle());
+            response.setDescription(item.getDescription());
+            response.setImage(item.getImage());
+            response.setCreated_at(item.getCreatedAt());
+            response.setUpdated_at(item.getUpdatedAt());
+            postResponses.add(response);
+        }
+        return ClubDetailResponse.builder()
+                .club_id(clubDetailProjection.getClubId())
+                .image(clubDetailProjection.getPicturePath())
+                .name(clubDetailProjection.getClubName())
+                .description(clubDetailProjection.getDescription())
+                .total_member(clubDetailProjection.getTotalMember())
+                .total_distance(clubDetailProjection.getTotalDistance())
+                .total_activities(clubDetailProjection.getTotalActivities())
+                .news(postResponses)
+                .created_at(clubDetailProjection.getCreatedAt())
+                .manager(clubDetailProjection.getAdmin())
+                .male(clubDetailProjection.getNumMales())
+                .female(clubDetailProjection.getNumFemales())
+                .min_pace(clubDetailProjection.getMinPace())
+                .max_pace(clubDetailProjection.getMaxPace())
+                .details(clubDetailProjection.getDetails())
+                .build();
     }
 }

@@ -18,7 +18,7 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "POST_ID")
-    private Long postId;
+    private Integer postId;
 
     @Column(name = "TITLE")
     private String title;
@@ -32,11 +32,10 @@ public class Post {
 
     /*@Lob
     @Column(name = "HTML_CONTENT")
-    private String htmlContent;
+    private String htmlContent;*/
 
-    @Lob
     @Column(name = "IMAGE")
-    private byte[] image;*/
+    private String image;
 
     @Column(name = "OUTSTANDING")
     private Boolean outstanding;
@@ -44,7 +43,7 @@ public class Post {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @Column(name = "UPDATE_AT")
+    @Column(name = "UPDATED_AT")
     private Date updatedAt;
 
     @Column(name = "DELETED")
