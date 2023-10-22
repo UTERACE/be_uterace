@@ -1,23 +1,32 @@
 package com.be_uterace.service.impl;
 
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Post;
-import com.be_uterace.payload.response.ClubDetailResponse;
-import com.be_uterace.payload.response.ClubPaginationResponse;
-import com.be_uterace.payload.response.ClubResponse;
-import com.be_uterace.payload.response.PostResponse;
+import com.be_uterace.entity.User;
+import com.be_uterace.payload.request.ClubAddDto;
+import com.be_uterace.payload.request.ClubUpdateDto;
+import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.ClubRepository;
 import com.be_uterace.repository.PostRepository;
+import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.ClubService;
+import com.be_uterace.utils.StatusCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static com.be_uterace.utils.DateConverter.convertStringToDate;
 
 @Service
 public class ClubServiceImpl implements ClubService {
@@ -26,9 +35,12 @@ public class ClubServiceImpl implements ClubService {
 
     private PostRepository postRepository;
 
-    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository) {
+    private UserRepository userRepository;
+
+    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository) {
         this.clubRepository = clubRepository;
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -87,5 +99,78 @@ public class ClubServiceImpl implements ClubService {
                 .max_pace(clubDetailProjection.getMaxPace())
                 .details(clubDetailProjection.getDetails())
                 .build();
+    }
+
+    @Override
+    public ResponseObject createClub(ClubAddDto clubAddDto, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Club club = new Club();
+                club.setClubName(clubAddDto.getName());
+                club.setDescription(clubAddDto.getDescription());
+                club.setPicturePath(clubAddDto.getImage());
+                club.setDetails(clubAddDto.getDetails());
+                club.setMinPace(clubAddDto.getMin_pace());
+                club.setMaxPace(clubAddDto.getMax_pace());
+                club.setAdminUser(userOptional.get());
+                club.setCreatorUser(userOptional.get());
+                clubRepository.save(club);
+                return ResponseObject.builder()
+                        .status(StatusCode.CREATED)
+                        .message("Tạo clb thành công").build();
+            }
+        }
+        return ResponseObject.builder()
+                .status(StatusCode.INTERNAL_SERVER_ERROR)
+                .message("Loi").build();
+
+    }
+
+    @Override
+    public ResponseObject updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Optional<Club> clubOptional = clubRepository.findById(clubUpdateDto.getClub_id());
+                if (clubOptional.isPresent()){
+                    Club club = clubOptional.get();
+                    club.setClubName(clubUpdateDto.getName());
+                    club.setDescription(clubUpdateDto.getDescription());
+                    club.setPicturePath(clubUpdateDto.getImage());
+                    //club.setDetails(club.getDetails());
+                    club.setMinPace(clubUpdateDto.getMin_pace());
+                    club.setMaxPace(clubUpdateDto.getMax_pace());
+                    clubRepository.save(club);
+                    return ResponseObject.builder()
+                            .status(StatusCode.SUCCESS)
+                            .message("Cập nhật thông tin clb thành công").build();
+                }
+            }
+
+        }
+        return ResponseObject.builder()
+                .status(StatusCode.INTERNAL_SERVER_ERROR)
+                .message("Loi").build();
+    }
+
+    @Override
+    public ResponseObject deleteClub(Integer club_id, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                    clubRepository.deleteById(club_id);
+                    return ResponseObject.builder()
+                            .status(StatusCode.SUCCESS)
+                            .message("Xóa clb thành công").build();
+                }
+            }
+
+        return ResponseObject.builder()
+                .status(StatusCode.INTERNAL_SERVER_ERROR)
+                .message("Loi").build();
     }
 }

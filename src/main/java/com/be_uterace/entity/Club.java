@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Setter
@@ -20,23 +23,24 @@ public class Club {
     @Column(name = "CLUB_ID")
     private Integer clubId;
 
-    @Column(name = "CLUB_NAME")
+    @Column(name = "CLUB_NAME", unique = true, length = 100)
     private String clubName;
 
     @Column(name = "DESCRIPTION")
     private String description;
 
+    @CreationTimestamp
     @Column(name = "CREATED_AT")
-    private Date createdAt;
+    private Timestamp createdAt;
 
     @Column(name = "CLUB_TOTAL_DISTANCE")
-    private Double clubTotalDistance;
+    private Double clubTotalDistance = 0.0;
 
     @Column(name = "CLUB_RANKING")
     private Integer clubRanking;
 
     @Column(name = "STATUS")
-    private String status;
+    private String status = "1";
 
     @ManyToOne
     @JoinColumn(name = "ADMIN", referencedColumnName = "USER_ID")
@@ -62,7 +66,7 @@ public class Club {
     private Integer numOfFemales;
 
     @Column(name = "TOTAL_ACTIVITIES")
-    private Integer totalActivities;
+    private Integer totalActivities = 0;
 
     @Column(name = "DETAILS")
     private String details;
