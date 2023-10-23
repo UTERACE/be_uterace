@@ -1,17 +1,15 @@
 package com.be_uterace.service.impl;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Post;
 import com.be_uterace.entity.User;
 import com.be_uterace.entity.UserClub;
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
-import com.be_uterace.payload.request.DeleteMemberRequest;
+import com.be_uterace.payload.request.UserClubRequest;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
-import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.ClubRepository;
 import com.be_uterace.repository.PostRepository;
 import com.be_uterace.repository.UserClubRepository;
@@ -30,8 +28,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static com.be_uterace.utils.DateConverter.convertStringToDate;
 
 @Service
 public class ClubServiceImpl implements ClubService {
@@ -177,7 +173,7 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> deleteMember(DeleteMemberRequest req) {
+    public ResponseEntity<ResponseObject> deleteMember(UserClubRequest req) {
         Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(),req.getUser_id());
         if (userClubOptional.isPresent()) {
             userClubRepository.delete(userClubOptional.get());
@@ -185,6 +181,23 @@ public class ClubServiceImpl implements ClubService {
             return ResponseEntity.status(HttpStatus.OK).body(responseObject);
         }
         ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Xóa thành viên thất bại");
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> changeAdmin(UserClubRequest req) {
+        Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(),req.getUser_id());
+        if (userClubOptional.isPresent()) {
+            Optional<Club> clubOptional = clubRepository.findById(req.getClub_id());
+            if (clubOptional.isPresent()){
+                Club club = clubOptional.get();
+                club.setAdminUser(userClubOptional.get().getUser());
+                clubRepository.save(club);
+                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Đổi admin thành công");
+                return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+            }
+        }
+        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Đổi admin thất bại");
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 }

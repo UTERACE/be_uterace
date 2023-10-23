@@ -2,11 +2,10 @@ package com.be_uterace.service;
 
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
-import com.be_uterace.payload.request.DeleteMemberRequest;
+import com.be_uterace.payload.request.UserClubRequest;
 import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
 import com.be_uterace.payload.response.ResponseObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
@@ -21,5 +20,7 @@ public interface ClubService {
 
     ResponseEntity<ResponseObject> deleteClub(Integer club_id, Authentication authentication);
 
-    ResponseEntity<ResponseObject> deleteMember(DeleteMemberRequest deleteMemberRequest);
+    ResponseEntity<ResponseObject> deleteMember(UserClubRequest userClubRequest);
+
+    ResponseEntity<ResponseObject> changeAdmin(UserClubRequest userClubRequest);
 }

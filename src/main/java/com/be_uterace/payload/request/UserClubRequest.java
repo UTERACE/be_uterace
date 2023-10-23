@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeleteMemberRequest {
+public class UserClubRequest {
     private Integer club_id;
     private Long user_id;
 }

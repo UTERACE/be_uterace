@@ -2,10 +2,9 @@ package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
-import com.be_uterace.payload.request.DeleteMemberRequest;
+import com.be_uterace.payload.request.UserClubRequest;
 import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
-import com.be_uterace.payload.response.EventPaginationResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.service.ClubService;
 import org.springframework.http.HttpStatus;
@@ -56,10 +55,11 @@ public class ClubController {
         return clubService.deleteClub(club_id, authentication);
     }
     @DeleteMapping("/delete-member")
-    public ResponseEntity<ResponseObject> deleteMemberController(@RequestBody DeleteMemberRequest request) {
+    public ResponseEntity<ResponseObject> deleteMemberController(@RequestBody UserClubRequest request) {
         return clubService.deleteMember(request);
     }
-
-
-
+    @PutMapping("/change-admin")
+    public ResponseEntity<ResponseObject> changeAdminController(@RequestBody UserClubRequest request) {
+        return clubService.changeAdmin(request);
+    }
 }
