@@ -2,10 +2,12 @@ package com.be_uterace.service;
 
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
+import com.be_uterace.payload.request.DeleteMemberRequest;
 import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 public interface ClubService {
@@ -13,9 +15,11 @@ public interface ClubService {
 
     ClubDetailResponse getClubDetail(int club_id);
 
-    ResponseObject createClub(ClubAddDto clubAddDto, Authentication authentication);
+    ResponseEntity<ResponseObject> createClub(ClubAddDto clubAddDto, Authentication authentication);
 
-    ResponseObject updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication);
+    ResponseEntity<ResponseObject> updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication);
 
-    ResponseObject deleteClub(Integer club_id, Authentication authentication);
+    ResponseEntity<ResponseObject> deleteClub(Integer club_id, Authentication authentication);
+
+    ResponseEntity<ResponseObject> deleteMember(DeleteMemberRequest deleteMemberRequest);
 }

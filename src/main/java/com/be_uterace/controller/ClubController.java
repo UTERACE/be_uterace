@@ -2,6 +2,7 @@ package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
+import com.be_uterace.payload.request.DeleteMemberRequest;
 import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
 import com.be_uterace.payload.response.EventPaginationResponse;
@@ -30,7 +31,7 @@ public class ClubController {
         return ResponseEntity.ok(clubPaginationResponse);
     }
 
-    @GetMapping("/s{club_id}")
+    @GetMapping("/{club_id}")
     public ResponseEntity<ClubDetailResponse> getClubDetail(@PathVariable Integer club_id) {
         ClubDetailResponse clubDetail = clubService.getClubDetail(club_id);
         if (clubDetail != null) {
@@ -42,19 +43,23 @@ public class ClubController {
 
     @PostMapping()
     public ResponseEntity<ResponseObject> createClubController(@RequestBody ClubAddDto clubAddDto, Authentication authentication) {
-        ResponseObject responseObject = clubService.createClub(clubAddDto, authentication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseObject);
+        return clubService.createClub(clubAddDto, authentication);
     }
 
     @PutMapping()
     public ResponseEntity<ResponseObject> updateClubController(@RequestBody ClubUpdateDto clubUpdateDto, Authentication authentication) {
-        ResponseObject responseObject = clubService.updateClub(clubUpdateDto, authentication);
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        return clubService.updateClub(clubUpdateDto, authentication);
     }
 
     @DeleteMapping("/{club_id}")
     public ResponseEntity<ResponseObject> deleteClubController(@PathVariable Integer club_id, Authentication authentication) {
-        ResponseObject responseObject = clubService.deleteClub(club_id, authentication);
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        return clubService.deleteClub(club_id, authentication);
     }
+    @DeleteMapping("/delete-member")
+    public ResponseEntity<ResponseObject> deleteMemberController(@RequestBody DeleteMemberRequest request) {
+        return clubService.deleteMember(request);
+    }
+
+
+
 }

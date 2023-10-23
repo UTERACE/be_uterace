@@ -4,20 +4,25 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Post;
 import com.be_uterace.entity.User;
+import com.be_uterace.entity.UserClub;
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
+import com.be_uterace.payload.request.DeleteMemberRequest;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.ClubRepository;
 import com.be_uterace.repository.PostRepository;
+import com.be_uterace.repository.UserClubRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.ClubService;
 import com.be_uterace.utils.StatusCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -37,10 +42,13 @@ public class ClubServiceImpl implements ClubService {
 
     private UserRepository userRepository;
 
-    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository) {
+    private UserClubRepository userClubRepository;
+
+    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository, UserClubRepository userClubRepository) {
         this.clubRepository = clubRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.userClubRepository = userClubRepository;
     }
 
     @Override
@@ -102,7 +110,7 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ResponseObject createClub(ClubAddDto clubAddDto, Authentication authentication) {
+    public ResponseEntity<ResponseObject> createClub(ClubAddDto clubAddDto, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
@@ -117,19 +125,17 @@ public class ClubServiceImpl implements ClubService {
                 club.setAdminUser(userOptional.get());
                 club.setCreatorUser(userOptional.get());
                 clubRepository.save(club);
-                return ResponseObject.builder()
-                        .status(StatusCode.CREATED)
-                        .message("Tạo clb thành công").build();
+                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Tạo clb thành công");
+                return ResponseEntity.status(HttpStatus.OK).body(responseObject);
             }
         }
-        return ResponseObject.builder()
-                .status(StatusCode.INTERNAL_SERVER_ERROR)
-                .message("Loi").build();
+        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Tạo clb thất bại");
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
 
     }
 
     @Override
-    public ResponseObject updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication) {
+    public ResponseEntity<ResponseObject> updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
@@ -144,33 +150,41 @@ public class ClubServiceImpl implements ClubService {
                     club.setMinPace(clubUpdateDto.getMin_pace());
                     club.setMaxPace(clubUpdateDto.getMax_pace());
                     clubRepository.save(club);
-                    return ResponseObject.builder()
-                            .status(StatusCode.SUCCESS)
-                            .message("Cập nhật thông tin clb thành công").build();
+                    ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Cập nhật clb thành công");
+                    return ResponseEntity.status(HttpStatus.OK).body(responseObject);
                 }
             }
 
         }
-        return ResponseObject.builder()
-                .status(StatusCode.INTERNAL_SERVER_ERROR)
-                .message("Loi").build();
+        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Cập nhật clb thất bại");
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @Override
-    public ResponseObject deleteClub(Integer club_id, Authentication authentication) {
+    public ResponseEntity<ResponseObject> deleteClub(Integer club_id, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                     clubRepository.deleteById(club_id);
-                    return ResponseObject.builder()
-                            .status(StatusCode.SUCCESS)
-                            .message("Xóa clb thành công").build();
+                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Xóa clb thành công");
+                return ResponseEntity.status(HttpStatus.OK).body(responseObject);
                 }
             }
 
-        return ResponseObject.builder()
-                .status(StatusCode.INTERNAL_SERVER_ERROR)
-                .message("Loi").build();
+        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Xóa clb thất bại");
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> deleteMember(DeleteMemberRequest req) {
+        Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(),req.getUser_id());
+        if (userClubOptional.isPresent()) {
+            userClubRepository.delete(userClubOptional.get());
+            ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Xóa thành viên thành công");
+            return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        }
+        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Xóa thành viên thất bại");
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 }

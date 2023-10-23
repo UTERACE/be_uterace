@@ -1,5 +1,6 @@
 package com.be_uterace.entity;
 
+import com.be_uterace.utils.key.UserClubId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "USER_CLUB")
+@IdClass(UserClubId.class)
 public class UserClub {
     @Id
     @ManyToOne
