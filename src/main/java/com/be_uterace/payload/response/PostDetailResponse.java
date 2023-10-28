@@ -10,11 +10,10 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostResponse {
+public class PostDetailResponse {
     private Integer news_id;
     private String name;
     private String description;
     private String image;
-    private Date created_at;
-    private Date updated_at;
+    private String content;
 }

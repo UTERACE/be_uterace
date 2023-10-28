@@ -78,7 +78,7 @@ public class ClubServiceImpl implements ClubService {
         List<PostResponse> postResponses = new ArrayList<>();
         for (Post item : postList){
             PostResponse response = new PostResponse();
-            response.setNew_id(item.getPostId());
+            response.setNews_id(item.getPostId());
             response.setName(item.getTitle());
             response.setDescription(item.getDescription());
             response.setImage(item.getImage());
