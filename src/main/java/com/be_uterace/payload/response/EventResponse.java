@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventResponse {
-    private Long event_id;
+    private Integer event_id;
     private String name;
     private String image;
     private Integer total_members;

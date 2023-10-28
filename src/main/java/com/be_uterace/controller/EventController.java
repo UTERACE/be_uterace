@@ -2,6 +2,7 @@ package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.LoginDto;
+import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.EventDetailResponse;
 import com.be_uterace.payload.response.EventPaginationResponse;
 import com.be_uterace.payload.response.LoginResponse;
@@ -32,16 +33,28 @@ public class EventController {
         return ResponseEntity.ok(eventPaginationResponse);
     }
 
-    @GetMapping(value = {"/{eventId}"})
-    public ResponseEntity<EventDetailResponse> eventPaginationController(@PathVariable Long eventId){
-        EventDetailResponse eventDetailResponse = eventService.getEventDetail(eventId);
+    @GetMapping(value = {"/{event_id}"})
+    public ResponseEntity<EventDetailResponse> eventPaginationController(@PathVariable Integer event_id){
+        EventDetailResponse eventDetailResponse = eventService.getEventDetail(event_id);
 
         return ResponseEntity.ok(eventDetailResponse);
     }
 
-    @PostMapping(value = {"/add-event"})
+    @PostMapping
     public ResponseEntity<ResponseObject> addEventController(@RequestBody CreateEventDto req, Authentication auth){
         ResponseObject res = eventService.createEvent(req, auth);
+        return ResponseEntity.ok(res);
+    }
+
+    @PutMapping
+    public ResponseEntity<ResponseObject> updateEventController(@RequestBody UpdateEventDto req){
+        ResponseObject res = eventService.updateEvent(req);
+        return ResponseEntity.ok(res);
+    }
+
+    @DeleteMapping(value = {"/{event_id}"})
+    public ResponseEntity<ResponseObject> deleteEventController(@PathVariable Integer event_id){
+        ResponseObject res = eventService.deleteEvent(event_id);
         return ResponseEntity.ok(res);
     }
 }

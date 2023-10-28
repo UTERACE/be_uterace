@@ -4,6 +4,7 @@ import com.be_uterace.entity.Event;
 import com.be_uterace.entity.RunningCategory;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.CreateEventDto;
+import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.EventRepository;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -69,7 +71,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventDetailResponse getEventDetail(Long event_id) {
+    public EventDetailResponse getEventDetail(Integer event_id) {
         Event event = eventRepository.findEventByEventId(event_id);
         List<RunningCategory> runningCategory = runningCategoryRepository.findRunningCategoriesByEvent(event);
         List<RunningCategoryResponse> categoryResponse = new ArrayList<>();
@@ -140,5 +142,44 @@ public class EventServiceImpl implements EventService {
             }
         }
         return null;
+    }
+
+    @Override
+    public ResponseObject updateEvent(UpdateEventDto req) {
+        Event event = eventRepository.findEventByEventId(req.getEvent_id());
+        event.setTitle(req.getName());
+        event.setPicturePath(req.getImage());
+        event.setDescription(req.getDescription());
+        event.setStartDate(req.getFrom_date());
+        event.setEndDate(req.getTo_date());
+        event.setDetails(req.getDetails());
+        event.setRegulations(req.getRegulations());
+        event.setPrize(req.getPrize());
+        event.setMinPace(req.getMin_pace());
+        event.setMaxPace(req.getMax_pace());
+        eventRepository.save(event);
+
+        List<RunningCategory> runningCategoriesEntity = runningCategoryRepository.findRunningCategoriesByEvent(event);
+
+        List<RunningCategoryResponse> runningCategories = req.getDistance();
+        for (RunningCategoryResponse item : runningCategories) {
+            for (RunningCategory runningCategory : runningCategoriesEntity) {
+                if (Objects.equals(item.getId(), runningCategory.getRunningCategoryID())) {
+                    runningCategory.setRunningCategoryName(item.getName());
+                    runningCategory.setRunningCategoryDistance(item.getDistance());
+                    runningCategoryRepository.save(runningCategory);
+                    break;
+                }
+            }
+        }
+
+        return new ResponseObject(StatusCode.SUCCESS,"Cập nhật giải chạy thành công");
+    }
+
+    @Override
+    public ResponseObject deleteEvent(int event_id) {
+        eventRepository.deleteById(event_id);
+        return new ResponseObject(StatusCode.SUCCESS,"Xóa giải chạy thành công");
+
     }
 }

@@ -1,17 +1,19 @@
-package com.be_uterace.payload.response;
+package com.be_uterace.payload.request;
 
-import lombok.*;
+import com.be_uterace.payload.response.RunningCategoryResponse;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
 
-@Getter
 @Setter
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class EventDetailResponse {
+public class UpdateEventDto {
     private Integer event_id;
     private String name;
     private String image;
@@ -19,14 +21,6 @@ public class EventDetailResponse {
     private Date from_date;
     private Date to_date;
     private List<RunningCategoryResponse> distance;
-    private int total_member;
-    private Double total_distance;
-    private int total_activities;
-    private int total_clubs;
-    private int completed;
-    private int not_completed;
-    private int male;
-    private int female;
     private Double min_pace;
     private Double max_pace;
     private String details;

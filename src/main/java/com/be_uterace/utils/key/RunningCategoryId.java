@@ -12,6 +12,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RunningCategoryId implements Serializable {
-    private Long event;
     private Integer runningCategoryID;
+    private Integer event;
 }
