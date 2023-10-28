@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Setter
@@ -26,8 +28,9 @@ public class Event {
     @Column(name = "TITLE")
     private String title;
 
+    @CreationTimestamp
     @Column(name = "CREATE_AT")
-    private Date createAt;
+    private Timestamp createAt;
 
     @Column(name = "PICTURE_PATH")
     private String picturePath;
@@ -39,25 +42,25 @@ public class Event {
     private Date endDate;
 
     @Column(name = "STATUS")
-    private String status;
+    private String status="1";
 
     @Column(name = "NUM_OF_ATTENDEE")
-    private Integer numOfAttendee;
+    private Integer numOfAttendee=0;
 
     @Column(name = "NUM_OF_RUNNER")
-    private Integer numOfRunner;
+    private Integer numOfRunner=0;
 
     @Column(name = "NUM_OF_CLUBS")
-    private Integer numOfClubs;
+    private Integer numOfClubs=0;
 
     @Column(name = "NUM_OF_COMPLETED")
-    private Integer completed;
+    private Integer completed=0;
 
     @Column(name = "NUM_OF_NOT_COMPLETED")
-    private Integer notCompleted;
+    private Integer notCompleted=0;
 
     @Column(name = "TOTAL_DISTANCE")
-    private Double totalDistance;
+    private Double totalDistance=0.0;
 
     @Column(name = "CONTENT")
     private String content;
@@ -80,13 +83,13 @@ public class Event {
     private User adminUser;
 
     @Column(name = "NUM_OF_MALES")
-    private Integer numOfMales;
+    private Integer numOfMales=0;
 
     @Column(name = "NUM_OF_FEMALES")
-    private Integer numOfFemales;
+    private Integer numOfFemales=0;
 
     @Column(name = "TOTAL_ACTIVITIES")
-    private Integer totalActivities;
+    private Integer totalActivities=0;
 
     @Column(name = "DETAILS")
     private String details;

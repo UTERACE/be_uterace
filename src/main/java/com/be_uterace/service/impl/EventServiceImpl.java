@@ -2,18 +2,28 @@ package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Event;
 import com.be_uterace.entity.RunningCategory;
+import com.be_uterace.entity.User;
+import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.EventRepository;
 import com.be_uterace.repository.RunningCategoryRepository;
+import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.EventService;
+import com.be_uterace.utils.StatusCode;
+import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -22,9 +32,15 @@ public class EventServiceImpl implements EventService {
 
     private RunningCategoryRepository runningCategoryRepository;
 
-    public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository) {
+    private UserRepository userRepository;
+
+    private final EntityManager em;
+
+    public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository, UserRepository userRepository, EntityManager em) {
         this.eventRepository = eventRepository;
         this.runningCategoryRepository = runningCategoryRepository;
+        this.userRepository = userRepository;
+        this.em = em;
     }
 
     @Override
@@ -86,5 +102,43 @@ public class EventServiceImpl implements EventService {
                 .regulations(event.getRegulations())
                 .prize(event.getPrize())
                 .build();
+    }
+
+    @Override
+    public ResponseObject createEvent(CreateEventDto req, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+
+                Event event = new Event();
+                event.setTitle(req.getName());
+                event.setPicturePath(req.getImage());
+                event.setDescription(req.getDescription());
+                event.setStartDate(req.getFrom_date());
+                event.setEndDate(req.getTo_date());
+                event.setDetails(req.getDetails());
+                event.setRegulations(req.getRegulations());
+                event.setPrize(req.getPrize());
+                event.setMinPace(req.getMin_pace());
+                event.setMaxPace(req.getMax_pace());
+                event.setAdminUser(userOptional.get());
+                eventRepository.save(event);
+                em.refresh(event);
+                List<RunningCategoryResponse> runningCategories = req.getDistance();
+                for(RunningCategoryResponse item : runningCategories){
+                    RunningCategory runningCategory = new RunningCategory();
+                    runningCategory.setRunningCategoryID(item.getId());
+                    runningCategory.setEvent(event);
+                    runningCategory.setRunningCategoryName(item.getName());
+                    runningCategory.setRunningCategoryDistance(item.getDistance());
+                    runningCategoryRepository.save(runningCategory);
+                }
+                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Tạo giải chạy thành công");
+                return responseObject;
+
+            }
+        }
+        return null;
     }
 }

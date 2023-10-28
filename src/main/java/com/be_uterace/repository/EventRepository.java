@@ -20,4 +20,7 @@ public interface EventRepository extends JpaRepository<Event,Long> {
     Event findEventByEventId(Long eventId);
 
 
+
+
+
 }

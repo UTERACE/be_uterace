@@ -1,5 +1,7 @@
 package com.be_uterace.entity;
 
+import com.be_uterace.utils.key.RunningCategoryId;
+import com.be_uterace.utils.key.UserClubId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,9 +16,9 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "RUNNING_CATEGORY")
+@IdClass(RunningCategoryId.class)
 public class RunningCategory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RUNNING_CATEGORY_ID")
     private Integer runningCategoryID;
 
@@ -26,6 +28,7 @@ public class RunningCategory {
     @Column(name = "RUNNING_CATEGORY_DISTANCE")
     private Double runningCategoryDistance;
 
+    @Id
     @ManyToOne
     @JoinColumn(name = "EVENT_ID")
     private Event event;
