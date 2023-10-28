@@ -62,4 +62,22 @@ public class ClubController {
     public ResponseEntity<ResponseObject> changeAdminController(@RequestBody UserClubRequest request) {
         return clubService.changeAdmin(request);
     }
+
+    @GetMapping("/created-club")
+    public ResponseEntity<ClubPaginationResponse> ownClubCreatedController(
+            @RequestParam int current_page,
+            @RequestParam int per_page, Authentication authentication){
+        ClubPaginationResponse clubPaginationResponse = clubService.getOwnClubCreated(
+                current_page,per_page, authentication);
+        return ResponseEntity.ok(clubPaginationResponse);
+    }
+
+    @GetMapping("/joined-club")
+    public ResponseEntity<ClubPaginationResponse> clubJoinedController(
+            @RequestParam int current_page,
+            @RequestParam int per_page, Authentication authentication){
+        ClubPaginationResponse clubPaginationResponse = clubService.getClubJoined(
+                current_page,per_page, authentication);
+        return ResponseEntity.ok(clubPaginationResponse);
+    }
 }

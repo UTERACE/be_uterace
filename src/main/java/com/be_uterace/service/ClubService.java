@@ -23,4 +23,9 @@ public interface ClubService {
     ResponseEntity<ResponseObject> deleteMember(UserClubRequest userClubRequest);
 
     ResponseEntity<ResponseObject> changeAdmin(UserClubRequest userClubRequest);
+
+    ClubPaginationResponse getOwnClubCreated(int current_page, int per_page, Authentication authentication);
+
+    ClubPaginationResponse getClubJoined(int current_page, int per_page, Authentication authentication);
+
 }

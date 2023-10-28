@@ -81,6 +81,29 @@ public interface ClubRepository extends JpaRepository<Club,Integer> {
             "u.firstName, u.lastName")
     ClubDetailProjection getClubDetails(@Param("clubId") int clubId);
 
+    @Query("SELECT c.clubId AS clubId, " +
+            "c.clubName AS clubName," +
+            "c.picturePath AS picturePath, " +
+            "c.clubTotalDistance, " +
+            "COUNT(uc.user.userId) AS memberCount " +
+            "FROM Club c " +
+            "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "WHERE c.creatorUser.userId = :creatorId " +
+            "GROUP BY c.clubId")
+    Page<ClubProjection> findOwnClubPagination(Pageable pageable, @Param("creatorId") Long creatorId);
+
+
+    @Query("SELECT c.clubId AS clubId, " +
+            "c.clubName AS clubName," +
+            "c.picturePath AS picturePath, " +
+            "c.clubTotalDistance, " +
+            "COUNT(uc.user.userId) AS memberCount " +
+            "FROM Club c " +
+            "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "WHERE EXISTS (SELECT 1 FROM UserClub uc2 WHERE uc2.club.clubId = c.clubId " +
+            "AND uc2.user.userId = :userId) " +
+            "GROUP BY c.clubId")
+    Page<ClubProjection> findClubJoined(Pageable pageable, @Param("userId") Long userId);
 
 
 }

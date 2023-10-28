@@ -200,4 +200,64 @@ public class ClubServiceImpl implements ClubService {
         ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Đổi admin thất bại");
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
+
+    @Override
+    public ClubPaginationResponse getOwnClubCreated(int current_page, int per_page, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Pageable pageable = PageRequest.of(current_page, per_page);
+                Page<ClubProjection> clubPage = clubRepository.findOwnClubPagination(pageable, userOptional.get().getUserId());
+                List<ClubProjection> clubProjectionList = clubPage.getContent();
+                List<ClubResponse> clubResponseList = new ArrayList<>();
+                for (ClubProjection item : clubProjectionList){
+                    ClubResponse clubResponse = new ClubResponse();
+                    clubResponse.setClub_id(item.getClubId());
+                    clubResponse.setName(item.getClubName());
+                    clubResponse.setImage(item.getPicturePath());
+                    clubResponse.setTotal_member(item.getMemberCount());
+                    clubResponse.setTotal_distance(item.getClubTotalDistance());
+                    clubResponseList.add(clubResponse);
+                }
+                return ClubPaginationResponse.builder()
+                        .per_page(clubPage.getSize())
+                        .current_page(clubPage.getNumber())
+                        .totalPage(clubPage.getTotalPages())
+                        .total_clubs((int) clubPage.getTotalElements())
+                        .clubs(clubResponseList).build();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ClubPaginationResponse getClubJoined(int current_page, int per_page, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Pageable pageable = PageRequest.of(current_page, per_page);
+                Page<ClubProjection> clubPage = clubRepository.findClubJoined(pageable, userOptional.get().getUserId());
+                List<ClubProjection> clubProjectionList = clubPage.getContent();
+                List<ClubResponse> clubResponseList = new ArrayList<>();
+                for (ClubProjection item : clubProjectionList){
+                    ClubResponse clubResponse = new ClubResponse();
+                    clubResponse.setClub_id(item.getClubId());
+                    clubResponse.setName(item.getClubName());
+                    clubResponse.setImage(item.getPicturePath());
+                    clubResponse.setTotal_member(item.getMemberCount());
+                    clubResponse.setTotal_distance(item.getClubTotalDistance());
+                    clubResponseList.add(clubResponse);
+                }
+                return ClubPaginationResponse.builder()
+                        .per_page(clubPage.getSize())
+                        .current_page(clubPage.getNumber())
+                        .totalPage(clubPage.getTotalPages())
+                        .total_clubs((int) clubPage.getTotalElements())
+                        .clubs(clubResponseList).build();
+            }
+        }
+        return null;
+    }
 }
