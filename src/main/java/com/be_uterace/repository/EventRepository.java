@@ -1,6 +1,7 @@
 package com.be_uterace.repository;
 
 import com.be_uterace.entity.Event;
+import com.be_uterace.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,8 +20,6 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
 
     Event findEventByEventId(Integer eventId);
 
-
-
-
+    Page<Event> findEventByCreateUser(User createUser, Pageable pageable);
 
 }

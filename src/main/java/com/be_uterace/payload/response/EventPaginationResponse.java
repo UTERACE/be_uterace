@@ -12,8 +12,8 @@ import java.util.List;
 public class EventPaginationResponse {
 
     private int per_page;
-    private int total_event;
+    private int total_events;
     private int current_page;
-    private int totalPage;
+    private int total_page;
     List<EventResponse> events;
 }

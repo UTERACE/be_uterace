@@ -1,13 +1,16 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.CreateEventDto;
+import com.be_uterace.payload.request.DeleteActivityEvent;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.EventDetailResponse;
 import com.be_uterace.payload.response.EventPaginationResponse;
 import com.be_uterace.payload.response.LoginResponse;
 import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.repository.UEActivityRepository;
 import com.be_uterace.service.EventService;
+import com.be_uterace.service.UEActivityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
 @Transactional
 public class EventController {
     private EventService eventService;
+    private UEActivityService ueActivityService;
 
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, UEActivityService ueActivityService) {
         this.eventService = eventService;
+        this.ueActivityService = ueActivityService;
     }
 
     @GetMapping
@@ -55,6 +60,20 @@ public class EventController {
     @DeleteMapping(value = {"/{event_id}"})
     public ResponseEntity<ResponseObject> deleteEventController(@PathVariable Integer event_id){
         ResponseObject res = eventService.deleteEvent(event_id);
+        return ResponseEntity.ok(res);
+    }
+
+    @PutMapping(value = {"/delete-activity"})
+    public ResponseEntity<ResponseObject> deleteActivityController(@RequestBody DeleteActivityEvent req){
+        ResponseObject res = ueActivityService.deleteActivity(req);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(value = {"/created-event"})
+    public ResponseEntity<EventPaginationResponse> getEventCreatedController(@RequestParam int current_page,
+                                                                    @RequestParam int per_page,
+                                                                    Authentication auth){
+        EventPaginationResponse res = eventService.getOwnEventCreated(current_page, per_page,auth);
         return ResponseEntity.ok(res);
     }
 }

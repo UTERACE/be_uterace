@@ -1,7 +1,9 @@
 package com.be_uterace.service;
 
 import com.be_uterace.payload.request.CreateEventDto;
+import com.be_uterace.payload.request.DeleteActivityEvent;
 import com.be_uterace.payload.request.UpdateEventDto;
+import com.be_uterace.payload.response.ClubPaginationResponse;
 import com.be_uterace.payload.response.EventDetailResponse;
 import com.be_uterace.payload.response.EventPaginationResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -17,4 +19,8 @@ public interface EventService {
     ResponseObject updateEvent(UpdateEventDto req);
 
     ResponseObject deleteEvent(int event_id);
+
+    EventPaginationResponse getOwnEventCreated(int current_page, int per_page, Authentication authentication);
+
+
 }

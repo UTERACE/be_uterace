@@ -66,7 +66,7 @@ public class ClubServiceImpl implements ClubService {
         return ClubPaginationResponse.builder()
                 .per_page(clubProjectionPage.getSize())
                 .current_page(clubProjectionPage.getNumber())
-                .totalPage(clubProjectionPage.getTotalPages())
+                .total_page(clubProjectionPage.getTotalPages())
                 .total_clubs((int) clubProjectionPage.getTotalElements())
                 .clubs(clubResponseList).build();
     }
@@ -223,7 +223,7 @@ public class ClubServiceImpl implements ClubService {
                 return ClubPaginationResponse.builder()
                         .per_page(clubPage.getSize())
                         .current_page(clubPage.getNumber())
-                        .totalPage(clubPage.getTotalPages())
+                        .total_page(clubPage.getTotalPages())
                         .total_clubs((int) clubPage.getTotalElements())
                         .clubs(clubResponseList).build();
             }
@@ -253,7 +253,7 @@ public class ClubServiceImpl implements ClubService {
                 return ClubPaginationResponse.builder()
                         .per_page(clubPage.getSize())
                         .current_page(clubPage.getNumber())
-                        .totalPage(clubPage.getTotalPages())
+                        .total_page(clubPage.getTotalPages())
                         .total_clubs((int) clubPage.getTotalElements())
                         .clubs(clubResponseList).build();
             }

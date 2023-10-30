@@ -13,6 +13,6 @@ public class ClubPaginationResponse {
     private int per_page;
     private int total_clubs;
     private int current_page;
-    private int totalPage;
+    private int total_page;
     List<ClubResponse> clubs;
 }

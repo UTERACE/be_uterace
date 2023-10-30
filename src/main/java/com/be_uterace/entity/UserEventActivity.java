@@ -26,7 +26,7 @@ public class UserEventActivity {
 
     @ManyToOne
     @JoinColumn(name = "EVENT_ID", referencedColumnName = "EVENT_ID")
-    private UserEvent userEvent;
+    private Event event;
 
     @Column(name = "STATUS")
     private String status;

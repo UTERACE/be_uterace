@@ -4,6 +4,7 @@ import com.be_uterace.entity.Event;
 import com.be_uterace.entity.RunningCategory;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.CreateEventDto;
+import com.be_uterace.payload.request.DeleteActivityEvent;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.UserRankingProjection;
@@ -63,9 +64,9 @@ public class EventServiceImpl implements EventService {
         }
         return EventPaginationResponse.builder()
                 .per_page(eventPage.getSize())
-                .total_event((int) eventPage.getTotalElements())
+                .total_events((int) eventPage.getTotalElements())
                 .current_page(eventPage.getNumber())
-                .totalPage(eventPage.getTotalPages())
+                .total_page(eventPage.getTotalPages())
                 .events(eventResponses)
                 .build();
     }
@@ -125,6 +126,7 @@ public class EventServiceImpl implements EventService {
                 event.setMinPace(req.getMin_pace());
                 event.setMaxPace(req.getMax_pace());
                 event.setAdminUser(userOptional.get());
+                event.setCreateUser(userOptional.get());
                 eventRepository.save(event);
                 em.refresh(event);
                 List<RunningCategoryResponse> runningCategories = req.getDistance();
@@ -182,4 +184,37 @@ public class EventServiceImpl implements EventService {
         return new ResponseObject(StatusCode.SUCCESS,"Xóa giải chạy thành công");
 
     }
+
+    @Override
+    public EventPaginationResponse getOwnEventCreated(int current_page, int per_page, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Pageable pageable = PageRequest.of(current_page, per_page);
+                Page<Event> eventPage = eventRepository.findEventByCreateUser(userOptional.get(), pageable);
+                List<Event> eventList = eventPage.getContent();
+                List<EventResponse> eventResponses = new ArrayList<>();
+                for (Event event : eventList){
+                    EventResponse eventResponse = new EventResponse();
+                    eventResponse.setEvent_id(event.getEventId());
+                    eventResponse.setName(event.getTitle());
+                    eventResponse.setImage(event.getPicturePath());
+                    eventResponse.setTotal_members(event.getNumOfAttendee());
+                    eventResponse.setTotal_clubs(event.getNumOfClubs());
+                    eventResponses.add(eventResponse);
+                }
+                return EventPaginationResponse.builder()
+                        .per_page(eventPage.getSize())
+                        .total_events((int) eventPage.getTotalElements())
+                        .current_page(eventPage.getNumber())
+                        .total_page(eventPage.getTotalPages())
+                        .events(eventResponses)
+                        .build();
+
+            }
+        }
+        return null;
+    }
+
 }
