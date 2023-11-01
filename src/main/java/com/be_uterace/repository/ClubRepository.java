@@ -106,4 +106,6 @@ public interface ClubRepository extends JpaRepository<Club,Integer> {
     Page<ClubProjection> findClubJoined(Pageable pageable, @Param("userId") Long userId);
 
 
+
+
 }

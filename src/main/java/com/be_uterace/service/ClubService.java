@@ -28,4 +28,8 @@ public interface ClubService {
 
     ClubPaginationResponse getClubJoined(int current_page, int per_page, Authentication authentication);
 
+    ResponseObject joinClub(int club_id, Authentication auth);
+
+    ResponseObject leaveClub(int club_id, Authentication auth);
+
 }

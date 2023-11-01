@@ -15,4 +15,6 @@ public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> 
     @Query("SELECT uc FROM UserClub uc WHERE uc.club.clubId = :clubId AND uc.user.userId = :userId")
     Optional<UserClub> findByClubIdAndUserId(@Param("clubId") Integer clubId, @Param("userId") Long userId);
 
+
+
 }

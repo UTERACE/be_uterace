@@ -260,4 +260,44 @@ public class ClubServiceImpl implements ClubService {
         }
         return null;
     }
+
+    @Override
+    public ResponseObject joinClub(int club_id, Authentication authentication) {
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Optional<Club> clubOptional = clubRepository.findById(club_id);
+                Optional<UserClub> userClubbool = userClubRepository.findByClubIdAndUserId(
+                        clubOptional.get().getClubId(),userOptional.get().getUserId());
+                if(userClubbool.isPresent()){
+                    return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"User đã tham gia club này");
+
+                }
+                UserClub userClub = new UserClub();
+                userClub.setClub(clubOptional.get());
+                userClub.setUser(userOptional.get());
+                userClubRepository.save(userClub);
+                return new ResponseObject(StatusCode.SUCCESS,"Tham gia clb thành công");
+            }
+        }
+        return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Tham gia clb thất bại");
+    }
+
+    @Override
+    public ResponseObject leaveClub(int club_id, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
+                        club_id,userOptional.get().getUserId());
+                userClubRepository.delete(userClubOptional.get());
+                return new ResponseObject(StatusCode.SUCCESS,"Rời clb thành công");
+
+            }
+        }
+        return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Rời clb thất bại");
+    }
 }

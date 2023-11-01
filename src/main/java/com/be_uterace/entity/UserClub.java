@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Setter
@@ -27,17 +29,18 @@ public class UserClub {
     @JoinColumn(name = "CLUB_ID", referencedColumnName = "CLUB_ID")
     private Club club;
 
+    @CreationTimestamp
     @Column(name = "JOIN_DATE")
-    private Date joinDate;
+    private Timestamp joinDate;
 
     @Column(name = "TOTAL_DISTANCE")
-    private Double totalDistance;
+    private Double totalDistance = 0.0;
 
     @Column(name = "RANKING")
     private Integer ranking;
 
     @Column(name = "PACE")
-    private Double pace;
+    private Double pace = 0.0;
 
     // Getters and setters
 }

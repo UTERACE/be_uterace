@@ -80,4 +80,18 @@ public class ClubController {
                 current_page,per_page, authentication);
         return ResponseEntity.ok(clubPaginationResponse);
     }
+
+    @PostMapping("/join-club/{club_id}")
+    public ResponseEntity<ResponseObject> joinClubController(@PathVariable Integer club_id, Authentication authentication) {
+        ResponseObject responseObject = clubService.joinClub(club_id,authentication);
+        return ResponseEntity.ok(responseObject);
+    }
+
+    @DeleteMapping("/leave-club/{club_id}")
+    public ResponseEntity<ResponseObject> leaveClubController(@PathVariable Integer club_id, Authentication authentication) {
+        ResponseObject responseObject = clubService.leaveClub(club_id,authentication);
+        return ResponseEntity.ok(responseObject);
+    }
+
+
 }
