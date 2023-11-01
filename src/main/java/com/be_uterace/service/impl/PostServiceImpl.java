@@ -24,7 +24,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostPaginationResponse getPost(int current_page, int per_page) {
-        Pageable pageable = PageRequest.of(current_page, per_page);
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Page<Post> postPage = postRepository.findAllBy(pageable);
 
         List<Post> postList = postPage.getContent();
@@ -42,7 +42,7 @@ public class PostServiceImpl implements PostService {
         return PostPaginationResponse.builder()
                 .per_page(postPage.getSize())
                 .total_news((int) postPage.getTotalElements())
-                .current_page(postPage.getNumber())
+                .current_page(postPage.getNumber() + 1)
                 .totalPage(postPage.getTotalPages())
                 .news(postResponses)
                 .build();
