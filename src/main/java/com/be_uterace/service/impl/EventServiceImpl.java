@@ -49,7 +49,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventPaginationResponse getEventPaginationEvent(int current_page, int per_page, boolean ongoing) {
         String ongoingAsString = (ongoing) ? "1" : "0";
-        Pageable pageable = PageRequest.of(current_page, per_page);
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Page<Event> eventPage = eventRepository.findAllByStatusAndEndDate(ongoingAsString,pageable);
         List<Event> eventList = eventPage.getContent();
         List<EventResponse> eventResponses = new ArrayList<>();
@@ -65,7 +65,7 @@ public class EventServiceImpl implements EventService {
         return EventPaginationResponse.builder()
                 .per_page(eventPage.getSize())
                 .total_events((int) eventPage.getTotalElements())
-                .current_page(eventPage.getNumber())
+                .current_page(eventPage.getNumber() + 1)
                 .total_page(eventPage.getTotalPages())
                 .events(eventResponses)
                 .build();
@@ -191,7 +191,7 @@ public class EventServiceImpl implements EventService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Pageable pageable = PageRequest.of(current_page, per_page);
+                Pageable pageable = PageRequest.of(current_page - 1, per_page);
                 Page<Event> eventPage = eventRepository.findEventByCreateUser(userOptional.get(), pageable);
                 List<Event> eventList = eventPage.getContent();
                 List<EventResponse> eventResponses = new ArrayList<>();
@@ -207,7 +207,7 @@ public class EventServiceImpl implements EventService {
                 return EventPaginationResponse.builder()
                         .per_page(eventPage.getSize())
                         .total_events((int) eventPage.getTotalElements())
-                        .current_page(eventPage.getNumber())
+                        .current_page(eventPage.getNumber() + 1)
                         .total_page(eventPage.getTotalPages())
                         .events(eventResponses)
                         .build();

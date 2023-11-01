@@ -49,7 +49,7 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public ClubPaginationResponse getAllClub(int current_page, int per_page) {
-        Pageable pageable = PageRequest.of(current_page, per_page);
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Page<ClubProjection> clubProjectionPage = clubRepository.findAllClubPagination(pageable);
         List<ClubProjection> clubProjectionList = clubProjectionPage.getContent();
         List<ClubResponse> clubResponseList = new ArrayList<>();
@@ -65,7 +65,7 @@ public class ClubServiceImpl implements ClubService {
 
         return ClubPaginationResponse.builder()
                 .per_page(clubProjectionPage.getSize())
-                .current_page(clubProjectionPage.getNumber())
+                .current_page(clubProjectionPage.getNumber()+1)
                 .total_page(clubProjectionPage.getTotalPages())
                 .total_clubs((int) clubProjectionPage.getTotalElements())
                 .clubs(clubResponseList).build();
@@ -207,7 +207,7 @@ public class ClubServiceImpl implements ClubService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Pageable pageable = PageRequest.of(current_page, per_page);
+                Pageable pageable = PageRequest.of(current_page - 1, per_page);
                 Page<ClubProjection> clubPage = clubRepository.findOwnClubPagination(pageable, userOptional.get().getUserId());
                 List<ClubProjection> clubProjectionList = clubPage.getContent();
                 List<ClubResponse> clubResponseList = new ArrayList<>();
@@ -222,7 +222,7 @@ public class ClubServiceImpl implements ClubService {
                 }
                 return ClubPaginationResponse.builder()
                         .per_page(clubPage.getSize())
-                        .current_page(clubPage.getNumber())
+                        .current_page(clubPage.getNumber() + 1)
                         .total_page(clubPage.getTotalPages())
                         .total_clubs((int) clubPage.getTotalElements())
                         .clubs(clubResponseList).build();
@@ -237,7 +237,7 @@ public class ClubServiceImpl implements ClubService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Pageable pageable = PageRequest.of(current_page, per_page);
+                Pageable pageable = PageRequest.of(current_page - 1, per_page);
                 Page<ClubProjection> clubPage = clubRepository.findClubJoined(pageable, userOptional.get().getUserId());
                 List<ClubProjection> clubProjectionList = clubPage.getContent();
                 List<ClubResponse> clubResponseList = new ArrayList<>();
@@ -252,7 +252,7 @@ public class ClubServiceImpl implements ClubService {
                 }
                 return ClubPaginationResponse.builder()
                         .per_page(clubPage.getSize())
-                        .current_page(clubPage.getNumber())
+                        .current_page(clubPage.getNumber() + 1)
                         .total_page(clubPage.getTotalPages())
                         .total_clubs((int) clubPage.getTotalElements())
                         .clubs(clubResponseList).build();
