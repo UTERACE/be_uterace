@@ -1,13 +1,22 @@
 package com.be_uterace.service.impl;
 
+import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Event;
 import com.be_uterace.entity.Post;
+import com.be_uterace.entity.User;
+import com.be_uterace.payload.request.CreatePostDto;
+import com.be_uterace.payload.request.UpdatePostDto;
 import com.be_uterace.payload.response.*;
+import com.be_uterace.repository.ClubRepository;
 import com.be_uterace.repository.PostRepository;
+import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.PostService;
+import com.be_uterace.utils.StatusCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,8 +27,14 @@ import java.util.Optional;
 public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
 
-    public PostServiceImpl(PostRepository postRepository) {
+    private UserRepository userRepository;
+
+    private ClubRepository clubRepository;
+
+    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, ClubRepository clubRepository) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
+        this.clubRepository = clubRepository;
     }
 
     @Override
@@ -60,4 +75,38 @@ public class PostServiceImpl implements PostService {
         postResponse.setContent(postResponse.getContent());
         return postResponse;
     }
+
+    @Override
+    public ResponseObject createPost(CreatePostDto createPostDto, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Post post = new Post();
+                if(createPostDto.getClub_id()==null){
+                    post.setClub(null);
+                }else {
+                    Optional<Club> clubOptional = clubRepository.findById(createPostDto.getClub_id());
+                    post.setClub(clubOptional.get());
+                }
+
+                post.setTitle(createPostDto.getTitle());
+                post.setDescription(createPostDto.getDescription());
+                post.setImage(createPostDto.getImage());
+                post.setHtmlContent(post.getHtmlContent());
+                post.setUserCreate(userOptional.get());
+                postRepository.save(post);
+                return new ResponseObject(StatusCode.SUCCESS,"Tạo bài viết thành công");
+
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public ResponseObject updatePost(UpdatePostDto updatePostDto) {
+        return null;
+    }
+
 }

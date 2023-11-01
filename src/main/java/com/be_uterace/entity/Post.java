@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Setter
@@ -20,19 +22,19 @@ public class Post {
     @Column(name = "POST_ID")
     private Integer postId;
 
-    @Column(name = "TITLE")
+    @Column(name = "TITLE", unique = true)
     private String title;
 
     @ManyToOne
     @JoinColumn(name = "USER_CREATE", referencedColumnName = "USER_ID")
     private User userCreate;
 
+    @CreationTimestamp
     @Column(name = "CREATED_AT")
-    private Date createdAt;
+    private Timestamp createdAt;
 
-    /*@Lob
     @Column(name = "HTML_CONTENT")
-    private String htmlContent;*/
+    private String htmlContent;
 
     @Column(name = "IMAGE")
     private String image;
@@ -43,11 +45,16 @@ public class Post {
     @Column(name = "DESCRIPTION")
     private String description;
 
+    @CreationTimestamp
     @Column(name = "UPDATED_AT")
-    private Date updatedAt;
+    private Timestamp updatedAt;
 
     @Column(name = "DELETED")
     private Boolean deleted;
+
+    @ManyToOne
+    @JoinColumn(name = "CLUB_ID", referencedColumnName = "CLUB_ID")
+    private Club club;
 
     // Getters and setters
 }
