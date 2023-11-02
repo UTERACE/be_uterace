@@ -16,4 +16,6 @@ public interface PostService {
     ResponseObject createPost(CreatePostDto createPostDto, Authentication authentication);
 
     ResponseObject updatePost(UpdatePostDto updatePostDto);
+
+    ResponseObject deletePost(Integer post_id);
 }

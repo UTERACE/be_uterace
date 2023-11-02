@@ -19,7 +19,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,7 +109,28 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ResponseObject updatePost(UpdatePostDto updatePostDto) {
+        Optional<Post> postOptional = postRepository.findByClubIdAndPostId(updatePostDto.getNews_id(),
+                updatePostDto.getClub_id());
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            post.setTitle(updatePostDto.getTitle());
+            post.setDescription(updatePostDto.getDescription());
+            post.setImage(updatePostDto.getImage());
+            post.setHtmlContent(post.getHtmlContent());
+            // Lấy thời gian hiện tại
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            post.setUpdatedAt(Timestamp.valueOf(currentDateTime));
+            postRepository.save(post);
+            return new ResponseObject(StatusCode.SUCCESS,"Cập nhât bài viết thành công");
+
+        }
         return null;
+    }
+
+    @Override
+    public ResponseObject deletePost(Integer post_id) {
+        postRepository.deleteById(post_id);
+        return new ResponseObject(StatusCode.SUCCESS,"Xóa bài viết thành công");
     }
 
 }

@@ -1,6 +1,7 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.CreatePostDto;
+import com.be_uterace.payload.request.UpdatePostDto;
 import com.be_uterace.payload.response.PostDetailResponse;
 import com.be_uterace.payload.response.PostPaginationResponse;
 import com.be_uterace.payload.response.PostResponse;
@@ -37,6 +38,18 @@ public class PostController {
     @PostMapping()
     public ResponseEntity<ResponseObject> addPostController(@RequestBody CreatePostDto createPostDto, Authentication auth){
         ResponseObject responseObject = postService.createPost(createPostDto,auth);
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @PutMapping()
+    public ResponseEntity<ResponseObject> updatePostController(@RequestBody UpdatePostDto updatePostDto){
+        ResponseObject responseObject = postService.updatePost(updatePostDto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @DeleteMapping("/{post_id}")
+    public ResponseEntity<ResponseObject> deletePostController(@PathVariable Integer post_id){
+        ResponseObject responseObject = postService.deletePost(post_id);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 }

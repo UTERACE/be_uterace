@@ -17,6 +17,6 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
 
     Page<Post> findAllBy(Pageable pageable);
 
-    @Query("SELECT p FROM Post p WHERE p.userCreate = (SELECT c.adminUser FROM Club c WHERE c.clubId = :clubId)")
-    Optional<Post> findByClubIdAndPostId();
+    @Query("SELECT p FROM Post p WHERE p.postId = :postId and p.club.clubId=:clubId")
+    Optional<Post> findByClubIdAndPostId(@Param("postId") Integer postId, @Param("clubId") Integer clubId);
 }
