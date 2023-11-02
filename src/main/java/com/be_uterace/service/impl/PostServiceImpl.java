@@ -75,7 +75,7 @@ public class PostServiceImpl implements PostService {
         postResponse.setImage(post.getImage());
         postResponse.setName(post.getTitle());
         postResponse.setDescription(post.getDescription());
-        postResponse.setContent(postResponse.getContent());
+        postResponse.setContent(post.getHtmlContent());
         return postResponse;
     }
 
@@ -96,7 +96,7 @@ public class PostServiceImpl implements PostService {
                 post.setTitle(createPostDto.getTitle());
                 post.setDescription(createPostDto.getDescription());
                 post.setImage(createPostDto.getImage());
-                post.setHtmlContent(post.getHtmlContent());
+                post.setHtmlContent(createPostDto.getContent());
                 post.setUserCreate(userOptional.get());
                 postRepository.save(post);
                 return new ResponseObject(StatusCode.SUCCESS,"Tạo bài viết thành công");
