@@ -13,49 +13,46 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.UUID;
 
 @Service
 public class FileServiceImpl implements FileService {
 
     @Value("${project.image}")
-    private String path;
+    private String UPLOAD_DIR;
+
+    @Value("${max.file.upload}")
+    private long MAX_IMAGE_SIZE;
+    @Value("${path.image}")
+    private String PATH_IMAGE;
     @Override
-    public String uploadImage(String path, MultipartFile file) throws IOException {
-        //File name
-        String name = file.getOriginalFilename();
-        //random name generate file
-        String randomID = UUID.randomUUID().toString();
-        assert name != null;
-        String fileName1 = randomID.concat(name.substring(name.lastIndexOf(".")));
-
-        //Fullpath
-        String filePath = path + File.separator + fileName1;
-        //create folder if not created
-        File f = new File(path);
-        if(!f.exists()){
-            f.mkdir();
-
-        }
-        //File copy
-        Files.copy(file.getInputStream(), Paths.get(filePath));
-        return name;
-    }
-
-    public Resource loadImage(String fileName) {
-        // Thay đổi đường dẫn dựa trên cấu hình của bạn
-        String imagePath = path + fileName;
-
-        // Đọc tệp hình ảnh từ hệ thống tệp
+    public String saveImage(String base64String) {
         try {
-            FileInputStream fileInputStream = new FileInputStream(imagePath);
-            InputStreamResource resource = new InputStreamResource(fileInputStream);
-            return resource;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null; // Trả về null nếu có lỗi
+            String base64Image = base64String.split(",")[1];
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
+            if (decodedBytes.length > MAX_IMAGE_SIZE) {
+                throw new RuntimeException("Image size exceeds the maximum allowed size");
+            }
+            String imageName= UUID.randomUUID().toString()+".png";
+            Path path = Paths.get(UPLOAD_DIR+imageName);
+            Files.write(path,decodedBytes);
+            return imageName;
+        } catch (Exception e) {
+            throw new RuntimeException("Could not save image", e);
         }
     }
 
-
+    @Override
+    public boolean deleteImage(String imageName) {
+        try {
+            Path path = Paths.get(UPLOAD_DIR+imageName.replace(PATH_IMAGE,""));
+            if (Files.exists(path)) {
+                Files.delete(path);
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

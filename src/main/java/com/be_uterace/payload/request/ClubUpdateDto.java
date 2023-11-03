@@ -14,7 +14,7 @@ public class ClubUpdateDto {
     private String name;
     private String description;
     private String image;
-    //private String details;
+    private String details;
     private Double min_pace;
     private Double max_pace;
 

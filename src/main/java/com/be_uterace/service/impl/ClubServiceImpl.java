@@ -15,7 +15,9 @@ import com.be_uterace.repository.PostRepository;
 import com.be_uterace.repository.UserClubRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.ClubService;
+import com.be_uterace.service.FileService;
 import com.be_uterace.utils.StatusCode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -39,12 +42,16 @@ public class ClubServiceImpl implements ClubService {
     private UserRepository userRepository;
 
     private UserClubRepository userClubRepository;
+    private FileService fileService;
+    @Value("${path.image}")
+    private String path;
 
-    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository, UserClubRepository userClubRepository) {
+    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository, UserClubRepository userClubRepository, FileService fileService) {
         this.clubRepository = clubRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.userClubRepository = userClubRepository;
+        this.fileService = fileService;
     }
 
     @Override
@@ -114,13 +121,20 @@ public class ClubServiceImpl implements ClubService {
                 Club club = new Club();
                 club.setClubName(clubAddDto.getName());
                 club.setDescription(clubAddDto.getDescription());
-                club.setPicturePath(clubAddDto.getImage());
+                if (!Objects.equals(clubAddDto.getImage(), ""))
+                    club.setPicturePath(path + fileService.saveImage(clubAddDto.getImage()));
+                else
+                    club.setPicturePath("");
                 club.setDetails(clubAddDto.getDetails());
                 club.setMinPace(clubAddDto.getMin_pace());
                 club.setMaxPace(clubAddDto.getMax_pace());
                 club.setAdminUser(userOptional.get());
                 club.setCreatorUser(userOptional.get());
                 clubRepository.save(club);
+                UserClub userClub = new UserClub();
+                userClub.setClub(club);
+                userClub.setUser(userOptional.get());
+                userClubRepository.save(userClub);
                 ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Tạo clb thành công");
                 return ResponseEntity.status(HttpStatus.OK).body(responseObject);
             }
@@ -132,28 +146,70 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public ResponseEntity<ResponseObject> updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            String username = userDetails.getUsername();
-            Optional<User> userOptional = userRepository.findByUsername(username);
-            if (userOptional.isPresent()) {
-                Optional<Club> clubOptional = clubRepository.findById(clubUpdateDto.getClub_id());
-                if (clubOptional.isPresent()){
-                    Club club = clubOptional.get();
-                    club.setClubName(clubUpdateDto.getName());
-                    club.setDescription(clubUpdateDto.getDescription());
-                    club.setPicturePath(clubUpdateDto.getImage());
-                    //club.setDetails(club.getDetails());
-                    club.setMinPace(clubUpdateDto.getMin_pace());
-                    club.setMaxPace(clubUpdateDto.getMax_pace());
-                    clubRepository.save(club);
-                    ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Cập nhật clb thành công");
-                    return ResponseEntity.status(HttpStatus.OK).body(responseObject);
-                }
-            }
-
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.UNAUTHORIZED,"Bạn không có quyền thực hiện hành động này"));
         }
-        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Cập nhật clb thất bại");
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy user"));
+        }
+        Optional<Club> clubOptional = clubRepository.findById(clubUpdateDto.getClub_id());
+        if (clubOptional.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy clb"));
+        }
+        Club club = clubOptional.get();
+        club.setClubName(clubUpdateDto.getName() != null && !Objects.equals(clubUpdateDto.getName(), "") ? clubUpdateDto.getName() : club.getClubName());
+        club.setDescription(clubUpdateDto.getDescription() != null && !Objects.equals(clubUpdateDto.getDescription(), "") ? clubUpdateDto.getDescription() : club.getDescription());
+        if (!club.getPicturePath().equals(clubUpdateDto.getImage()) && !Objects.equals(clubUpdateDto.getImage(), "")){
+            if (Objects.equals(club.getPicturePath(), ""))
+                club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
+            else if (fileService.deleteImage(club.getPicturePath())){
+                System.out.println("Delete Image Successful");
+                club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
+            }
+        }
+        club.setDetails(clubUpdateDto.getDetails() != null && !Objects.equals(clubUpdateDto.getDetails(), "") ? clubUpdateDto.getDetails() : club.getDetails());
+        club.setMinPace(clubUpdateDto.getMin_pace() != null ? clubUpdateDto.getMin_pace() : club.getMinPace());
+        club.setMaxPace(clubUpdateDto.getMax_pace() != null ? clubUpdateDto.getMax_pace() : club.getMaxPace());
+        clubRepository.save(club);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(StatusCode.SUCCESS,"Cập nhật clb thành công"));
+
+//        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+//            String username = userDetails.getUsername();
+//            Optional<User> userOptional = userRepository.findByUsername(username);
+//            if (userOptional.isPresent()) {
+//                Optional<Club> clubOptional = clubRepository.findById(clubUpdateDto.getClub_id());
+//                if (clubOptional.isPresent()){
+//                    Club club = clubOptional.get();
+//                    if (clubUpdateDto.getName() != null && !Objects.equals(clubUpdateDto.getName(), ""))
+//                        club.setClubName(clubUpdateDto.getName());
+//                    if (clubUpdateDto.getDescription() != null && !Objects.equals(clubUpdateDto.getDescription(), ""))
+//                        club.setDescription(clubUpdateDto.getDescription());
+//                    if (!club.getPicturePath().equals(clubUpdateDto.getImage()) && !Objects.equals(clubUpdateDto.getImage(), "")){
+//                        if (Objects.equals(club.getPicturePath(), ""))
+//                            club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
+//                        else if (fileService.deleteImage(club.getPicturePath())){
+//                            System.out.println("Delete Image Successful");
+//                            club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
+//                        }
+//                    }
+//                    if (clubUpdateDto.getDetails() != null && !Objects.equals(clubUpdateDto.getDetails(), ""))
+//                        club.setDetails(clubUpdateDto.getDetails());
+//                    if (clubUpdateDto.getMin_pace() != null)
+//                        club.setMinPace(clubUpdateDto.getMin_pace());
+//                    if (clubUpdateDto.getMax_pace() != null)
+//                        club.setMaxPace(clubUpdateDto.getMax_pace());
+//                    clubRepository.save(club);
+//                    ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Cập nhật clb thành công");
+//                    return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+//                }
+//            }
+//
+//        }
+//        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Cập nhật clb thất bại");
+//        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @Override

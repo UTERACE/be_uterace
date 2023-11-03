@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) ->
                         //authorize.anyRequest().authenticated()
                         authorize.requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
                                 .requestMatchers("/api/**").permitAll()
                                 .anyRequest().authenticated()
 
