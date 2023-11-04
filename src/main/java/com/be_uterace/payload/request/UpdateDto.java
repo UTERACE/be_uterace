@@ -10,15 +10,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateDto {
-    private String firstname;
-    private String lastname;
-    private String email;
-    private String telNumber;
-    private String birthday;
-    private String gender;
-    private String address;
-    private String province;
-    private String district;
-    private String ward;
-    private String image;
+    private String firstname = "";
+    private String lastname = "";
+    private String email = "";
+    private String telNumber = "";
+    private String birthday = "";
+    private String gender = "";
+    private String address = "";
+    private String province = "";
+    private String district = "";
+    private String ward = "";
+    private String image = "";
 }

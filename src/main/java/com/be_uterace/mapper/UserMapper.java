@@ -42,9 +42,9 @@ public class UserMapper {
                 .birthday(convertDateToString(user.getDateOfBirth()))
                 .gender(user.getGender())
                 .address(user.getHomeNumber())
-                .province(user.getArea().getProvince())
-                .district(user.getArea().getDistrict())
-                .ward(user.getArea().getPrecinct())
+                .province(user.getArea() != null ? user.getArea().getProvince() : null)
+                .district(user.getArea() != null ? user.getArea().getDistrict() : null)
+                .ward(user.getArea() != null ? user.getArea().getPrecinct() : null)
                 .build();
     }
 }

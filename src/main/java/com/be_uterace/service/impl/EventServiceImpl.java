@@ -12,8 +12,10 @@ import com.be_uterace.repository.EventRepository;
 import com.be_uterace.repository.RunningCategoryRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.EventService;
+import com.be_uterace.service.FileService;
 import com.be_uterace.utils.StatusCode;
 import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,12 +40,17 @@ public class EventServiceImpl implements EventService {
     private UserRepository userRepository;
 
     private final EntityManager em;
+    private FileService fileService;
+    @Value("${path.image}")
+    private String path;
 
-    public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository, UserRepository userRepository, EntityManager em) {
+
+    public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository, UserRepository userRepository, EntityManager em, FileService fileService) {
         this.eventRepository = eventRepository;
         this.runningCategoryRepository = runningCategoryRepository;
         this.userRepository = userRepository;
         this.em = em;
+        this.fileService = fileService;
     }
 
     @Override
@@ -113,10 +120,12 @@ public class EventServiceImpl implements EventService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-
                 Event event = new Event();
                 event.setTitle(req.getName());
-                event.setPicturePath(req.getImage());
+                if (!Objects.equals(req.getImage(), "") && req.getImage() != null)
+                    event.setPicturePath(path+fileService.saveImage(req.getImage()));
+                else
+                    event.setPicturePath("");
                 event.setDescription(req.getDescription());
                 event.setStartDate(req.getFrom_date());
                 event.setEndDate(req.getTo_date());

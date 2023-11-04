@@ -81,7 +81,8 @@ public class ClubServiceImpl implements ClubService {
     @Override
     public ClubDetailResponse getClubDetail(int club_id) {
         ClubDetailProjection clubDetailProjection = clubRepository.getClubDetails(club_id);
-        List<Post> postList = postRepository.findPostsCreatedByClubAdmin(club_id);
+//        List<Post> postList = postRepository.findPostsCreatedByClubAdmin(club_id);
+        List<Post> postList = postRepository.getPostsByClubClubId(club_id);
         List<PostResponse> postResponses = new ArrayList<>();
         for (Post item : postList){
             PostResponse response = new PostResponse();
@@ -91,6 +92,7 @@ public class ClubServiceImpl implements ClubService {
             response.setImage(item.getImage());
             response.setCreated_at(item.getCreatedAt());
             response.setUpdated_at(item.getUpdatedAt());
+            response.setDeleted(item.getDeleted());
             postResponses.add(response);
         }
         return ClubDetailResponse.builder()

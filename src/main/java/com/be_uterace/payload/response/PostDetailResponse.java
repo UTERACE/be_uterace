@@ -16,4 +16,5 @@ public class PostDetailResponse {
     private String description;
     private String image;
     private String content;
+    private String outstanding;
 }

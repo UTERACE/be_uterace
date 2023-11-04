@@ -29,6 +29,13 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<PostPaginationResponse> getPostByUserCreatedController(@RequestParam int current_page,
+                                                          @RequestParam int per_page, Authentication auth) {
+        PostPaginationResponse res = postService.getPostByUserCreated(current_page, per_page, auth);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
     @GetMapping("/{news_id}")
     public ResponseEntity<PostDetailResponse> getPostController(@PathVariable Integer news_id){
         PostDetailResponse postResponse = postService.getPost(news_id);
@@ -48,8 +55,13 @@ public class PostController {
     }
 
     @DeleteMapping("/{post_id}")
-    public ResponseEntity<ResponseObject> deletePostController(@PathVariable Integer post_id){
-        ResponseObject responseObject = postService.deletePost(post_id);
+    public ResponseEntity<ResponseObject> deletePostController(@PathVariable Integer post_id, Authentication auth){
+        ResponseObject responseObject = postService.deletePost(post_id,auth);
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+    @PutMapping("/hide/{post_id}")
+    public ResponseEntity<ResponseObject> hidePostController(@PathVariable Integer post_id, Authentication auth){
+        ResponseObject responseObject = postService.hidePost(post_id,auth);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 }

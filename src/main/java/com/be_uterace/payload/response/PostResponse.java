@@ -17,4 +17,6 @@ public class PostResponse {
     private String image;
     private Date created_at;
     private Date updated_at;
+    private boolean outstanding;
+    private boolean deleted;
 }

@@ -7,9 +7,11 @@ import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.UserResponse;
 import com.be_uterace.repository.AreaRepository;
 import com.be_uterace.repository.UserRepository;
+import com.be_uterace.service.FileService;
 import com.be_uterace.service.UserService;
 import com.be_uterace.utils.Constant;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.be_uterace.mapper.UserMapper.convertFromUserToUserResponse;
@@ -29,12 +32,15 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     private AreaRepository areaRepository;
     private ModelMapper modelMapper;
-
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AreaRepository areaRepository, ModelMapper modelMapper) {
+    private FileService fileService;
+    @Value("${path.image}")
+    private String path;
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AreaRepository areaRepository, ModelMapper modelMapper, FileService fileService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.areaRepository = areaRepository;
         this.modelMapper = modelMapper;
+        this.fileService = fileService;
     }
 
     @Override
@@ -75,17 +81,29 @@ public class UserServiceImpl implements UserService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
-                user.setFirstName(updateDto.getFirstname());
-                user.setLastName(updateDto.getLastname());
-                user.setEmail(updateDto.getEmail());
-                user.setTelNum(updateDto.getTelNumber());
-                user.setDateOfBirth(convertStringToDate(updateDto.getBirthday()));
-                user.setGender(updateDto.getGender());
-                user.setHomeNumber(updateDto.getAddress());
-                user.setArea(areaRepository.findArea(updateDto.getProvince(),
+                user.setFirstName(!Objects.equals(updateDto.getFirstname(), "") ? updateDto.getFirstname() : user.getFirstName());
+                user.setLastName(!Objects.equals(updateDto.getLastname(), "") ? updateDto.getLastname() : user.getLastName());
+                user.setEmail(!Objects.equals(updateDto.getEmail(), "") ? updateDto.getEmail() : user.getEmail());
+                user.setTelNum(!Objects.equals(updateDto.getTelNumber(), "") ? updateDto.getTelNumber() : user.getTelNum());
+                user.setDateOfBirth(!Objects.equals(updateDto.getBirthday(), "") ? convertStringToDate(updateDto.getBirthday()) : user.getDateOfBirth());
+                user.setGender(!Objects.equals(updateDto.getGender(), "") ? updateDto.getGender() : user.getGender());
+                user.setHomeNumber(!Objects.equals(updateDto.getAddress(), "") ? updateDto.getAddress() : user.getHomeNumber());
+                user.setArea(!Objects.equals(updateDto.getProvince(), "") && !Objects.equals(updateDto.getDistrict(), "") && !Objects.equals(updateDto.getWard(), "") ? areaRepository.findArea(updateDto.getProvince(),
                         updateDto.getDistrict(),
-                        updateDto.getWard()));
-                user.setAvatarPath(updateDto.getImage());
+                        updateDto.getWard()) : user.getArea());
+//                user.setArea(areaRepository.findArea(updateDto.getProvince(),
+//                        updateDto.getDistrict(),
+//                        updateDto.getWard()));
+                if (user.getTypeAccount().equals("default")){
+                    if (!user.getAvatarPath().equals(updateDto.getImage()) && !Objects.equals(updateDto.getImage(), "")){
+                        if (Objects.equals(user.getAvatarPath(), "")){
+                            user.setAvatarPath(path+ fileService.saveImage(updateDto.getImage()));
+                        }else if (fileService.deleteImage(user.getAvatarPath())){
+                            System.out.println("Delete image success");
+                            user.setAvatarPath(path+ fileService.saveImage(updateDto.getImage()));
+                        }
+                    }
+                }
                 userRepository.save(user);
                 return ResponseObject.builder()
                         .status(200)
