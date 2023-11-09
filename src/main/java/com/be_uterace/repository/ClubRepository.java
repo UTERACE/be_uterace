@@ -49,8 +49,9 @@ public interface ClubRepository extends JpaRepository<Club,Integer> {
             "COUNT(uc.user.userId) AS memberCount " +
             "FROM Club c " +
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "WHERE LOWER(c.clubName) LIKE %:search_name% " +
             "GROUP BY c.clubId")
-    Page<ClubProjection> findAllClubPagination(Pageable pageable);
+    Page<ClubProjection> findAllClubPagination(@Param("search_name") String search_name,Pageable pageable);
 
 
     @Query("SELECT c.clubId AS clubId, " +
@@ -89,8 +90,9 @@ public interface ClubRepository extends JpaRepository<Club,Integer> {
             "FROM Club c " +
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
             "WHERE c.creatorUser.userId = :creatorId " +
+            "AND LOWER(c.clubName) LIKE %:search_name% " +
             "GROUP BY c.clubId")
-    Page<ClubProjection> findOwnClubPagination(Pageable pageable, @Param("creatorId") Long creatorId);
+    Page<ClubProjection> findOwnClubPagination(@Param("search_name") String search_name,Pageable pageable, @Param("creatorId") Long creatorId);
 
 
     @Query("SELECT c.clubId AS clubId, " +
@@ -102,8 +104,9 @@ public interface ClubRepository extends JpaRepository<Club,Integer> {
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
             "WHERE EXISTS (SELECT 1 FROM UserClub uc2 WHERE uc2.club.clubId = c.clubId " +
             "AND uc2.user.userId = :userId) " +
+            "AND LOWER(c.clubName) LIKE %:search_name% " +
             "GROUP BY c.clubId")
-    Page<ClubProjection> findClubJoined(Pageable pageable, @Param("userId") Long userId);
+    Page<ClubProjection> findClubJoined(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
 
 
 

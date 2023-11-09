@@ -9,9 +9,9 @@ import com.be_uterace.payload.response.ResponseObject;
 import org.springframework.security.core.Authentication;
 
 public interface PostService {
-    PostPaginationResponse getPost(int current_page, int per_page);
+    PostPaginationResponse getPost(int current_page, int per_page,String search_name);
 
-    PostPaginationResponse getPostByUserCreated(int current_page, int per_page, Authentication authentication);
+    PostPaginationResponse getPostByUserCreated(int current_page, int per_page, String search_name, Authentication authentication);
 
     PostDetailResponse getPost(Integer news_id);
 

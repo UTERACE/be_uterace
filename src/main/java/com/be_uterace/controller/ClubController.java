@@ -24,9 +24,10 @@ public class ClubController {
     @GetMapping
     public ResponseEntity<ClubPaginationResponse> clubPaginationController(
             @RequestParam int current_page,
-            @RequestParam int per_page){
+            @RequestParam int per_page,
+            @RequestParam String search_name){
         ClubPaginationResponse clubPaginationResponse = clubService.getAllClub(
-                current_page,per_page);
+                current_page,per_page,search_name);
         return ResponseEntity.ok(clubPaginationResponse);
     }
 
@@ -66,18 +67,18 @@ public class ClubController {
     @GetMapping("/created-club")
     public ResponseEntity<ClubPaginationResponse> ownClubCreatedController(
             @RequestParam int current_page,
-            @RequestParam int per_page, Authentication authentication){
+            @RequestParam int per_page,@RequestParam String search_name, Authentication authentication){
         ClubPaginationResponse clubPaginationResponse = clubService.getOwnClubCreated(
-                current_page,per_page, authentication);
+                current_page,per_page,search_name, authentication);
         return ResponseEntity.ok(clubPaginationResponse);
     }
 
     @GetMapping("/joined-club")
     public ResponseEntity<ClubPaginationResponse> clubJoinedController(
             @RequestParam int current_page,
-            @RequestParam int per_page, Authentication authentication){
+            @RequestParam int per_page,@RequestParam String search_name, Authentication authentication){
         ClubPaginationResponse clubPaginationResponse = clubService.getClubJoined(
-                current_page,per_page, authentication);
+                current_page,per_page,search_name, authentication);
         return ResponseEntity.ok(clubPaginationResponse);
     }
 

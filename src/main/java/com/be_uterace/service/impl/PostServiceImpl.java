@@ -44,9 +44,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostPaginationResponse getPost(int current_page, int per_page) {
+    public PostPaginationResponse getPost(int current_page, int per_page, String search_name) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
-        Page<Post> postPage = postRepository.findAllBy(pageable);
+        Page<Post> postPage = postRepository.findAllByTitleContaining(search_name,pageable);
 
         List<Post> postList = postPage.getContent();
         List<PostResponse> postResponses = new ArrayList<>();
@@ -70,13 +70,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostPaginationResponse getPostByUserCreated(int current_page, int per_page, Authentication authentication) {
+    public PostPaginationResponse getPostByUserCreated(int current_page, int per_page, String search_name, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<Post> postPage = postRepository.getPostsByUserCreateUserId(pageable, userOptional.get().getUserId().intValue());
+                Page<Post> postPage = postRepository.getPostsByTitleContainingAndUserCreateUserId(search_name,pageable, userOptional.get().getUserId().intValue());
                 List<Post> postList = postPage.getContent();
                 List<PostResponse> postResponses = new ArrayList<>();
                 for (Post post : postList) {

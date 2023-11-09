@@ -24,15 +24,15 @@ public class PostController {
 
     @GetMapping()
     public ResponseEntity<PostPaginationResponse> getPostPaginationController(@RequestParam int current_page,
-                                                          @RequestParam int per_page) {
-        PostPaginationResponse res = postService.getPost(current_page, per_page);
+                                                          @RequestParam int per_page,@RequestParam String search_name) {
+        PostPaginationResponse res = postService.getPost(current_page, per_page,search_name);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @GetMapping("/user")
     public ResponseEntity<PostPaginationResponse> getPostByUserCreatedController(@RequestParam int current_page,
-                                                          @RequestParam int per_page, Authentication auth) {
-        PostPaginationResponse res = postService.getPostByUserCreated(current_page, per_page, auth);
+                                                          @RequestParam int per_page,@RequestParam String search_name, Authentication auth) {
+        PostPaginationResponse res = postService.getPostByUserCreated(current_page, per_page, search_name, auth);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 

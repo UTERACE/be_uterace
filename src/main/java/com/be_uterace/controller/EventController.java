@@ -32,9 +32,10 @@ public class EventController {
     public ResponseEntity<EventPaginationResponse> eventPaginationController(
             @RequestParam int current_page,
             @RequestParam int per_page,
-            @RequestParam boolean ongoing){
+            @RequestParam boolean ongoing,
+            @RequestParam String search_name){
         EventPaginationResponse eventPaginationResponse = eventService.getEventPaginationEvent(
-                current_page,per_page,ongoing);
+                current_page,per_page,search_name,ongoing);
         return ResponseEntity.ok(eventPaginationResponse);
     }
 
@@ -72,8 +73,9 @@ public class EventController {
     @GetMapping(value = {"/created-event"})
     public ResponseEntity<EventPaginationResponse> getEventCreatedController(@RequestParam int current_page,
                                                                     @RequestParam int per_page,
+                                                                    @RequestParam String search_name,
                                                                     Authentication auth){
-        EventPaginationResponse res = eventService.getOwnEventCreated(current_page, per_page,auth);
+        EventPaginationResponse res = eventService.getOwnEventCreated(current_page, per_page,search_name,auth);
         return ResponseEntity.ok(res);
     }
 }

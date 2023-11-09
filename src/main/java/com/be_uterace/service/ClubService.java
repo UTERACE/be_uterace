@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 public interface ClubService {
-    ClubPaginationResponse getAllClub(int current_page, int per_page);
+    ClubPaginationResponse getAllClub(int current_page, int per_page, String search);
 
     ClubDetailResponse getClubDetail(int club_id);
 
@@ -24,9 +24,9 @@ public interface ClubService {
 
     ResponseEntity<ResponseObject> changeAdmin(UserClubRequest userClubRequest);
 
-    ClubPaginationResponse getOwnClubCreated(int current_page, int per_page, Authentication authentication);
+    ClubPaginationResponse getOwnClubCreated(int current_page, int per_page, String search, Authentication authentication);
 
-    ClubPaginationResponse getClubJoined(int current_page, int per_page, Authentication authentication);
+    ClubPaginationResponse getClubJoined(int current_page, int per_page, String search, Authentication authentication);
 
     ResponseObject joinClub(int club_id, Authentication auth);
 

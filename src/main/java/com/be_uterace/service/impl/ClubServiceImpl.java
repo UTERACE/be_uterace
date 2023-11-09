@@ -55,9 +55,9 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ClubPaginationResponse getAllClub(int current_page, int per_page) {
+    public ClubPaginationResponse getAllClub(int current_page, int per_page, String search) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
-        Page<ClubProjection> clubProjectionPage = clubRepository.findAllClubPagination(pageable);
+        Page<ClubProjection> clubProjectionPage = clubRepository.findAllClubPagination(search ,pageable);
         List<ClubProjection> clubProjectionList = clubProjectionPage.getContent();
         List<ClubResponse> clubResponseList = new ArrayList<>();
         for (ClubProjection item : clubProjectionList){
@@ -260,13 +260,13 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ClubPaginationResponse getOwnClubCreated(int current_page, int per_page, Authentication authentication) {
+    public ClubPaginationResponse getOwnClubCreated(int current_page, int per_page, String search, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<ClubProjection> clubPage = clubRepository.findOwnClubPagination(pageable, userOptional.get().getUserId());
+                Page<ClubProjection> clubPage = clubRepository.findOwnClubPagination(search ,pageable, userOptional.get().getUserId());
                 List<ClubProjection> clubProjectionList = clubPage.getContent();
                 List<ClubResponse> clubResponseList = new ArrayList<>();
                 for (ClubProjection item : clubProjectionList){
@@ -290,13 +290,13 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ClubPaginationResponse getClubJoined(int current_page, int per_page, Authentication authentication) {
+    public ClubPaginationResponse getClubJoined(int current_page, int per_page, String search, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<ClubProjection> clubPage = clubRepository.findClubJoined(pageable, userOptional.get().getUserId());
+                Page<ClubProjection> clubPage = clubRepository.findClubJoined(search, pageable, userOptional.get().getUserId());
                 List<ClubProjection> clubProjectionList = clubPage.getContent();
                 List<ClubResponse> clubResponseList = new ArrayList<>();
                 for (ClubProjection item : clubProjectionList){

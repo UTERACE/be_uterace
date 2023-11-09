@@ -54,10 +54,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventPaginationResponse getEventPaginationEvent(int current_page, int per_page, boolean ongoing) {
+    public EventPaginationResponse getEventPaginationEvent(int current_page, int per_page,String search_name, boolean ongoing) {
         String ongoingAsString = (ongoing) ? "1" : "0";
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
-        Page<Event> eventPage = eventRepository.findAllByStatusAndEndDate(ongoingAsString,pageable);
+        Page<Event> eventPage = eventRepository.findEventsWithStatusAndSearchName(ongoingAsString,search_name, pageable);
         List<Event> eventList = eventPage.getContent();
         List<EventResponse> eventResponses = new ArrayList<>();
         for (Event event : eventList){
@@ -195,13 +195,13 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventPaginationResponse getOwnEventCreated(int current_page, int per_page, Authentication authentication) {
+    public EventPaginationResponse getOwnEventCreated(int current_page, int per_page,String search_name, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<Event> eventPage = eventRepository.findEventByCreateUser(userOptional.get(), pageable);
+                Page<Event> eventPage = eventRepository.findEventByCreateUserAndTitleContaining(userOptional.get(),search_name, pageable);
                 List<Event> eventList = eventPage.getContent();
                 List<EventResponse> eventResponses = new ArrayList<>();
                 for (Event event : eventList){

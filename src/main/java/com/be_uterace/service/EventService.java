@@ -10,7 +10,7 @@ import com.be_uterace.payload.response.ResponseObject;
 import org.springframework.security.core.Authentication;
 
 public interface EventService {
-    EventPaginationResponse getEventPaginationEvent(int current_page, int per_page, boolean ongoing);
+    EventPaginationResponse getEventPaginationEvent(int current_page, int per_page,String search_name, boolean ongoing);
 
     EventDetailResponse getEventDetail(Integer event_id);
 
@@ -20,7 +20,7 @@ public interface EventService {
 
     ResponseObject deleteEvent(int event_id);
 
-    EventPaginationResponse getOwnEventCreated(int current_page, int per_page, Authentication authentication);
+    EventPaginationResponse getOwnEventCreated(int current_page, int per_page,String search_name, Authentication authentication);
 
 
 }
