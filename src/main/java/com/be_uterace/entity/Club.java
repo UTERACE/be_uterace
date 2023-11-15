@@ -71,6 +71,9 @@ public class Club {
     @Column(name = "DETAILS")
     private String details;
 
+    @Column(name = "OUTSTANDING")
+    private String outstanding = "0";
+
 }
 
 

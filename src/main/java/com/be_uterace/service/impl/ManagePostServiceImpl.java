@@ -16,9 +16,30 @@ public class ManagePostServiceImpl implements ManagePostService {
     }
 
     @Override
-    public ResponseObject blockPost(Integer post_id) {
-        postRepository.markPost("1",post_id);
-        ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Xóa bài viết thành công");
+    public ResponseObject lockPost(Integer post_id) {
+        postRepository.markLockPost("1",post_id);
+        ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Khóa bài viết thành công");
+        return responseObject;
+    }
+
+    @Override
+    public ResponseObject unlockPost(Integer post_id) {
+        postRepository.markLockPost("0",post_id);
+        ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Mở khóa bài viết thành công");
+        return responseObject;
+    }
+
+    @Override
+    public ResponseObject outstandingPost(Integer post_id) {
+        postRepository.markOutstandingPost("1",post_id);
+        ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Chọn bài viết nổi bật thành công");
+        return responseObject;
+    }
+
+    @Override
+    public ResponseObject notOutstandingPost(Integer post_id) {
+        postRepository.markOutstandingPost("0",post_id);
+        ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Xóa bài viết nổi bật thành công");
         return responseObject;
     }
 }

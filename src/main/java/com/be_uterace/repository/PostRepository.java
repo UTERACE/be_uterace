@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,12 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
     Optional<Post> findByClubIdAndPostId(@Param("postId") Integer postId, @Param("clubId") Integer clubId);
 
     @Modifying
+    @Transactional
     @Query("UPDATE Post p SET p.deleted = :mark WHERE p.postId = :postId")
-    void markPost(@Param("mark") String mark, @Param("postId") Integer postId);
+    void markLockPost(@Param("mark") String mark, @Param("postId") Integer postId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Post p SET p.outstanding = :mark WHERE p.postId = :postId")
+    void markOutstandingPost(@Param("mark") String mark, @Param("postId") Integer postId);
 }
