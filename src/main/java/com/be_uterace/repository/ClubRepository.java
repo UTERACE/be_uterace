@@ -8,8 +8,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -109,7 +111,15 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "GROUP BY c.clubId")
     Page<ClubProjection> findClubJoined(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Club c SET c.deleted = :mark WHERE c.clubId = :clubId")
+    void markLockClub(@Param("mark") String mark, @Param("clubId") Integer clubId);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Club c SET c.outstanding = :mark WHERE c.clubId = :clubId")
+    void markOutstandingClub(@Param("mark") String mark, @Param("clubId") Integer clubId);
 
 
 }
