@@ -40,7 +40,7 @@ public class Post {
     private String image;
 
     @Column(name = "OUTSTANDING")
-    private Boolean outstanding;
+    private String outstanding;
 
     @Column(name = "DESCRIPTION")
     private String description;
@@ -50,7 +50,7 @@ public class Post {
     private Timestamp updatedAt;
 
     @Column(name = "DELETED")
-    private Boolean deleted;
+    private String deleted;
 
     @ManyToOne
     @JoinColumn(name = "CLUB_ID", referencedColumnName = "CLUB_ID")

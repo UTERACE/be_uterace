@@ -7,12 +7,13 @@ import com.be_uterace.projection.ClubRankingProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ClubRepository extends JpaRepository<Club,Integer> {
+public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecificationExecutor<Club> {
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubRanking AS clubRanking, " +
             "c.clubName AS clubName, " +

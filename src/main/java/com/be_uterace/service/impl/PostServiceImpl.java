@@ -138,8 +138,8 @@ public class PostServiceImpl implements PostService {
                     post.setImage("");
                 post.setHtmlContent(createPostDto.getContent());
                 post.setUserCreate(userOptional.get());
-                post.setOutstanding(false);
-                post.setDeleted(false);
+                post.setOutstanding("0");
+                post.setDeleted("0");
                 postRepository.save(post);
                 return new ResponseObject(StatusCode.SUCCESS,"Tạo bài viết thành công");
 
@@ -212,7 +212,7 @@ public class PostServiceImpl implements PostService {
                 Optional<Post> postOptional = postRepository.findById(post_id);
                 if (postOptional.isPresent()) {
                     Post post = postOptional.get();
-                    post.setDeleted(true);
+                    post.setDeleted("1");
                     postRepository.save(post);
                     return new ResponseObject(StatusCode.SUCCESS,"Ẩn bài viết thành công");
                 }
