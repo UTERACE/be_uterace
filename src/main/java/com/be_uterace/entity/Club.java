@@ -74,8 +74,6 @@ public class Club {
     @Column(name = "OUTSTANDING")
     private String outstanding = "0";
 
-    @Column(name = "DELETED")
-    private String deleted = "0";
 
 }
 

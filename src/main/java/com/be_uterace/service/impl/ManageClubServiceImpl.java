@@ -17,14 +17,14 @@ public class ManageClubServiceImpl implements ManageClubService {
 
     @Override
     public ResponseObject lockClub(Integer club_id) {
-        clubRepository.markLockClub("1",club_id);
+        clubRepository.markLockClub("0",club_id);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Khóa clb thành công");
         return responseObject;
     }
 
     @Override
     public ResponseObject unlockClub(Integer club_id) {
-        clubRepository.markLockClub("0",club_id);
+        clubRepository.markLockClub("1",club_id);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Mở khóa clb thành công");
         return responseObject;
     }

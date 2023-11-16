@@ -49,8 +49,8 @@ public class Post {
     @Column(name = "UPDATED_AT")
     private Timestamp updatedAt;
 
-    @Column(name = "DELETED")
-    private String deleted;
+    @Column(name = "STATUS")
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "CLUB_ID", referencedColumnName = "CLUB_ID")

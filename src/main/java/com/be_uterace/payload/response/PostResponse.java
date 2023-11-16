@@ -18,5 +18,5 @@ public class PostResponse {
     private Date created_at;
     private Date updated_at;
     private String outstanding;
-    private String deleted;
+    private String status;
 }

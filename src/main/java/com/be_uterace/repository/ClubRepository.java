@@ -113,7 +113,7 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
 
     @Modifying
     @Transactional
-    @Query("UPDATE Club c SET c.deleted = :mark WHERE c.clubId = :clubId")
+    @Query("UPDATE Club c SET c.status = :mark WHERE c.clubId = :clubId")
     void markLockClub(@Param("mark") String mark, @Param("clubId") Integer clubId);
 
     @Modifying

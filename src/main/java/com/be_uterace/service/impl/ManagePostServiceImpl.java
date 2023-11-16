@@ -17,14 +17,14 @@ public class ManagePostServiceImpl implements ManagePostService {
 
     @Override
     public ResponseObject lockPost(Integer post_id) {
-        postRepository.markLockPost("1",post_id);
+        postRepository.markLockPost("0",post_id);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Khóa bài viết thành công");
         return responseObject;
     }
 
     @Override
     public ResponseObject unlockPost(Integer post_id) {
-        postRepository.markLockPost("0",post_id);
+        postRepository.markLockPost("1",post_id);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Mở khóa bài viết thành công");
         return responseObject;
     }

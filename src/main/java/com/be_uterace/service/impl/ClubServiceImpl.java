@@ -92,7 +92,7 @@ public class ClubServiceImpl implements ClubService {
             response.setImage(item.getImage());
             response.setCreated_at(item.getCreatedAt());
             response.setUpdated_at(item.getUpdatedAt());
-            response.setDeleted(item.getDeleted());
+            response.setStatus(item.getStatus());
             postResponses.add(response);
         }
         return ClubDetailResponse.builder()
