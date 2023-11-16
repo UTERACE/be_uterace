@@ -1,14 +1,17 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Event;
+import com.be_uterace.entity.EventRunningCategory;
 import com.be_uterace.entity.RunningCategory;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.DeleteActivityEvent;
+import com.be_uterace.payload.request.RunningCategoryDto;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.EventRepository;
+import com.be_uterace.repository.EventRunningCategoryRepository;
 import com.be_uterace.repository.RunningCategoryRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.EventService;
@@ -36,6 +39,7 @@ public class EventServiceImpl implements EventService {
     private EventRepository eventRepository;
 
     private RunningCategoryRepository runningCategoryRepository;
+    private EventRunningCategoryRepository eventRunningCategoryRepository;
 
     private UserRepository userRepository;
 
@@ -45,9 +49,12 @@ public class EventServiceImpl implements EventService {
     private String path;
 
 
-    public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository, UserRepository userRepository, EntityManager em, FileService fileService) {
+    public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository,
+                            EventRunningCategoryRepository eventRunningCategoryRepository,
+                            UserRepository userRepository, EntityManager em, FileService fileService) {
         this.eventRepository = eventRepository;
         this.runningCategoryRepository = runningCategoryRepository;
+        this.eventRunningCategoryRepository = eventRunningCategoryRepository;
         this.userRepository = userRepository;
         this.em = em;
         this.fileService = fileService;
@@ -81,7 +88,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDetailResponse getEventDetail(Integer event_id) {
         Event event = eventRepository.findEventByEventId(event_id);
-        List<RunningCategory> runningCategory = runningCategoryRepository.findRunningCategoriesByEvent(event);
+        List<RunningCategory> runningCategory = runningCategoryRepository.findRunningCategoriesByEvent_EventId(event_id);
         List<RunningCategoryResponse> categoryResponse = new ArrayList<>();
         for (RunningCategory item : runningCategory){
             RunningCategoryResponse response = new RunningCategoryResponse();
@@ -140,12 +147,11 @@ public class EventServiceImpl implements EventService {
                 em.refresh(event);
                 List<RunningCategoryResponse> runningCategories = req.getDistance();
                 for(RunningCategoryResponse item : runningCategories){
-                    RunningCategory runningCategory = new RunningCategory();
-                    runningCategory.setRunningCategoryID(item.getId());
-                    runningCategory.setEvent(event);
-                    runningCategory.setRunningCategoryName(item.getName());
-                    runningCategory.setRunningCategoryDistance(item.getDistance());
-                    runningCategoryRepository.save(runningCategory);
+                    RunningCategory runningCategory = runningCategoryRepository.findById(item.getId()).orElse(null);
+                    EventRunningCategory eventRunningCategory = new EventRunningCategory();
+                    eventRunningCategory.setEvent(event);
+                    eventRunningCategory.setRunningCategory(runningCategory);
+                    eventRunningCategoryRepository.save(eventRunningCategory);
                 }
                 ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Tạo giải chạy thành công");
                 return responseObject;
@@ -170,19 +176,19 @@ public class EventServiceImpl implements EventService {
         event.setMaxPace(req.getMax_pace());
         eventRepository.save(event);
 
-        List<RunningCategory> runningCategoriesEntity = runningCategoryRepository.findRunningCategoriesByEvent(event);
-
-        List<RunningCategoryResponse> runningCategories = req.getDistance();
-        for (RunningCategoryResponse item : runningCategories) {
-            for (RunningCategory runningCategory : runningCategoriesEntity) {
-                if (Objects.equals(item.getId(), runningCategory.getRunningCategoryID())) {
-                    runningCategory.setRunningCategoryName(item.getName());
-                    runningCategory.setRunningCategoryDistance(item.getDistance());
-                    runningCategoryRepository.save(runningCategory);
-                    break;
-                }
-            }
-        }
+//        List<RunningCategory> runningCategoriesEntity = runningCategoryRepository.findRunningCategoriesByEvent(event);
+//
+//        List<RunningCategoryResponse> runningCategories = req.getDistance();
+//        for (RunningCategoryResponse item : runningCategories) {
+//            for (RunningCategory runningCategory : runningCategoriesEntity) {
+//                if (Objects.equals(item.getId(), runningCategory.getRunningCategoryID())) {
+//                    runningCategory.setRunningCategoryName(item.getName());
+//                    runningCategory.setRunningCategoryDistance(item.getDistance());
+//                    runningCategoryRepository.save(runningCategory);
+//                    break;
+//                }
+//            }
+//        }
 
         return new ResponseObject(StatusCode.SUCCESS,"Cập nhật giải chạy thành công");
     }
@@ -192,6 +198,69 @@ public class EventServiceImpl implements EventService {
         eventRepository.deleteById(event_id);
         return new ResponseObject(StatusCode.SUCCESS,"Xóa giải chạy thành công");
 
+    }
+
+    @Override
+    public ResponseObject addDistanceToEvent(int event_id, int distance_id, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (!userOptional.isPresent()) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+            }
+            User user = userOptional.get();
+            Event event = eventRepository.findEventByEventId(event_id);
+            if (event == null) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+            }
+            if (!Objects.equals(user.getUserId(), event.getAdminUser().getUserId())) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không có quyền thêm khoảng cách");
+            }
+            RunningCategory runningCategory = runningCategoryRepository.findById(distance_id).orElse(null);
+            if (runningCategory == null) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy khoảng cách");
+            }
+            EventRunningCategory eventRunningCategory = eventRunningCategoryRepository.findEventRunningCategoryByEventAndRunningCategory(event, runningCategory);
+            if (eventRunningCategory != null) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Khoảng cách đã tồn tại");
+            }
+            eventRunningCategory = new EventRunningCategory();
+            eventRunningCategory.setEvent(event);
+            eventRunningCategory.setRunningCategory(runningCategory);
+            eventRunningCategoryRepository.save(eventRunningCategory);
+            return new ResponseObject(StatusCode.SUCCESS,"Thêm khoảng cách thành công");
+        }
+        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+    }
+
+    @Override
+    public ResponseObject deleteDistanceFromEvent(int event_id, int distance_id, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (!userOptional.isPresent()) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+            }
+            User user = userOptional.get();
+            Event event = eventRepository.findEventByEventId(event_id);
+            if (event == null) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+            }
+            if (!Objects.equals(user.getUserId(), event.getAdminUser().getUserId())) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không có quyền xóa khoảng cách");
+            }
+            RunningCategory runningCategory = runningCategoryRepository.findById(distance_id).orElse(null);
+            if (runningCategory == null) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy khoảng cách");
+            }
+            EventRunningCategory eventRunningCategory = eventRunningCategoryRepository.findEventRunningCategoryByEventAndRunningCategory(event, runningCategory);
+            if (eventRunningCategory == null) {
+                return new ResponseObject(StatusCode.NOT_FOUND,"Khoảng cách không tồn tại");
+            }
+            eventRunningCategoryRepository.delete(eventRunningCategory);
+            return new ResponseObject(StatusCode.SUCCESS,"Xóa khoảng cách thành công");
+        }
+        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
     }
 
     @Override

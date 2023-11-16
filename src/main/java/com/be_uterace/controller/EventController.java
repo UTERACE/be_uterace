@@ -64,6 +64,22 @@ public class EventController {
         return ResponseEntity.ok(res);
     }
 
+    @PostMapping(value = {"/{event_id}/add-distance/{distance_id}"})
+    public ResponseEntity<ResponseObject> addDistanceToEventController(@PathVariable int event_id,
+                                                                       @PathVariable int distance_id,
+                                                                       Authentication authentication){
+        ResponseObject res = eventService.addDistanceToEvent(event_id, distance_id, authentication);
+        return ResponseEntity.ok(res);
+    }
+
+    @DeleteMapping(value = {"/{event_id}/delete-distance/{distance_id}"})
+    public ResponseEntity<ResponseObject> deleteDistanceFromEventController(@PathVariable int event_id,
+                                                                       @PathVariable int distance_id,
+                                                                       Authentication authentication){
+        ResponseObject res = eventService.deleteDistanceFromEvent(event_id, distance_id, authentication);
+        return ResponseEntity.ok(res);
+    }
+
     @PutMapping(value = {"/delete-activity"})
     public ResponseEntity<ResponseObject> deleteActivityController(@RequestBody DeleteActivityEvent req){
         ResponseObject res = ueActivityService.deleteActivity(req);
