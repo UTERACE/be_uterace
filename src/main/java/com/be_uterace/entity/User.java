@@ -57,13 +57,13 @@ public class User {
     private Double totalDistance;
 
     @Column(name = "PACE")
-    private Double pace;
+    private Double pace=0.0;
 
     @Column(name = "RANKING")
     private Integer ranking;
 
     @Column(name = "STATUS")
-    private String status;
+    private String status="1";
 
     @Column(name = "LINK_FB")
     private String linkFb;
@@ -104,6 +104,13 @@ public class User {
     @Column(name = "STRAVA_IMAGE")
     private String stravaImage;
     @Column(name = "SYNC_STATUS")
-    private Integer syncStatus;
+    private String syncStatus;
+
+    @Column(name = "REASON")
+    private String reason;
+
+    @CreationTimestamp
+    @Column(name = "LAST_SYNC")
+    private Timestamp last_sync;
 }
 

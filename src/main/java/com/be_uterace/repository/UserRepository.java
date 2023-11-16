@@ -6,8 +6,10 @@ import com.be_uterace.projection.UserRankingProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,5 +49,15 @@ public interface UserRepository extends JpaRepository<User,Long> {
             @Param("year") int year,
             Pageable pageable
     );
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.status = :mark WHERE u.userId = :userId")
+    void markLockUser(@Param("mark") String mark, @Param("userId") Integer userId);
+
+    @Query("SELECT u FROM User u " +
+            "WHERE unaccent(LOWER(u.firstName)) LIKE unaccent(LOWER(:searchName)) " +
+            "OR unaccent(LOWER(u.lastName)) LIKE unaccent(LOWER(:searchName))")
+    Page<User> searchUsers(@Param("searchName") String searchName, Pageable pageable);
 
 }
