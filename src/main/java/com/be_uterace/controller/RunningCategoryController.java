@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/running-category")
+@RequestMapping("/api/distance")
 public class RunningCategoryController {
     private RunningCategoryService runningCategoryService;
     public RunningCategoryController(RunningCategoryService runningCategoryService) {
