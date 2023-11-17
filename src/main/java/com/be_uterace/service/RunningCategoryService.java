@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface RunningCategoryService {
     List<RunningCategory> getAllRunningCategory();
+    RunningCategory getRunningCategoryById(Integer running_category_id);
     ResponseObject addRunningCategory(RunningCategoryDto runningCategoryDto);
     ResponseObject updateRunningCategory(Integer running_category_id,RunningCategoryDto runningCategoryDto);
     ResponseObject deleteRunningCategory(Integer running_category_id);

@@ -61,10 +61,15 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventPaginationResponse getEventPaginationEvent(int current_page, int per_page,String search_name, boolean ongoing) {
-        String ongoingAsString = (ongoing) ? "1" : "0";
+    public EventPaginationResponse getEventPaginationEvent(int current_page, int per_page,String search_name, String ongoing) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
-        Page<Event> eventPage = eventRepository.findEventsWithStatusAndSearchName(ongoingAsString,search_name, pageable);
+        Page<Event> eventPage;
+        if (ongoing.equals("1"))
+            eventPage= eventRepository.findEventsWithStatusOnGoing(search_name, pageable);
+        else if (ongoing.equals("0"))
+            eventPage = eventRepository.findEventsWithStatusFinished(search_name, pageable);
+        else
+            eventPage = eventRepository.findEventsWithStatusUpcoming(search_name, pageable);
         List<Event> eventList = eventPage.getContent();
         List<EventResponse> eventResponses = new ArrayList<>();
         for (Event event : eventList){
@@ -162,18 +167,37 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ResponseObject updateEvent(UpdateEventDto req) {
+    public ResponseObject updateEvent(UpdateEventDto req, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)){
+            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        }
         Event event = eventRepository.findEventByEventId(req.getEvent_id());
-        event.setTitle(req.getName());
-        event.setPicturePath(req.getImage());
-        event.setDescription(req.getDescription());
-        event.setStartDate(req.getFrom_date());
-        event.setEndDate(req.getTo_date());
-        event.setDetails(req.getDetails());
-        event.setRegulations(req.getRegulations());
-        event.setPrize(req.getPrize());
-        event.setMinPace(req.getMin_pace());
-        event.setMaxPace(req.getMax_pace());
+        if (event == null) {
+            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+        }
+        event.setTitle(req.getName() != null && !Objects.equals(req.getName(), "") ? req.getName() : event.getTitle());
+        if (!event.getPicturePath().equals(req.getImage()) && !Objects.equals(req.getImage(), "")){
+            if (Objects.equals(event.getPicturePath(), ""))
+                event.setPicturePath(path + fileService.saveImage(req.getImage()));
+            else if (fileService.deleteImage(event.getPicturePath())){
+                System.out.println("Delete Image Successful");
+                event.setPicturePath(path + fileService.saveImage(req.getImage()));
+            }
+        }
+        event.setDescription(req.getDescription() != null && !Objects.equals(req.getDescription(), "") ? req.getDescription() : event.getDescription());
+        event.setStartDate(req.getFrom_date() != null ? req.getFrom_date() : event.getStartDate());
+        event.setEndDate(req.getTo_date() != null ? req.getTo_date() : event.getEndDate());
+        event.setDetails(req.getDetails() != null && !Objects.equals(req.getDetails(), "") ? req.getDetails() : event.getDetails());
+        event.setRegulations(req.getRegulations() != null && !Objects.equals(req.getRegulations(), "") ? req.getRegulations() : event.getRegulations());
+        event.setPrize(req.getPrize() != null && !Objects.equals(req.getPrize(), "") ? req.getPrize() : event.getPrize());
+        event.setMinPace(req.getMin_pace() != null ? req.getMin_pace() : event.getMinPace());
+        event.setMaxPace(req.getMax_pace() != null ? req.getMax_pace() : event.getMaxPace());
         eventRepository.save(event);
 
 //        List<RunningCategory> runningCategoriesEntity = runningCategoryRepository.findRunningCategoriesByEvent(event);

@@ -20,6 +20,11 @@ public class RunningCategoryServiceImpl implements RunningCategoryService {
     }
 
     @Override
+    public RunningCategory getRunningCategoryById(Integer running_category_id) {
+        return runningCategoryRepository.findById(running_category_id).orElse(null);
+    }
+
+    @Override
     public ResponseObject addRunningCategory(RunningCategoryDto runningCategoryDto) {
         RunningCategory runningCategory = new RunningCategory();
         runningCategory.setRunningCategoryName(runningCategoryDto.getRunningCategoryName());

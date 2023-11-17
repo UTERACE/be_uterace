@@ -25,6 +25,12 @@ public class RunningCategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(runningCategories);
     }
 
+    @GetMapping("/{running_category_id}")
+    public ResponseEntity<RunningCategory> getRunningCategoryByIdController(@PathVariable Integer running_category_id){
+        RunningCategory runningCategory = runningCategoryService.getRunningCategoryById(running_category_id);
+        return ResponseEntity.status(HttpStatus.OK).body(runningCategory);
+    }
+
     @PostMapping()
     public ResponseEntity<ResponseObject> addRunningCategoryController(@RequestBody RunningCategoryDto runningCategoryDto) {
         ResponseObject responseObject = runningCategoryService.addRunningCategory(runningCategoryDto);

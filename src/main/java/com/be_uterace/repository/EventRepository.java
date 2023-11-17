@@ -14,15 +14,30 @@ import java.util.Date;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event,Integer> {
-    @Query("SELECT e FROM Event e WHERE e.status = '1' AND e.endDate > CURRENT_TIMESTAMP")
-    List<Event> findAllByStatusAndEndDate();
+    @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
+    List<Event> findEventsWithStatusOnGoing();
 
-    @Query("SELECT e FROM Event e WHERE e.status = :status AND e.endDate > CURRENT_TIMESTAMP " +
-            "AND LOWER(e.title) LIKE %:search_name%") // Thêm điều kiện tìm kiếm
-    Page<Event> findEventsWithStatusAndSearchName(
-            @Param("status") String status,
+    List<Event> findTop6EventsByOutstanding(Integer outstanding);
+
+    @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
+            " AND LOWER(e.title) LIKE %:search_name%") // Thêm điều kiện tìm kiếm
+    Page<Event> findEventsWithStatusOnGoing(
             @Param("search_name") String search_name,
             Pageable pageable);
+
+    @Query("SELECT e FROM Event e WHERE e.endDate < CURRENT_TIMESTAMP AND LOWER(e.title) LIKE %:search_name% "
+            + "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
+    Page<Event> findEventsWithStatusFinished(
+            @Param("search_name") String search_name,
+            Pageable pageable);
+
+    @Query("SELECT e FROM Event e WHERE e.startDate > CURRENT_TIMESTAMP AND LOWER(e.title) LIKE %:search_name% "
+            + "ORDER BY e.startDate ASC") // Thêm điều kiện tìm kiếm
+    Page<Event> findEventsWithStatusUpcoming(
+            @Param("search_name") String search_name,
+            Pageable pageable);
+
 
     Event findEventByEventId(Integer eventId);
 

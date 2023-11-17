@@ -32,7 +32,7 @@ public class EventController {
     public ResponseEntity<EventPaginationResponse> eventPaginationController(
             @RequestParam int current_page,
             @RequestParam int per_page,
-            @RequestParam boolean ongoing,
+            @RequestParam String ongoing,
             @RequestParam String search_name){
         EventPaginationResponse eventPaginationResponse = eventService.getEventPaginationEvent(
                 current_page,per_page,search_name,ongoing);
@@ -53,8 +53,8 @@ public class EventController {
     }
 
     @PutMapping
-    public ResponseEntity<ResponseObject> updateEventController(@RequestBody UpdateEventDto req){
-        ResponseObject res = eventService.updateEvent(req);
+    public ResponseEntity<ResponseObject> updateEventController(@RequestBody UpdateEventDto req, Authentication authentication){
+        ResponseObject res = eventService.updateEvent(req, authentication);
         return ResponseEntity.ok(res);
     }
 

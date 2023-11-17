@@ -16,6 +16,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post,Integer> {
     @Query("SELECT p FROM Post p WHERE p.userCreate = (SELECT c.adminUser FROM Club c WHERE c.clubId = :clubId)")
     List<Post> findPostsCreatedByClubAdmin(@Param("clubId") Integer clubId);
+    List<Post> findTop6PostsByOutstanding(String outstanding);
     List<Post> getPostsByClubClubId(Integer clubId);
     Page<Post> getPostsByTitleContainingAndUserCreateUserId(String search_name,Pageable pageable,Integer userId);
 

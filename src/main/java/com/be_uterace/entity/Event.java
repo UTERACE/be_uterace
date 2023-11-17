@@ -22,7 +22,7 @@ public class Event {
     @Column(name = "EVENT_ID")
     private Integer eventId;
 
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "TITLE")

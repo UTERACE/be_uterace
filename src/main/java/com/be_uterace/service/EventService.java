@@ -11,13 +11,13 @@ import com.be_uterace.payload.response.ResponseObject;
 import org.springframework.security.core.Authentication;
 
 public interface EventService {
-    EventPaginationResponse getEventPaginationEvent(int current_page, int per_page,String search_name, boolean ongoing);
+    EventPaginationResponse getEventPaginationEvent(int current_page, int per_page,String search_name, String ongoing);
 
     EventDetailResponse getEventDetail(Integer event_id);
 
     ResponseObject createEvent(CreateEventDto req, Authentication auth);
 
-    ResponseObject updateEvent(UpdateEventDto req);
+    ResponseObject updateEvent(UpdateEventDto req, Authentication authentication);
 
     ResponseObject deleteEvent(int event_id);
     ResponseObject addDistanceToEvent(int event_id, int distance_id, Authentication authentication);

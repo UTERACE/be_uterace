@@ -28,6 +28,8 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "ORDER BY c.clubRanking ASC")
     List<ClubRankingProjection> findTop8ClubsWithMemberAndEventCount();
 
+    List<Club> findTop6ClubsByOutstanding(String outstanding);
+
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubName AS clubName, " +
             "c.picturePath, COALESCE(SUM(r.distance), 0) AS clubTotalDistance, " +
