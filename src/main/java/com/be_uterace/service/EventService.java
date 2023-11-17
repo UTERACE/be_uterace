@@ -25,5 +25,5 @@ public interface EventService {
 
     EventPaginationResponse getOwnEventCreated(int current_page, int per_page,String search_name, Authentication authentication);
 
-
+    boolean checkJoinEvent(int event_id, Authentication auth);
 }

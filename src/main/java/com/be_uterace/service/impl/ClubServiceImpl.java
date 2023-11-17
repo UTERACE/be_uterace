@@ -358,4 +358,20 @@ public class ClubServiceImpl implements ClubService {
         }
         return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Rời clb thất bại");
     }
+
+    @Override
+    public Boolean checkJoinClub(int club_id, Authentication auth) {
+        if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
+                        club_id,userOptional.get().getUserId());
+                if (userClubOptional.isPresent()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

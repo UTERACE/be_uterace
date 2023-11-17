@@ -94,5 +94,9 @@ public class ClubController {
         return ResponseEntity.ok(responseObject);
     }
 
-
+    @GetMapping("/check-join-club/{club_id}")
+    public ResponseEntity<Boolean> checkJoinClubController(@PathVariable Integer club_id, Authentication authentication) {
+        Boolean responseObject = clubService.checkJoinClub(club_id,authentication);
+        return ResponseEntity.ok(responseObject);
+    }
 }

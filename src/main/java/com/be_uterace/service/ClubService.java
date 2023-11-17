@@ -32,4 +32,6 @@ public interface ClubService {
 
     ResponseObject leaveClub(int club_id, Authentication auth);
 
+    Boolean checkJoinClub(int club_id, Authentication auth);
+
 }

@@ -319,4 +319,16 @@ public class EventServiceImpl implements EventService {
         return null;
     }
 
+    @Override
+    public boolean checkJoinEvent(int event_id, Authentication auth) {
+        if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Optional<Event> eventOptional = eventRepository.findById(event_id);
+            }
+        }
+        return false;
+    }
+
 }

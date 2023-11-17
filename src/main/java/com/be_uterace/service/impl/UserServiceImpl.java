@@ -112,6 +112,10 @@ public class UserServiceImpl implements UserService {
                         .build();
             }
         }
-        return null;
+        return ResponseObject.builder()
+                .status(400)
+                .message("Cập nhật thông tin ngừoi dùng \n" +
+                        " thất bại!")
+                .build();
     }
 }

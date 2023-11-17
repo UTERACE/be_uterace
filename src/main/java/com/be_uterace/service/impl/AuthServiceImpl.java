@@ -223,7 +223,9 @@ public class AuthServiceImpl implements AuthService {
             }
             else if (registerDto.getType_account().equals("default")) {
                 user.setTypeAccount("default");
+                user.setAvatarPath("");
             }
+            user.setHomeNumber(registerDto.getAddress());
             userRepository.save(user);
             return ResponseObject.builder().status(201)
                     .message(Constant.SUCCESS_REGISTER)
