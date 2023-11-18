@@ -41,7 +41,14 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
 
     Event findEventByEventId(Integer eventId);
 
-    Page<Event> findEventByCreateUserAndTitleContaining( User createUser,String title, Pageable pageable);
+    @Query("SELECT e FROM Event e WHERE e.createUser.userId = :user_id AND LOWER(e.title) LIKE %:search_name%")
+    Page<Event> findEventByCreateUserAndTitleContaining(
+            @Param("user_id") Long user_id,
+            @Param("search_name") String search_name,
+            Pageable pageable);
+    @Query("SELECT e FROM Event e LEFT JOIN UserEvent ue ON e.eventId = ue.event.eventId WHERE ue.user.userId = :userId AND " +
+            "LOWER(e.title) LIKE %:search_name%")
+    Page<Event> findEventByJoinUserUserId(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
 
     @Modifying
     @Transactional

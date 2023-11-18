@@ -94,4 +94,31 @@ public class EventController {
         EventPaginationResponse res = eventService.getOwnEventCreated(current_page, per_page,search_name,auth);
         return ResponseEntity.ok(res);
     }
+
+    @GetMapping(value = {"/joined-event"})
+    public ResponseEntity<EventPaginationResponse> getEventJoinedController(@RequestParam int current_page,
+                                                                    @RequestParam int per_page,
+                                                                    @RequestParam String search_name,
+                                                                    Authentication auth){
+        EventPaginationResponse res = eventService.getEventJoined(current_page, per_page,search_name,auth);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(value = {"/join-event/{event_id}"})
+    public ResponseEntity<ResponseObject> joinEventController(@PathVariable Integer event_id, Authentication auth){
+        ResponseObject res = eventService.joinEvent(event_id, auth);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(value = {"/leave-event/{event_id}"})
+    public ResponseEntity<ResponseObject> leaveEventController(@PathVariable Integer event_id, Authentication auth){
+        ResponseObject res = eventService.leaveEvent(event_id, auth);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(value = {"/check-join-event/{event_id}"})
+    public ResponseEntity<Boolean> checkJoinEventController(@PathVariable Integer event_id, Authentication auth){
+        Boolean res = eventService.checkJoinEvent(event_id, auth);
+        return ResponseEntity.ok(res);
+    }
 }

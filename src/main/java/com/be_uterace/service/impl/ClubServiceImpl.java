@@ -367,9 +367,7 @@ public class ClubServiceImpl implements ClubService {
             if (userOptional.isPresent()) {
                 Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
                         club_id,userOptional.get().getUserId());
-                if (userClubOptional.isPresent()){
-                    return true;
-                }
+                return userClubOptional.isPresent();
             }
         }
         return false;

@@ -1,19 +1,13 @@
 package com.be_uterace.service.impl;
 
-import com.be_uterace.entity.Event;
-import com.be_uterace.entity.EventRunningCategory;
-import com.be_uterace.entity.RunningCategory;
-import com.be_uterace.entity.User;
+import com.be_uterace.entity.*;
 import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.DeleteActivityEvent;
 import com.be_uterace.payload.request.RunningCategoryDto;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.UserRankingProjection;
-import com.be_uterace.repository.EventRepository;
-import com.be_uterace.repository.EventRunningCategoryRepository;
-import com.be_uterace.repository.RunningCategoryRepository;
-import com.be_uterace.repository.UserRepository;
+import com.be_uterace.repository.*;
 import com.be_uterace.service.EventService;
 import com.be_uterace.service.FileService;
 import com.be_uterace.utils.StatusCode;
@@ -42,6 +36,7 @@ public class EventServiceImpl implements EventService {
     private EventRunningCategoryRepository eventRunningCategoryRepository;
 
     private UserRepository userRepository;
+    private UserEventRepository userEventRepository;
 
     private final EntityManager em;
     private FileService fileService;
@@ -50,12 +45,13 @@ public class EventServiceImpl implements EventService {
 
 
     public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository,
-                            EventRunningCategoryRepository eventRunningCategoryRepository,
+                            EventRunningCategoryRepository eventRunningCategoryRepository, UserEventRepository userEventRepository,
                             UserRepository userRepository, EntityManager em, FileService fileService) {
         this.eventRepository = eventRepository;
         this.runningCategoryRepository = runningCategoryRepository;
         this.eventRunningCategoryRepository = eventRunningCategoryRepository;
         this.userRepository = userRepository;
+        this.userEventRepository = userEventRepository;
         this.em = em;
         this.fileService = fileService;
     }
@@ -148,6 +144,7 @@ public class EventServiceImpl implements EventService {
                 event.setMaxPace(req.getMax_pace());
                 event.setAdminUser(userOptional.get());
                 event.setCreateUser(userOptional.get());
+                event.setOutstanding(0);
                 eventRepository.save(event);
                 em.refresh(event);
                 List<RunningCategoryResponse> runningCategories = req.getDistance();
@@ -294,7 +291,7 @@ public class EventServiceImpl implements EventService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<Event> eventPage = eventRepository.findEventByCreateUserAndTitleContaining(userOptional.get(),search_name, pageable);
+                Page<Event> eventPage = eventRepository.findEventByJoinUserUserId(search_name, pageable, userOptional.get().getUserId());
                 List<Event> eventList = eventPage.getContent();
                 List<EventResponse> eventResponses = new ArrayList<>();
                 for (Event event : eventList){
@@ -320,12 +317,94 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public boolean checkJoinEvent(int event_id, Authentication auth) {
+    public EventPaginationResponse getEventJoined(int current_page, int per_page, String search_name, Authentication authentication) {
+        if (authentication !=null && authentication.getPrincipal() instanceof UserDetails userDetails){
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()){
+                Pageable pageable = PageRequest.of(current_page - 1, per_page);
+                Page<Event> eventPage = eventRepository.findEventByJoinUserUserId(search_name, pageable, userOptional.get().getUserId());
+                List<Event> eventList = eventPage.getContent();
+                List<EventResponse> eventResponses = new ArrayList<>();
+                for (Event event : eventList){
+                    EventResponse eventResponse = new EventResponse();
+                    eventResponse.setEvent_id(event.getEventId());
+                    eventResponse.setName(event.getTitle());
+                    eventResponse.setImage(event.getPicturePath());
+                    eventResponse.setTotal_members(event.getNumOfAttendee());
+                    eventResponse.setTotal_clubs(event.getNumOfClubs());
+                    eventResponses.add(eventResponse);
+                }
+                return EventPaginationResponse.builder()
+                        .per_page(eventPage.getSize())
+                        .total_events((int) eventPage.getTotalElements())
+                        .current_page(eventPage.getNumber() + 1)
+                        .total_page(eventPage.getTotalPages())
+                        .events(eventResponses)
+                        .build();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseObject joinEvent(int event_id, Authentication auth) {
         if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Optional<Event> eventOptional = eventRepository.findById(event_id);
+                if (eventOptional.isPresent()) {
+                    Event event = eventOptional.get();
+                    Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
+                    if (userEventOptional.isPresent()) {
+                        return new ResponseObject(StatusCode.NOT_FOUND,"Bạn đã tham gia giải chạy này");
+                    }
+                    UserEvent userEvent = new UserEvent();
+                    userEvent.setEvent(event);
+                    userEvent.setUser(userOptional.get());
+                    userEventRepository.save(userEvent);
+                    event.setNumOfAttendee(event.getNumOfAttendee() + 1);
+                    eventRepository.save(event);
+                    return new ResponseObject(StatusCode.SUCCESS,"Tham gia giải chạy thành công");
+                }
+            }
+        }
+        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+    }
+
+    @Override
+    public ResponseObject leaveEvent(int event_id, Authentication auth) {
+        if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Optional<Event> eventOptional = eventRepository.findById(event_id);
+                if (eventOptional.isPresent()) {
+                    Event event = eventOptional.get();
+                    Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
+                    if (userEventOptional.isPresent()) {
+                        UserEvent userEvent = userEventOptional.get();
+                        userEventRepository.delete(userEvent);
+                        event.setNumOfAttendee(event.getNumOfAttendee() - 1);
+                        eventRepository.save(event);
+                        return new ResponseObject(StatusCode.SUCCESS,"Rời khỏi giải chạy thành công");
+                    }
+                }
+                return new ResponseObject(StatusCode.NOT_FOUND,"Bạn chưa tham gia giải chạy này");
+            }
+        }
+        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+    }
+
+    @Override
+    public boolean checkJoinEvent(int event_id, Authentication auth) {
+        if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
+                return userEventOptional.isPresent();
             }
         }
         return false;
