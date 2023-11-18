@@ -3,27 +3,27 @@ package com.be_uterace.service.impl;
 import com.be_uterace.entity.Run;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.response.ConnectStravaResponse;
+import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.stravaresponse.ActivityStravaResponse;
 import com.be_uterace.payload.response.stravaresponse.StravaOauthResponse;
 import com.be_uterace.repository.RunRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.StravaService;
+import com.be_uterace.utils.StatusCode;
 import com.be_uterace.utils.StravaUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import com.be_uterace.utils.Format;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static com.be_uterace.utils.Format.formatSeconds;
 import static com.be_uterace.utils.StravaUtils.getAllActivities;
@@ -51,10 +51,13 @@ public class StravaServiceImpl implements StravaService {
             StravaOauthResponse stravaOauthResponse = StravaUtils.exchangeAuthorizationCode(code);
             assert stravaOauthResponse != null;
             //strava này đã được kết nối bởi người khác
-            boolean userExistsWithStravaId = userRepository.existsByStravaId(stravaOauthResponse.getAthlete().getId());
-            if (userExistsWithStravaId) {
+            if (userRepository.existsByStravaId(stravaOauthResponse.getAthlete().getId())) {
                 return ConnectStravaResponse.builder()
+                        .status(201)
                         .detail("Strava has been connected by another account")
+                        .stravaFullname(null)
+                        .stravaImage(null)
+                        .stravaId(null)
                         .build();
             }
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -79,13 +82,20 @@ public class StravaServiceImpl implements StravaService {
             user.setStravaImage(stravaOauthResponse.getAthlete().getProfile());
             userRepository.save(user);
             return ConnectStravaResponse.builder()
+                    .status(200)
                     .detail("Connect Strava Success")
                     .stravaId(stravaOauthResponse.getAthlete().getId())
                     .stravaFullname(stravaOauthResponse.getAthlete().getFullName())
                     .stravaImage(stravaOauthResponse.getAthlete().getProfile())
                     .build();
         }
-        return null;
+        return ConnectStravaResponse.builder()
+                .status(400)
+                .detail("Connect Strava Fail")
+                .stravaFullname(null)
+                .stravaImage(null)
+                .stravaId(null)
+                .build();
     }
 
     @Override
@@ -99,8 +109,12 @@ public class StravaServiceImpl implements StravaService {
         user.setStravaFullName(null);
         user.setStravaImage(null);
         userRepository.save(user);
+        removeRuns();
         return ConnectStravaResponse.builder()
                 .detail("Disconnect Strava Success")
+                .stravaId(null)
+                .stravaFullname(null)
+                .stravaImage(null)
                 .build();
     }
 
@@ -119,6 +133,9 @@ public class StravaServiceImpl implements StravaService {
         }
         return ConnectStravaResponse.builder()
                 .detail("Strava has not been connected")
+                .stravaId(null)
+                .stravaFullname(null)
+                .stravaImage(null)
                 .build();
     }
 
@@ -163,5 +180,19 @@ public class StravaServiceImpl implements StravaService {
         // Save all runs in a batch
         runRepository.saveAll(runsToSave);
     }
-
+     public void removeRuns() {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)){
+             return;
+         }
+         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+         String username = userDetails.getUsername();
+         Optional<User> userOptional = userRepository.findByUsername(username);
+         if (userOptional.isEmpty()) {
+             return;
+         }
+         User user = userOptional.get();
+         List<Run> runs = runRepository.findAllByUser_UserId(user.getUserId());
+         runRepository.deleteAll(runs);
+     }
 }

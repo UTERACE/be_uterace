@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ConnectStravaResponse {
+    private int status;
     private String detail;
     private Long stravaId;
     private String stravaFullname;

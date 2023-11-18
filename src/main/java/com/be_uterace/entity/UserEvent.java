@@ -1,6 +1,5 @@
 package com.be_uterace.entity;
 
-import com.be_uterace.utils.key.UserEventId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,14 +14,16 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "USER_EVENT")
-@IdClass(UserEventId.class)
 public class UserEvent {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "USER_EVENT_ID")
+    private Integer userEventId;
+
     @ManyToOne
     @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID")
     private User user;
 
-    @Id
     @ManyToOne
     @JoinColumn(name = "EVENT_ID", referencedColumnName = "EVENT_ID")
     private Event event;

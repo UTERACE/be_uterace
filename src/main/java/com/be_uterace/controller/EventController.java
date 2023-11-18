@@ -104,13 +104,13 @@ public class EventController {
         return ResponseEntity.ok(res);
     }
 
-    @GetMapping(value = {"/join-event/{event_id}"})
+    @PostMapping(value = {"/join-event/{event_id}"})
     public ResponseEntity<ResponseObject> joinEventController(@PathVariable Integer event_id, Authentication auth){
         ResponseObject res = eventService.joinEvent(event_id, auth);
         return ResponseEntity.ok(res);
     }
 
-    @GetMapping(value = {"/leave-event/{event_id}"})
+    @PostMapping(value = {"/leave-event/{event_id}"})
     public ResponseEntity<ResponseObject> leaveEventController(@PathVariable Integer event_id, Authentication auth){
         ResponseObject res = eventService.leaveEvent(event_id, auth);
         return ResponseEntity.ok(res);

@@ -22,10 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -353,7 +350,10 @@ public class EventServiceImpl implements EventService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Optional<Event> eventOptional = eventRepository.findById(event_id);
+                Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
+                if (eventOptional.isEmpty()) {
+                    return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy hoặc giải chạy đã kết thúc");
+                }
                 if (eventOptional.isPresent()) {
                     Event event = eventOptional.get();
                     Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
@@ -363,6 +363,7 @@ public class EventServiceImpl implements EventService {
                     UserEvent userEvent = new UserEvent();
                     userEvent.setEvent(event);
                     userEvent.setUser(userOptional.get());
+                    userEvent.setJoinDate(new Date());
                     userEventRepository.save(userEvent);
                     event.setNumOfAttendee(event.getNumOfAttendee() + 1);
                     eventRepository.save(event);

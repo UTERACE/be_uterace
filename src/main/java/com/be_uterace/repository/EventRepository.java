@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event,Integer> {
     @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
@@ -25,6 +26,9 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
     Page<Event> findEventsWithStatusOnGoing(
             @Param("search_name") String search_name,
             Pageable pageable);
+    @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP " +
+            " AND e.eventId=:eventId ") // Thêm điều kiện tìm kiếm
+    Optional<Event> findEventsWithStatusOnGoing(@Param("eventId") Integer eventId);
 
     @Query("SELECT e FROM Event e WHERE e.endDate < CURRENT_TIMESTAMP AND LOWER(e.title) LIKE %:search_name% "
             + "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
