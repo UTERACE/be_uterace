@@ -1,5 +1,6 @@
-package com.be_uterace.payload.response;
+package com.be_uterace.payload.response.stravaresponse;
 
+import com.be_uterace.payload.response.stravaresponse.AthleteResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;

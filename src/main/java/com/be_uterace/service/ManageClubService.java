@@ -1,5 +1,6 @@
 package com.be_uterace.service;
 
+import com.be_uterace.payload.response.ManageClubSearchResponse;
 import com.be_uterace.payload.response.ResponseObject;
 
 public interface ManageClubService {
@@ -10,4 +11,8 @@ public interface ManageClubService {
     ResponseObject outstandingClub(Integer club_id);
 
     ResponseObject notOutstandingClub(Integer club_id);
+
+//    ManageClubSearchResponse searchCLub(int current_page, int per_page, String search);
+
+
 }

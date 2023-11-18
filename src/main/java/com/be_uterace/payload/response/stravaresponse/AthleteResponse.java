@@ -1,4 +1,4 @@
-package com.be_uterace.payload.response;
+package com.be_uterace.payload.response.stravaresponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
