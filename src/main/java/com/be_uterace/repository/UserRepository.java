@@ -56,8 +56,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     void markLockUser(@Param("mark") String mark, @Param("userId") Integer userId);
 
     @Query("SELECT u FROM User u " +
-            "WHERE unaccent(LOWER(u.firstName)) LIKE unaccent(LOWER(:searchName)) " +
-            "OR unaccent(LOWER(u.lastName)) LIKE unaccent(LOWER(:searchName))")
+            "WHERE unaccent(LOWER(u.firstName)) ILIKE unaccent(LOWER(:searchName)) " +
+            "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName))")
     Page<User> searchUsers(@Param("searchName") String searchName, Pageable pageable);
 
 }

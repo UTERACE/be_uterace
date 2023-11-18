@@ -1,10 +1,20 @@
 package com.be_uterace.service.impl;
 
+import com.be_uterace.entity.Club;
+import com.be_uterace.entity.User;
+import com.be_uterace.payload.response.ManageClubSearchResponse;
+import com.be_uterace.payload.response.ManageUserStatusResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.repository.ClubRepository;
 import com.be_uterace.service.ManageClubService;
 import com.be_uterace.utils.StatusCode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ManageClubServiceImpl implements ManageClubService {
@@ -42,4 +52,37 @@ public class ManageClubServiceImpl implements ManageClubService {
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Xóa clb nổi bật thành công");
         return responseObject;
     }
+
+    /*@Override
+    public ManageClubSearchResponse searchCLub(int current_page, int per_page, String search) {
+        Page<Club> clubPage;
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
+        if(search==null || search.equals("")) {
+            clubPage = clubRepository.findAll(pageable);
+        } else {
+            clubPage = clubRepository.searchClubManage(search,pageable);
+        }
+        List<Club> clubList = clubPage.getContent();
+        List<ManageClubSearchResponse.Club> clubListResponse = new ArrayList<>();
+//        for (Club club : clubList){
+//            ManageClubSearchResponse.Club clubResponse = new ManageUserStatusResponse.UserStatus();
+//            clubResponse.setClub_id(club.getClubId());
+//            clubResponse.setName(club.getClubName());
+//            clubResponse.setImage(club.getPicturePath());
+//            clubResponse.setTotal_members(club.get());
+//            clubResponse.setTotal_distance(club.getGender());
+//            clubResponse.setOutstanding(club.getPace());
+//            clubResponse.setStatus(club.getTotalDistance());
+//            clubResponse.setReason_block(club.getOrganization());
+//            clubArrayList.add(userStatus);
+//        }
+//        return ManageUserStatusResponse.builder()
+//                .per_page(userPage.getSize())
+//                .total_user((int) userPage.getTotalElements())
+//                .current_page(userPage.getNumber() + 1)
+//                .total_page(userPage.getTotalPages())
+//                .users(userStatusList)
+//                .build();
+        return null;
+    }*/
 }

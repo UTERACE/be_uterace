@@ -5,6 +5,8 @@ import com.be_uterace.payload.response.ConnectStravaResponse;
 import com.be_uterace.service.StravaService;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/strava")
 public class StravaController {
@@ -13,7 +15,7 @@ public class StravaController {
         this.stravaService = stravaService;
     }
     @PostMapping(value = {"/connect"})
-    public ConnectStravaResponse connect(@RequestBody ConnectStravaRequest connectStravaRequest) {
+    public ConnectStravaResponse connect(@RequestBody ConnectStravaRequest connectStravaRequest) throws IOException {
         return stravaService.connectStrava(connectStravaRequest.getCode());
     }
     @PostMapping(value = {"/disconnect"})

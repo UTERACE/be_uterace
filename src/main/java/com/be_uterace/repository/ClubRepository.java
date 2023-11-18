@@ -1,6 +1,7 @@
 package com.be_uterace.repository;
 
 import com.be_uterace.entity.Club;
+import com.be_uterace.entity.User;
 import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
 import com.be_uterace.projection.ClubRankingProjection;
@@ -122,6 +123,10 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     @Transactional
     @Query("UPDATE Club c SET c.outstanding = :mark WHERE c.clubId = :clubId")
     void markOutstandingClub(@Param("mark") String mark, @Param("clubId") Integer clubId);
+
+//    @Query("SELECT c FROM Club c WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :clubName, '%')))")
+//    Page<Club> searchClubManage(@Param("searchName") String searchName, Pageable pageable);
+
 
 
 }
