@@ -144,7 +144,7 @@ public class StravaServiceImpl implements StravaService {
             run.setUser(user);
             run.setStravaRunId(activity.getId());
             run.setName(activity.getName());
-            run.setDistance(activity.getDistance());
+            run.setDistance(activity.getDistance()/1000);
             run.setType(activity.getType());
             run.setDuration(formatSeconds(activity.getMoving_time()));
             run.setPace(pace);
