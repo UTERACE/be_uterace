@@ -56,5 +56,8 @@ public class Post {
     @JoinColumn(name = "CLUB_ID", referencedColumnName = "CLUB_ID")
     private Club club;
 
+    @Column(name = "REASON")
+    private String reason;
+
     // Getters and setters
 }

@@ -1,5 +1,6 @@
 package com.be_uterace.repository;
 
+import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Post;
 import com.be_uterace.entity.User;
 import org.springframework.data.domain.Page;
@@ -34,4 +35,7 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
     @Transactional
     @Query("UPDATE Post p SET p.outstanding = :mark WHERE p.postId = :postId")
     void markOutstandingPost(@Param("mark") String mark, @Param("postId") Integer postId);
+
+    @Query("SELECT p FROM Post p WHERE unaccent(LOWER(p.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
+    Page<Post> searchPostManage(@Param("searchName") String searchName, Pageable pageable);
 }
