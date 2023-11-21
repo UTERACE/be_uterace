@@ -59,7 +59,7 @@ public class Run {
     @Column(name = "STEP_RATE")
     private Double stepRate;
 
-    @Column(name = "SUMMARY_POLYLINE", length = 10000)
+    @Column(name = "SUMMARY_POLYLINE")
     private String summaryPolyline;
 
     // Getters and setters

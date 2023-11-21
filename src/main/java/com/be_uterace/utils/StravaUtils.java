@@ -6,6 +6,7 @@ import java.util.*;
 import com.be_uterace.payload.response.stravaresponse.ActivityStravaResponse;
 import com.be_uterace.payload.response.stravaresponse.AthleteResponse;
 import com.be_uterace.payload.response.stravaresponse.StravaOauthResponse;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import okhttp3.*;
@@ -106,7 +107,7 @@ public class StravaUtils {
 //        }
 //    }
 
-    public static String getActivityInfoById(int objectId, String accessToken) throws IOException {
+    public static String getActivityInfoById(Long objectId, String accessToken) throws IOException {
         String url = "https://www.strava.com/api/v3/activities/" + objectId;
         Request request = new Request.Builder()
                 .url(url)
@@ -138,17 +139,12 @@ public class StravaUtils {
     }
 
     public static void main(String[] args) throws IOException {
-        try {
-            List<ActivityStravaResponse> activities = getAllActivities("2c58358d07f172756bb010b8875416ff8544a64c");
 
-            if (activities != null) {
-                for (ActivityStravaResponse activity : activities) {
-                    // Xử lý thông tin hoạt động ở đây
-                    System.out.println("Activity Name: " + activity);
-                }
-            } else {
-                System.out.println("Failed to retrieve activities");
-            }
+        try {
+            Map<String, String> res = refreshStravaToken("d35c12def42b1317940ceed32a0586e078f92dd8");
+
+            // In ra kết quả
+            System.out.println("Polyline: " + res);
         } catch (Exception e) {
             e.printStackTrace();
         }
