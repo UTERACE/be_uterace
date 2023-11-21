@@ -53,7 +53,7 @@ public class ManageClubServiceImpl implements ManageClubService {
         return responseObject;
     }
 
-    /*@Override
+    @Override
     public ManageClubSearchResponse searchCLub(int current_page, int per_page, String search) {
         Page<Club> clubPage;
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
@@ -64,25 +64,24 @@ public class ManageClubServiceImpl implements ManageClubService {
         }
         List<Club> clubList = clubPage.getContent();
         List<ManageClubSearchResponse.Club> clubListResponse = new ArrayList<>();
-//        for (Club club : clubList){
-//            ManageClubSearchResponse.Club clubResponse = new ManageUserStatusResponse.UserStatus();
-//            clubResponse.setClub_id(club.getClubId());
-//            clubResponse.setName(club.getClubName());
-//            clubResponse.setImage(club.getPicturePath());
-//            clubResponse.setTotal_members(club.get());
-//            clubResponse.setTotal_distance(club.getGender());
-//            clubResponse.setOutstanding(club.getPace());
-//            clubResponse.setStatus(club.getTotalDistance());
-//            clubResponse.setReason_block(club.getOrganization());
-//            clubArrayList.add(userStatus);
-//        }
-//        return ManageUserStatusResponse.builder()
-//                .per_page(userPage.getSize())
-//                .total_user((int) userPage.getTotalElements())
-//                .current_page(userPage.getNumber() + 1)
-//                .total_page(userPage.getTotalPages())
-//                .users(userStatusList)
-//                .build();
-        return null;
-    }*/
+        for (Club club : clubList){
+            ManageClubSearchResponse.Club clubResponse = new ManageClubSearchResponse.Club();
+            clubResponse.setClub_id(club.getClubId());
+            clubResponse.setName(club.getClubName());
+            clubResponse.setImage(club.getPicturePath());
+            clubResponse.setTotal_members((club.getNumOfMales() != null ? club.getNumOfMales() : 0) + (club.getNumOfFemales() != null ? club.getNumOfFemales() : 0));
+            clubResponse.setTotal_distance(club.getClubTotalDistance());
+            clubResponse.setOutstanding(club.getOutstanding());
+            clubResponse.setStatus(club.getStatus());
+            clubResponse.setReason_block(club.getReason());
+            clubListResponse.add(clubResponse);
+        }
+        return ManageClubSearchResponse.builder()
+                .per_page(clubPage.getSize())
+                .total_clubs((int) clubPage.getTotalElements())
+                .current_page(clubPage.getNumber() + 1)
+                .total_page(clubPage.getTotalPages())
+                .clubs(clubListResponse)
+                .build();
+    }
 }

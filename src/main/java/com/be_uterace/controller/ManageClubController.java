@@ -1,13 +1,12 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.payload.response.ManageClubSearchResponse;
+import com.be_uterace.payload.response.ManageUserStatusResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.service.ManageClubService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/manage-club")
@@ -40,5 +39,14 @@ public class ManageClubController {
     public ResponseEntity<ResponseObject> notOutstanding(@PathVariable Integer club_id){
         ResponseObject responseObject = manageClubService.notOutstandingClub(club_id);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @GetMapping()
+    public ResponseEntity<ManageClubSearchResponse> findAllUserStatus(
+            @RequestParam int current_page,
+            @RequestParam int per_page,
+            @RequestParam(required=false) String search_name) {
+        ManageClubSearchResponse manageClubSearchResponse = manageClubService.searchCLub(current_page,per_page,search_name);
+        return ResponseEntity.status(HttpStatus.OK).body(manageClubSearchResponse);
     }
 }

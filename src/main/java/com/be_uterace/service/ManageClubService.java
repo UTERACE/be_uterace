@@ -12,7 +12,7 @@ public interface ManageClubService {
 
     ResponseObject notOutstandingClub(Integer club_id);
 
-//    ManageClubSearchResponse searchCLub(int current_page, int per_page, String search);
+    ManageClubSearchResponse searchCLub(int current_page, int per_page, String search);
 
 
 }

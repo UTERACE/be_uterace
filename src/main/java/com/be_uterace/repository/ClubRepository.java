@@ -124,8 +124,8 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     @Query("UPDATE Club c SET c.outstanding = :mark WHERE c.clubId = :clubId")
     void markOutstandingClub(@Param("mark") String mark, @Param("clubId") Integer clubId);
 
-//    @Query("SELECT c FROM Club c WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :clubName, '%')))")
-//    Page<Club> searchClubManage(@Param("searchName") String searchName, Pageable pageable);
+    @Query("SELECT c FROM Club c WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
+    Page<Club> searchClubManage(@Param("searchName") String searchName, Pageable pageable);
 
 
 
