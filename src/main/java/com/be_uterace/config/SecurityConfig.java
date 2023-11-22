@@ -25,6 +25,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -59,14 +62,27 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) ->requests
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events",
+                                "/api/news","/api/clubs/**","/api/events/**","/api/news/**","/api/area/**",
+                                "/api/home", "/api/scoreboard"
+                                , "/api/user/recent-active/**","/api/decode-polyline","/api/strava/status").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/auth","/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/news/**","/api/clubs/**","/api/strava/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/news/**","/api/clubs/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/news/**","/api/clubs/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/events/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/events/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/events/**").hasAnyRole("ADMIN")
                         .requestMatchers("/api/user").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/admin", "/api/manage-news", "/api/manage-club", "/api/manage-user", "/api/manage-event").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/**", "/api/home", "/api/decode-polyline").permitAll()
+                        .requestMatchers("/api/admin", "/api/manage-news", "/api/manage-club", "/api/manage-user", "/api/manage-event",
+                                "/api/distance", "/api/manage-news/**", "/api/manage-club/**", "/api/manage-user/**", "/api/manage-event/**",
+                                "/api/distance/**").hasRole("ADMIN")
+
+
                         .anyRequest().authenticated()
 
                 ).exceptionHandling( exception -> exception
@@ -76,21 +92,32 @@ public class SecurityConfig {
                 );
 
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(corsFilter(), ChannelProcessingFilter.class);
-
+//        http.addFilterBefore(corsFilter(), ChannelProcessingFilter.class);
+        http.cors(Customizer.withDefaults());
         return http.build();
     }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("*");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setMaxAge(3600L);
 
-    private OncePerRequestFilter corsFilter() {
-        return new OncePerRequestFilter() {
-            @Override
-            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-                response.addHeader("Access-Control-Allow-Origin", "*");
-                response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-                response.addHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-                response.addHeader("Access-Control-Max-Age", "3600");
-                filterChain.doFilter(request, response);
-            }
-        };
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
+//    private OncePerRequestFilter corsFilter() {
+//        return new OncePerRequestFilter() {
+//            @Override
+//            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+//                response.addHeader("Access-Control-Allow-Origin", "*");
+//                response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+//                response.addHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+//                response.addHeader("Access-Control-Max-Age", "3600");
+//                filterChain.doFilter(request, response);
+//            }
+//        };
+//    }
 }

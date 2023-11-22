@@ -73,6 +73,7 @@ public class ManagePostServiceImpl implements ManagePostService {
             postResponse.setDescription(post.getDescription());
             postResponse.setCreatedAt(post.getCreatedAt());
             postResponse.setUpdatedAt(post.getUpdatedAt());
+            postResponse.setOutstanding(post.getOutstanding());
             postResponse.setStatus(post.getStatus());
             postResponse.setReason_block(post.getReason());
             postListResponse.add(postResponse);

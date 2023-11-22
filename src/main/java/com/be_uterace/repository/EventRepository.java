@@ -57,7 +57,7 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Event e SET e.status = :mark, e.status = :reason WHERE e.eventId = :eventId")
+    @Query("UPDATE Event e SET e.status = :mark, e.reason = :reason WHERE e.eventId = :eventId")
     void markLockEvent(@Param("mark") String mark, @Param("eventId") Integer eventId, @Param("reason") String reason);
 
     @Modifying
