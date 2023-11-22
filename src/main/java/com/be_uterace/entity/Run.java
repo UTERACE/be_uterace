@@ -62,6 +62,9 @@ public class Run {
     @Column(name = "SUMMARY_POLYLINE")
     private String summaryPolyline;
 
+    @Column(name = "REASON")
+    private String reason;
+
     // Getters and setters
 }
 

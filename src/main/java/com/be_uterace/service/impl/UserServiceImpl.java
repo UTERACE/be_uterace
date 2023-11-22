@@ -1,17 +1,26 @@
 package com.be_uterace.service.impl;
 
+import com.be_uterace.entity.Post;
+import com.be_uterace.entity.Run;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.ChangePasswordDto;
 import com.be_uterace.payload.request.UpdateDto;
+import com.be_uterace.payload.response.ManagePostSearchResponse;
+import com.be_uterace.payload.response.RecentActiveResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.UserResponse;
 import com.be_uterace.repository.AreaRepository;
+import com.be_uterace.repository.RunRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.FileService;
 import com.be_uterace.service.UserService;
 import com.be_uterace.utils.Constant;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,6 +28,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,18 +42,20 @@ import static com.be_uterace.utils.DateConverter.convertStringToDate;
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
+    private RunRepository runRepository;
     private PasswordEncoder passwordEncoder;
     private AreaRepository areaRepository;
     private ModelMapper modelMapper;
     private FileService fileService;
     @Value("${path.image}")
     private String path;
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AreaRepository areaRepository, ModelMapper modelMapper, FileService fileService) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AreaRepository areaRepository, ModelMapper modelMapper, FileService fileService, RunRepository runRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.areaRepository = areaRepository;
         this.modelMapper = modelMapper;
         this.fileService = fileService;
+        this.runRepository = runRepository;
     }
 
     @Override
@@ -116,6 +131,47 @@ public class UserServiceImpl implements UserService {
                 .status(400)
                 .message("Cập nhật thông tin ngừoi dùng \n" +
                         " thất bại!")
+                .build();
+    }
+
+    @Override
+    public RecentActiveResponse getRecentActivity(int current_page, int per_page,Long userId, String search, int hours) {
+        Page<Run> runPage;
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime thresholdDateTime = now.minusHours(hours);
+        Timestamp thresholdTimestamp = Timestamp.valueOf(thresholdDateTime);
+
+        if(search==null || search.equals("")) {
+            runPage = runRepository.findRunsByDateTimeAndName(thresholdTimestamp, null, userId,pageable);
+        } else {
+            runPage = runRepository.findRunsByDateTimeAndName(thresholdTimestamp, search,userId,pageable);
+        }
+        List<Run> runList = runPage.getContent();
+        List<RecentActiveResponse.Activity> arrayList = new ArrayList<>();
+        for (Run run : runList){
+            RecentActiveResponse.Activity activityResponse = new RecentActiveResponse.Activity();
+            activityResponse.setActivity_id(run.getRunId());
+            activityResponse.setMember_id(run.getUser().getUserId());
+            activityResponse.setMember_image(run.getUser().getAvatarPath());
+            activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());
+            activityResponse.setActivity_start_date(run.getCreatedAt());
+            activityResponse.setActivity_distance(run.getDistance());
+            activityResponse.setActivity_duration(run.getDuration());
+            activityResponse.setActivity_name(run.getName());
+            activityResponse.setActivity_type(run.getType());
+            activityResponse.setActivity_link_strava("https://www.strava.com/activities/"+run.getStravaRunId());
+            activityResponse.setActivity_map(run.getSummaryPolyline());
+            activityResponse.setStatus(run.getStatus());
+            activityResponse.setReason(run.getReason());
+            arrayList.add(activityResponse);
+        }
+        return RecentActiveResponse.builder()
+                .per_page(runPage.getSize())
+                .total_activities((int) runPage.getTotalElements())
+                .current_page(runPage.getNumber() + 1)
+                .total_page(runPage.getTotalPages())
+                .activities(arrayList)
                 .build();
     }
 }
