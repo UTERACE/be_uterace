@@ -1,5 +1,6 @@
 package com.be_uterace.repository;
 
+import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Event;
 import com.be_uterace.entity.User;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
             "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
     List<Event> findEventsWithStatusOnGoing();
 
-    List<Event> findTop6EventsByOutstanding(Integer outstanding);
+    List<Event> findTop6EventsByOutstanding(String outstanding);
 
     @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
             " AND LOWER(e.title) LIKE %:search_name%") // Thêm điều kiện tìm kiếm
@@ -63,5 +64,8 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
     @Transactional
     @Query("UPDATE Event e SET e.outstanding = :mark WHERE e.eventId = :eventId")
     void markOutstandingEvent(@Param("mark") String mark, @Param("eventId") Integer eventId);
+
+    @Query("SELECT e FROM Event e WHERE unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
+    Page<Event> searchEventManage(@Param("searchName") String searchName, Pageable pageable);
 
 }

@@ -1,6 +1,8 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.LockRequest;
+import com.be_uterace.payload.response.ManageClubSearchResponse;
+import com.be_uterace.payload.response.ManageEventSearchResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.service.ManageClubService;
 import com.be_uterace.service.ManageEventService;
@@ -40,5 +42,14 @@ public class ManageEventController {
     public ResponseEntity<ResponseObject> notOutstanding(@PathVariable Integer event_id){
         ResponseObject responseObject = manageEventService.notOutstandingEvent(event_id);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @GetMapping()
+    public ResponseEntity<ManageEventSearchResponse> findAllUserStatus(
+            @RequestParam int current_page,
+            @RequestParam int per_page,
+            @RequestParam(required=false) String search_name) {
+        ManageEventSearchResponse manageEventSearchResponse = manageEventService.searchEvent(current_page,per_page,search_name);
+        return ResponseEntity.status(HttpStatus.OK).body(manageEventSearchResponse);
     }
 }

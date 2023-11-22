@@ -79,7 +79,7 @@ public class HomeServiceImpl implements HomeService {
 
         }
         List<Map<String, Object>> eventsList = new ArrayList<>();
-        List<Event> events = eventRepository.findTop6EventsByOutstanding(1);
+        List<Event> events = eventRepository.findTop6EventsByOutstanding("1");
         for (Event event : events) {
             Map<String, Object> eventItem = new HashMap<>();
             eventItem.put("event_id", event.getEventId());

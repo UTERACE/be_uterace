@@ -141,7 +141,7 @@ public class EventServiceImpl implements EventService {
                 event.setMaxPace(req.getMax_pace());
                 event.setAdminUser(userOptional.get());
                 event.setCreateUser(userOptional.get());
-                event.setOutstanding(0);
+                event.setOutstanding("0");
                 eventRepository.save(event);
                 em.refresh(event);
                 List<RunningCategoryResponse> runningCategories = req.getDistance();

@@ -69,7 +69,7 @@ public class Event {
     private Double maxPace;
 
     @Column(name = "OUTSTANDING")
-    private Integer outstanding;
+    private String outstanding;
 
     @ManyToOne
     @JoinColumn(name = "USER_CREATE", referencedColumnName = "USER_ID")
@@ -99,6 +99,9 @@ public class Event {
 
     @Column(name = "PRIZE")
     private String prize;
+
+    @Column(name = "REASON")
+    private String reason;
 
 
     // Getters and setters
