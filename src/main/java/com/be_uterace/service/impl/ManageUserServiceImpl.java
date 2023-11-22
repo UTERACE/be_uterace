@@ -1,6 +1,7 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ManageUserInitializeResponse;
 import com.be_uterace.payload.response.ManageUserStatusResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -25,15 +26,15 @@ public class ManageUserServiceImpl implements ManageUserService {
     }
 
     @Override
-    public ResponseObject lockUser(Integer user_id) {
-        userRepository.markLockUser("0",user_id);
+    public ResponseObject lockUser(Integer user_id, LockRequest lockRequest) {
+        userRepository.markLockUser("0",user_id, lockRequest.getReason());
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Khóa tài khoản người dùng thành công");
         return responseObject;
     }
 
     @Override
     public ResponseObject unlockUser(Integer user_id) {
-        userRepository.markLockUser("1",user_id);
+        userRepository.markLockUser("1",user_id, null);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Mở khóa tài khoản người dùng thành công");
         return responseObject;
     }

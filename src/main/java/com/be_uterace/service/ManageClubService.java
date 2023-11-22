@@ -1,10 +1,11 @@
 package com.be_uterace.service;
 
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ManageClubSearchResponse;
 import com.be_uterace.payload.response.ResponseObject;
 
 public interface ManageClubService {
-    ResponseObject lockClub(Integer club_id);
+    ResponseObject lockClub(Integer club_id, LockRequest lockRequest);
 
     ResponseObject unlockClub(Integer club_id);
 

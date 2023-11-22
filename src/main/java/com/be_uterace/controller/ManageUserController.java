@@ -1,5 +1,6 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ManageUserInitializeResponse;
 import com.be_uterace.payload.response.ManageUserStatusResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -19,13 +20,13 @@ public class ManageUserController {
     }
 
     @PostMapping("/lock/{user_id}")
-    public ResponseEntity<ResponseObject> lockPost(@PathVariable Integer user_id){
-        ResponseObject responseObject = manageUserService.lockUser(user_id);
+    public ResponseEntity<ResponseObject> lockUser(@PathVariable Integer user_id, @RequestBody LockRequest lockRequest){
+        ResponseObject responseObject = manageUserService.lockUser(user_id, lockRequest);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @PostMapping("/unlock/{user_id}")
-    public ResponseEntity<ResponseObject> unlockPost(@PathVariable Integer user_id){
+    public ResponseEntity<ResponseObject> unlockUser(@PathVariable Integer user_id){
         ResponseObject responseObject = manageUserService.unlockUser(user_id);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }

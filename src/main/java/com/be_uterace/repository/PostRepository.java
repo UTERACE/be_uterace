@@ -28,8 +28,8 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Post p SET p.status = :mark WHERE p.postId = :postId")
-    void markLockPost(@Param("mark") String mark, @Param("postId") Integer postId);
+    @Query("UPDATE Post p SET p.status = :mark, p.reason = :reason WHERE p.postId = :postId")
+    void markLockPost(@Param("mark") String mark, @Param("postId") Integer postId, @Param("reason") String reason);
 
     @Modifying
     @Transactional

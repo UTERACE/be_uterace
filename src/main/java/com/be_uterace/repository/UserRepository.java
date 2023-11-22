@@ -52,8 +52,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE User u SET u.status = :mark WHERE u.userId = :userId")
-    void markLockUser(@Param("mark") String mark, @Param("userId") Integer userId);
+    @Query("UPDATE User u SET u.status = :mark, u.reason = :reason WHERE u.userId = :userId")
+    void markLockUser(@Param("mark") String mark, @Param("userId") Integer userId, @Param("reason") String reason);
+
 
     @Query("SELECT u FROM User u " +
             "WHERE unaccent(LOWER(u.firstName)) ILIKE unaccent(LOWER(:searchName)) " +

@@ -1,6 +1,8 @@
 package com.be_uterace.controller;
 
 
+import com.be_uterace.payload.request.LockRequest;
+import com.be_uterace.payload.request.UpdateDto;
 import com.be_uterace.payload.response.ManageClubSearchResponse;
 import com.be_uterace.payload.response.ManagePostSearchResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -8,6 +10,8 @@ import com.be_uterace.service.ManagePostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/manage-news")
@@ -20,8 +24,8 @@ public class ManagePostController {
     }
 
     @PostMapping("/lock/{post_id}")
-    public ResponseEntity<ResponseObject> lockPost(@PathVariable Integer post_id){
-        ResponseObject responseObject = managePostService.lockPost(post_id);
+    public ResponseEntity<ResponseObject> lockPost(@PathVariable Integer post_id, @RequestBody LockRequest lockRequest){
+        ResponseObject responseObject = managePostService.lockPost(post_id, lockRequest);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 

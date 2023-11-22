@@ -1,5 +1,6 @@
 package com.be_uterace.service.impl;
 
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.repository.EventRepository;
 import com.be_uterace.service.ManageEventService;
@@ -16,15 +17,15 @@ public class ManageEventServiceImpl implements ManageEventService {
     }
 
     @Override
-    public ResponseObject lockEvent(Integer event_id) {
-        eventRepository.markLockEvent("0",event_id);
+    public ResponseObject lockEvent(Integer event_id, LockRequest lockRequest) {
+        eventRepository.markLockEvent("0",event_id, lockRequest.getReason());
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Khóa sự kiện thành công");
         return responseObject;
     }
 
     @Override
     public ResponseObject unlockEvent(Integer event_id) {
-        eventRepository.markLockEvent("1",event_id);
+        eventRepository.markLockEvent("1",event_id, null);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Mở khóa sự kiện thành công");
         return responseObject;    }
 

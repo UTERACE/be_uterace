@@ -2,6 +2,7 @@ package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Club;
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ManageClubSearchResponse;
 import com.be_uterace.payload.response.ManageUserStatusResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -26,15 +27,15 @@ public class ManageClubServiceImpl implements ManageClubService {
     }
 
     @Override
-    public ResponseObject lockClub(Integer club_id) {
-        clubRepository.markLockClub("0",club_id);
+    public ResponseObject lockClub(Integer club_id, LockRequest lockRequest) {
+        clubRepository.markLockClub("0",club_id, lockRequest.getReason());
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Khóa clb thành công");
         return responseObject;
     }
 
     @Override
     public ResponseObject unlockClub(Integer club_id) {
-        clubRepository.markLockClub("1",club_id);
+        clubRepository.markLockClub("1",club_id, null);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Mở khóa clb thành công");
         return responseObject;
     }

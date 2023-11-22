@@ -1,5 +1,6 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ManageClubSearchResponse;
 import com.be_uterace.payload.response.ManageUserStatusResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -18,8 +19,8 @@ public class ManageClubController {
     }
 
     @PostMapping("/lock/{club_id}")
-    public ResponseEntity<ResponseObject> lockClub(@PathVariable Integer club_id){
-        ResponseObject responseObject = manageClubService.lockClub(club_id);
+    public ResponseEntity<ResponseObject> lockClub(@PathVariable Integer club_id, @RequestBody LockRequest lockRequest){
+        ResponseObject responseObject = manageClubService.lockClub(club_id, lockRequest);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 

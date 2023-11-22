@@ -1,12 +1,13 @@
 package com.be_uterace.service;
 
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ManageUserInitializeResponse;
 import com.be_uterace.payload.response.ManageUserStatusResponse;
 import com.be_uterace.payload.response.ResponseObject;
 
 public interface ManageUserService {
 
-    ResponseObject lockUser(Integer user_id);
+    ResponseObject lockUser(Integer user_id, LockRequest lockRequest);
 
     ResponseObject unlockUser(Integer user_id);
 

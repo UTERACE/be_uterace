@@ -157,6 +157,7 @@ public class UserServiceImpl implements UserService {
             activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());
             activityResponse.setActivity_start_date(run.getCreatedAt());
             activityResponse.setActivity_distance(run.getDistance());
+            activityResponse.setActivity_pace(run.getPace());
             activityResponse.setActivity_duration(run.getDuration());
             activityResponse.setActivity_name(run.getName());
             activityResponse.setActivity_type(run.getType());

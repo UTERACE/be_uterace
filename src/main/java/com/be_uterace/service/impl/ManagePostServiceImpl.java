@@ -2,6 +2,7 @@ package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Post;
+import com.be_uterace.payload.request.LockRequest;
 import com.be_uterace.payload.response.ManageClubSearchResponse;
 import com.be_uterace.payload.response.ManagePostSearchResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -26,15 +27,15 @@ public class ManagePostServiceImpl implements ManagePostService {
     }
 
     @Override
-    public ResponseObject lockPost(Integer post_id) {
-        postRepository.markLockPost("0",post_id);
+    public ResponseObject lockPost(Integer post_id, LockRequest lockRequest) {
+        postRepository.markLockPost("0",post_id, lockRequest.getReason());
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Khóa bài viết thành công");
         return responseObject;
     }
 
     @Override
     public ResponseObject unlockPost(Integer post_id) {
-        postRepository.markLockPost("1",post_id);
+        postRepository.markLockPost("1",post_id, null);
         ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Mở khóa bài viết thành công");
         return responseObject;
     }
