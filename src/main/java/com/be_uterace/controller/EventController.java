@@ -11,6 +11,7 @@ import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.repository.UEActivityRepository;
 import com.be_uterace.service.EventService;
 import com.be_uterace.service.UEActivityService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,7 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseObject> addEventController(@RequestBody CreateEventDto req, Authentication auth){
+    public ResponseEntity<ResponseObject> addEventController(@Valid @RequestBody CreateEventDto req, Authentication auth){
         ResponseObject res = eventService.createEvent(req, auth);
         return ResponseEntity.ok(res);
     }

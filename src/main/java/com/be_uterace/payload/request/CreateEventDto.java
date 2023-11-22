@@ -1,6 +1,8 @@
 package com.be_uterace.payload.request;
 
 import com.be_uterace.payload.response.RunningCategoryResponse;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateEventDto {
+    @NotBlank(message = "The name is required.")
+    @Size(max = 100, message = "The name must not exceed 100 characters.")
     private String name;
     private String image;
     private String description;

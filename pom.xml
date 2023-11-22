@@ -119,6 +119,11 @@
             <version>20210307</version> <!-- Sử dụng phiên bản mới nhất có sẵn -->
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
 
 
 

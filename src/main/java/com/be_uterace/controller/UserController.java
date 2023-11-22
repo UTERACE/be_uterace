@@ -7,6 +7,7 @@ import com.be_uterace.payload.response.RecentActiveResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.UserResponse;
 import com.be_uterace.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,7 @@ public class UserController {
     }
 
     @PutMapping(value = {"/change-password"})
-    public ResponseEntity<ResponseObject> changePasswordController(@RequestBody ChangePasswordDto changePasswordDto, Authentication authentication) {
+    public ResponseEntity<ResponseObject> changePasswordController(@RequestBody @Valid ChangePasswordDto changePasswordDto, Authentication authentication) {
         ResponseObject userResponse = userService.changePassword(changePasswordDto,authentication);
         return ResponseEntity.ok(userResponse);
     }

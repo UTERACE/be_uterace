@@ -10,6 +10,7 @@ import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.ThirdPartyResponse;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,7 @@ public class AuthController {
 
     // Build Login REST API
     @PostMapping(value = {"/login", "/signin"})
-    public ResponseEntity<LoginResponse> loginController(@RequestBody LoginDto loginDto){
+    public ResponseEntity<LoginResponse> loginController(@Valid @RequestBody LoginDto loginDto){
         LoginResponse loginResponse = authService.login(loginDto);
         return ResponseEntity.ok(loginResponse);
     }
@@ -57,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping(value = {"/reset-password"})
-    public ResponseEntity<ResponseObject> resetPasswordController(@RequestBody ResetPasswordDto resetPasswordDto){
+    public ResponseEntity<ResponseObject> resetPasswordController(@RequestBody @Valid ResetPasswordDto resetPasswordDto){
         ResponseObject responseObject = authService.resetPassword(resetPasswordDto);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
