@@ -59,14 +59,17 @@ public class Club {
     @JoinColumn(name = "CREATOR_ID", referencedColumnName = "USER_ID")
     private User creatorUser;
 
+    @Column(name = "NUM_OF_ATTENDEE")
+    private Long numOfAttendee=0L;
+
     @Column(name = "NUM_OF_MALES")
-    private Integer numOfMales;
+    private Integer numOfMales=0;
 
     @Column(name = "NUM_OF_FEMALES")
-    private Integer numOfFemales;
+    private Integer numOfFemales=0;
 
     @Column(name = "TOTAL_ACTIVITIES")
-    private Integer totalActivities = 0;
+    private Long totalActivities = 0L;
 
     @Column(name = "DETAILS")
     private String details;

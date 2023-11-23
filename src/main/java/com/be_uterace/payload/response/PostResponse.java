@@ -1,12 +1,11 @@
 package com.be_uterace.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
-
+@Getter
+@Setter
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

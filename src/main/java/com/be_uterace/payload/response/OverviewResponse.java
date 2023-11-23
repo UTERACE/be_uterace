@@ -7,11 +7,11 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventResponse {
+public class OverviewResponse {
     private Integer event_id;
-    private String name;
+    private String title;
+    private String content;
     private String image;
     private Integer total_members;
     private Integer total_activities;
-
 }

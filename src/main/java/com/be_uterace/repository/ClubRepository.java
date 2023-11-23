@@ -1,7 +1,10 @@
 package com.be_uterace.repository;
 
 import com.be_uterace.entity.Club;
+import com.be_uterace.entity.Event;
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.response.ClubRankingResponse;
+import com.be_uterace.payload.response.ClubResponse;
 import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
 import com.be_uterace.projection.ClubRankingProjection;
@@ -113,6 +116,19 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "AND LOWER(c.clubName) LIKE %:search_name% " +
             "GROUP BY c.clubId")
     Page<ClubProjection> findClubJoined(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
+    @Query("SELECT  new com.be_uterace.payload.response.ClubResponse(c.clubId, c.clubName, c.picturePath, c.numOfAttendee, c.clubTotalDistance) " +
+            "FROM Club c " +
+            "WHERE c.outstanding = '1' AND c.status = '1' AND c.numOfAttendee >=0 " +
+            "ORDER BY c.numOfAttendee DESC " +
+            "LIMIT 6")
+    List<ClubResponse> findTop6ClubsByOutstandingAndStatusAndNumOfAttendeeContaining();
+
+    @Query("SELECT  new com.be_uterace.payload.response.ClubRankingResponse(c.clubId,c.clubRanking, c.clubName, c.picturePath, c.clubTotalDistance,c.numOfAttendee, c.totalActivities) " +
+            "FROM Club c " +
+            "WHERE c.status = '1' " +
+            "ORDER BY c.clubTotalDistance DESC " +
+            "LIMIT 8")
+    List<ClubRankingResponse> findTop8ClubsByTotalDistanceContaining();
 
     @Modifying
     @Transactional

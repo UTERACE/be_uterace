@@ -67,14 +67,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests((requests) ->requests
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events",
-                                "/api/news","/api/clubs/**","/api/events/**","/api/news/**","/api/area/**",
-                                "/api/home", "/api/scoreboard"
+                                "/api/news","/api/clubs/**","/api/events/**",
+                                "/api/news/**","/api/area/**","/api/home", "/api/scoreboard"
                                 , "/api/user/recent-active/**","/api/decode-polyline","/api/strava/status").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth","/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/news/**","/api/clubs/**","/api/strava/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/news/**","/api/clubs/**","/api/events/join-event/**","/api/events/leave-event/**"
+                                ,"/api/strava/**").hasAnyRole("USER","ADMIN")
                         .requestMatchers(HttpMethod.PUT,"/api/news/**","/api/clubs/**").hasAnyRole("USER","ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/news/**","/api/clubs/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/api/events/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/events").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/events/*/add-distance/**").hasAnyRole("ADMIN")
+
                         .requestMatchers(HttpMethod.PUT,"/api/events/**").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/events/**").hasAnyRole("ADMIN")
                         .requestMatchers("/api/user").hasAnyRole("USER", "ADMIN")

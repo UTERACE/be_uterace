@@ -1,6 +1,7 @@
 package com.be_uterace.repository;
 
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.response.RankingUserHomeResponse;
 import com.be_uterace.payload.response.UserRankingResponse;
 import com.be_uterace.projection.UserRankingProjection;
 import org.springframework.data.domain.Page;
@@ -49,6 +50,12 @@ public interface UserRepository extends JpaRepository<User,Long> {
             @Param("year") int year,
             Pageable pageable
     );
+    @Query("SELECT new com.be_uterace.payload.response.RankingUserHomeResponse(u.userId,u.ranking, u.firstName, u.lastName, u.avatarPath, u.totalDistance, u.pace) " +
+            "FROM User u " +
+            "WHERE u.status = '1' " +
+            "ORDER BY u.totalDistance DESC " +
+            "LIMIT 8")
+    List<RankingUserHomeResponse> findTop8ByOrderByTotalDistanceAsc();
 
     @Modifying
     @Transactional

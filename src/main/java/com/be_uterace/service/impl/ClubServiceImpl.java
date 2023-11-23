@@ -27,10 +27,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Service
 public class ClubServiceImpl implements ClubService {
@@ -177,41 +175,6 @@ public class ClubServiceImpl implements ClubService {
         club.setMaxPace(clubUpdateDto.getMax_pace() != null ? clubUpdateDto.getMax_pace() : club.getMaxPace());
         clubRepository.save(club);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(StatusCode.SUCCESS,"Cập nhật clb thành công"));
-
-//        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-//            String username = userDetails.getUsername();
-//            Optional<User> userOptional = userRepository.findByUsername(username);
-//            if (userOptional.isPresent()) {
-//                Optional<Club> clubOptional = clubRepository.findById(clubUpdateDto.getClub_id());
-//                if (clubOptional.isPresent()){
-//                    Club club = clubOptional.get();
-//                    if (clubUpdateDto.getName() != null && !Objects.equals(clubUpdateDto.getName(), ""))
-//                        club.setClubName(clubUpdateDto.getName());
-//                    if (clubUpdateDto.getDescription() != null && !Objects.equals(clubUpdateDto.getDescription(), ""))
-//                        club.setDescription(clubUpdateDto.getDescription());
-//                    if (!club.getPicturePath().equals(clubUpdateDto.getImage()) && !Objects.equals(clubUpdateDto.getImage(), "")){
-//                        if (Objects.equals(club.getPicturePath(), ""))
-//                            club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
-//                        else if (fileService.deleteImage(club.getPicturePath())){
-//                            System.out.println("Delete Image Successful");
-//                            club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
-//                        }
-//                    }
-//                    if (clubUpdateDto.getDetails() != null && !Objects.equals(clubUpdateDto.getDetails(), ""))
-//                        club.setDetails(clubUpdateDto.getDetails());
-//                    if (clubUpdateDto.getMin_pace() != null)
-//                        club.setMinPace(clubUpdateDto.getMin_pace());
-//                    if (clubUpdateDto.getMax_pace() != null)
-//                        club.setMaxPace(clubUpdateDto.getMax_pace());
-//                    clubRepository.save(club);
-//                    ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Cập nhật clb thành công");
-//                    return ResponseEntity.status(HttpStatus.OK).body(responseObject);
-//                }
-//            }
-//
-//        }
-//        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Cập nhật clb thất bại");
-//        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @Override
@@ -336,7 +299,17 @@ public class ClubServiceImpl implements ClubService {
                 UserClub userClub = new UserClub();
                 userClub.setClub(clubOptional.get());
                 userClub.setUser(userOptional.get());
+                userClub.setJoinDate(new Timestamp(System.currentTimeMillis()));
+                userClub.setTotalDistance(0.0);
+                userClub.setPace(0.0);
                 userClubRepository.save(userClub);
+                Club club = clubOptional.get();
+                club.setNumOfAttendee(club.getNumOfAttendee() + 1);
+                if (Objects.equals(userOptional.get().getGender(), "Nam"))
+                    club.setNumOfMales(club.getNumOfMales() + 1);
+                else
+                    club.setNumOfFemales(club.getNumOfFemales() + 1);
+                clubRepository.save(club);
                 return new ResponseObject(StatusCode.SUCCESS,"Tham gia clb thành công");
             }
         }
@@ -352,6 +325,13 @@ public class ClubServiceImpl implements ClubService {
                 Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
                         club_id,userOptional.get().getUserId());
                 userClubRepository.delete(userClubOptional.get());
+                Club club = clubRepository.findById(club_id).get();
+                club.setNumOfAttendee(club.getNumOfAttendee() - 1);
+                if (Objects.equals(userOptional.get().getGender(), "Nam") && club.getNumOfMales() > 0)
+                    club.setNumOfMales(club.getNumOfMales() - 1);
+                else if (Objects.equals(userOptional.get().getGender(), "Nữ") && club.getNumOfFemales() > 0)
+                    club.setNumOfFemales(club.getNumOfFemales() - 1);
+                clubRepository.save(club);
                 return new ResponseObject(StatusCode.SUCCESS,"Rời clb thành công");
 
             }

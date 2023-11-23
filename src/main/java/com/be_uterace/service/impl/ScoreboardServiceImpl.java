@@ -39,7 +39,7 @@ public class ScoreboardServiceImpl implements ScoreboardService {
 
         for (ClubRankingProjection club : content) {
             ClubRankingResponse rankingClubItem = new ClubRankingResponse();
-            rankingClubItem.setClub_id(club.getClubId());
+            rankingClubItem.setClub_id(club.getClubId().intValue());
             rankingClubItem.setRanking(club.getClubRanking());
             rankingClubItem.setName(club.getClubName());
             rankingClubItem.setImage(club.getPicturePath());

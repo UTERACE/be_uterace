@@ -7,12 +7,12 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClubRankingResponse {
-    private Integer club_id;
+public class RankingUserHomeResponse {
+    private Long user_id;
     private Integer ranking;
-    private String name;
+    private String first_name;
+    private String last_name;
     private String image;
     private Double total_distance;
-    private Long total_members;
-    private Long total_activities;
+    private Double pace;
 }

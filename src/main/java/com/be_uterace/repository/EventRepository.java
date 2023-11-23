@@ -3,6 +3,8 @@ package com.be_uterace.repository;
 import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Event;
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.response.EventResponse;
+import com.be_uterace.payload.response.OverviewResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -54,6 +56,19 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
     @Query("SELECT e FROM Event e LEFT JOIN UserEvent ue ON e.eventId = ue.event.eventId WHERE ue.user.userId = :userId AND " +
             "LOWER(e.title) LIKE %:search_name%")
     Page<Event> findEventByJoinUserUserId(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
+    @Query("SELECT new com.be_uterace.payload.response.EventResponse(e.eventId, e.title, e.picturePath, e.numOfAttendee, e.totalActivities) " +
+            "FROM Event e " +
+            "WHERE e.outstanding = '1' AND e.status = '1' AND e.numOfAttendee >= 0 " +
+            "ORDER BY e.numOfAttendee DESC " +
+            "LIMIT 6")
+    List<EventResponse> findTop6EventsByOutstandingAndStatusAndNumOfAttendeeContaining();
+
+    @Query("SELECT new com.be_uterace.payload.response.OverviewResponse(e.eventId, e.title,e.content, e.picturePath, e.numOfAttendee, e.totalActivities) " +
+            "FROM Event e " +
+            "WHERE e.outstanding = '1' AND e.status = '1' AND e.numOfAttendee >= 0 " +
+            "ORDER BY e.totalActivities DESC " +
+            "LIMIT 3")
+    List<OverviewResponse> findTop3EventsByOutstandingAndStatusAndNumOfAttendeeContaining();
 
     @Modifying
     @Transactional

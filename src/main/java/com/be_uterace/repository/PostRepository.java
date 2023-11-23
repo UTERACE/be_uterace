@@ -3,6 +3,8 @@ package com.be_uterace.repository;
 import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Post;
 import com.be_uterace.entity.User;
+import com.be_uterace.payload.response.PostHomeResponse;
+import com.be_uterace.payload.response.PostResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +19,12 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post,Integer> {
     @Query("SELECT p FROM Post p WHERE p.userCreate = (SELECT c.adminUser FROM Club c WHERE c.clubId = :clubId)")
     List<Post> findPostsCreatedByClubAdmin(@Param("clubId") Integer clubId);
+    @Query("SELECT  new com.be_uterace.payload.response.PostHomeResponse(p.postId, p.title, p.image, p.description) " +
+            "FROM Post p " +
+            "WHERE p.outstanding = '1' AND p.status = '1' " +
+            "ORDER BY p.createdAt DESC " +
+            "LIMIT 6")
+    List<PostHomeResponse> findTop6ClubsByOutstandingAndCreatedAtContaining();
     List<Post> findTop6PostsByOutstanding(String outstanding);
     List<Post> getPostsByClubClubId(Integer clubId);
     Page<Post> getPostsByTitleContainingAndUserCreateUserId(String search_name,Pageable pageable,Integer userId);

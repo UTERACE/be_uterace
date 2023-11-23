@@ -5,13 +5,11 @@ import lombok.*;
 @Getter
 @Setter
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class EventResponse {
-    private Integer event_id;
+@NoArgsConstructor
+public class PostHomeResponse {
+    private Integer news_id;
     private String name;
+    private String description;
     private String image;
-    private Integer total_members;
-    private Integer total_activities;
-
 }

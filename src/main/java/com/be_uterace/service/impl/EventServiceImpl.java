@@ -71,7 +71,7 @@ public class EventServiceImpl implements EventService {
             eventResponse.setName(event.getTitle());
             eventResponse.setImage(event.getPicturePath());
             eventResponse.setTotal_members(event.getNumOfAttendee());
-            eventResponse.setTotal_clubs(event.getNumOfClubs());
+            eventResponse.setTotal_activities(event.getTotalActivities());
             eventResponses.add(eventResponse);
         }
         return EventPaginationResponse.builder()
@@ -297,7 +297,7 @@ public class EventServiceImpl implements EventService {
                     eventResponse.setName(event.getTitle());
                     eventResponse.setImage(event.getPicturePath());
                     eventResponse.setTotal_members(event.getNumOfAttendee());
-                    eventResponse.setTotal_clubs(event.getNumOfClubs());
+                    eventResponse.setTotal_activities(event.getTotalActivities());
                     eventResponses.add(eventResponse);
                 }
                 return EventPaginationResponse.builder()
@@ -329,7 +329,7 @@ public class EventServiceImpl implements EventService {
                     eventResponse.setName(event.getTitle());
                     eventResponse.setImage(event.getPicturePath());
                     eventResponse.setTotal_members(event.getNumOfAttendee());
-                    eventResponse.setTotal_clubs(event.getNumOfClubs());
+                    eventResponse.setTotal_activities(event.getTotalActivities());
                     eventResponses.add(eventResponse);
                 }
                 return EventPaginationResponse.builder()
@@ -364,8 +364,14 @@ public class EventServiceImpl implements EventService {
                     userEvent.setEvent(event);
                     userEvent.setUser(userOptional.get());
                     userEvent.setJoinDate(new Date());
+                    userEvent.setTotalDistance(0.0);
+                    userEvent.setPace(0.0);
                     userEventRepository.save(userEvent);
                     event.setNumOfAttendee(event.getNumOfAttendee() + 1);
+                    if (Objects.equals(userOptional.get().getGender(), "Nam"))
+                        event.setNumOfMales(event.getNumOfMales() + 1);
+                    else
+                        event.setNumOfFemales(event.getNumOfFemales() + 1);
                     eventRepository.save(event);
                     return new ResponseObject(StatusCode.SUCCESS,"Tham gia giải chạy thành công");
                 }
@@ -388,6 +394,10 @@ public class EventServiceImpl implements EventService {
                         UserEvent userEvent = userEventOptional.get();
                         userEventRepository.delete(userEvent);
                         event.setNumOfAttendee(event.getNumOfAttendee() - 1);
+                        if (Objects.equals(userOptional.get().getGender(), "Nam") && event.getNumOfMales() > 0)
+                            event.setNumOfMales(event.getNumOfMales() - 1);
+                        else if (Objects.equals(userOptional.get().getGender(), "Nữ") && event.getNumOfFemales() > 0)
+                            event.setNumOfFemales(event.getNumOfFemales() - 1);
                         eventRepository.save(event);
                         return new ResponseObject(StatusCode.SUCCESS,"Rời khỏi giải chạy thành công");
                     }
