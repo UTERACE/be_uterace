@@ -1,15 +1,11 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.service.FileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +22,13 @@ public class FileServiceImpl implements FileService {
     private long MAX_IMAGE_SIZE;
     @Value("${path.image}")
     private String PATH_IMAGE;
+    @Autowired
+    private final ResourceLoader resourceLoader;
+
+    public FileServiceImpl(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
     @Override
     public String saveImage(String base64String) {
         try {
@@ -35,8 +38,12 @@ public class FileServiceImpl implements FileService {
                 throw new RuntimeException("Image size exceeds the maximum allowed size");
             }
             String imageName= UUID.randomUUID().toString()+".png";
-            Path path = Paths.get(UPLOAD_DIR+imageName);
-            Files.write(path,decodedBytes);
+            String staticFolderPath = resourceLoader.getResource("classpath:static").getURI().getPath();
+
+            // Create the path for the new image
+            Path imagePath = Paths.get(staticFolderPath, "images", imageName);
+
+            Files.write(imagePath,decodedBytes);
             return imageName;
         } catch (Exception e) {
             throw new RuntimeException("Could not save image", e);
@@ -46,7 +53,9 @@ public class FileServiceImpl implements FileService {
     @Override
     public boolean deleteImage(String imageName) {
         try {
-            Path path = Paths.get(UPLOAD_DIR+imageName.replace(PATH_IMAGE,""));
+            String staticFolderPath = resourceLoader.getResource("classpath:static").getURI().getPath();
+
+            Path path = Paths.get(staticFolderPath+imageName.replace(PATH_IMAGE,""));
             if (Files.exists(path)) {
                 Files.delete(path);
             }
