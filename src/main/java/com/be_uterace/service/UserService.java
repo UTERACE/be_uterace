@@ -6,6 +6,7 @@ import com.be_uterace.payload.request.UpdateDto;
 import com.be_uterace.payload.response.RecentActiveResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.UserResponse;
+import com.be_uterace.payload.response.UserStatisticResponse;
 import org.springframework.security.core.Authentication;
 
 public interface UserService {
@@ -17,5 +18,5 @@ public interface UserService {
 
     RecentActiveResponse getRecentActivity(int current_page, int per_page, Long userId, String search, int hour);
 
-
+    UserStatisticResponse getSummaryActivity(Long user_id);
 }

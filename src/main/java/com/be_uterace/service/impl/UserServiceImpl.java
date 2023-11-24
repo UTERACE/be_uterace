@@ -5,13 +5,8 @@ import com.be_uterace.entity.Run;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.ChangePasswordDto;
 import com.be_uterace.payload.request.UpdateDto;
-import com.be_uterace.payload.response.ManagePostSearchResponse;
-import com.be_uterace.payload.response.RecentActiveResponse;
-import com.be_uterace.payload.response.ResponseObject;
-import com.be_uterace.payload.response.UserResponse;
-import com.be_uterace.repository.AreaRepository;
-import com.be_uterace.repository.RunRepository;
-import com.be_uterace.repository.UserRepository;
+import com.be_uterace.payload.response.*;
+import com.be_uterace.repository.*;
 import com.be_uterace.service.FileService;
 import com.be_uterace.service.UserService;
 import com.be_uterace.utils.Constant;
@@ -24,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,17 +41,29 @@ public class UserServiceImpl implements UserService {
     private RunRepository runRepository;
     private PasswordEncoder passwordEncoder;
     private AreaRepository areaRepository;
+    private UserClubRepository userClubRepository;
+    private UserEventRepository userEventRepository;
+
     private ModelMapper modelMapper;
     private FileService fileService;
     @Value("${path.image}")
     private String path;
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AreaRepository areaRepository, ModelMapper modelMapper, FileService fileService, RunRepository runRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                           AreaRepository areaRepository,
+                           ModelMapper modelMapper,
+                           FileService fileService,
+                           RunRepository runRepository,
+                           UserClubRepository userClubRepository,
+                           UserEventRepository userEventRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.areaRepository = areaRepository;
         this.modelMapper = modelMapper;
         this.fileService = fileService;
         this.runRepository = runRepository;
+        this.userClubRepository = userClubRepository;
+        this.userEventRepository = userEventRepository;
+
     }
 
     @Override
@@ -173,6 +181,51 @@ public class UserServiceImpl implements UserService {
                 .current_page(runPage.getNumber() + 1)
                 .total_page(runPage.getTotalPages())
                 .activities(arrayList)
+                .build();
+    }
+
+    @Override
+    public UserStatisticResponse getSummaryActivity(Long user_id) {
+        if (user_id == null){
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = userRepository.findByUsername(authentication.getName()).orElse(null);
+            user_id = user.getUserId();
+        }
+        List<Object[]> rawStats = runRepository.getUserRunStats(user_id);
+        Optional<User> userOptional = userRepository.findById(user_id);
+        User user = userOptional.get();
+        List<UserStatisticResponse.ChartDate> statisticDateResponses = new ArrayList<>();
+        List<UserStatisticResponse.ChartMonth> statisticMonthResponses = new ArrayList<>();
+
+        int rowIndex = 0;
+        for (Object[] row : rawStats) {
+            String formattedDate = (String) row[0];
+            Double totalDistance = (Double) row[1];
+            Double averagePace = (Double) row[2];
+
+            if (rowIndex < 7) {
+                // Add to statisticDateResponses for the first 7 rows
+                statisticDateResponses.add(new UserStatisticResponse.ChartDate(formattedDate, totalDistance, averagePace));
+            } else {
+                // Add to statisticMonthResponses for the last 2 rows
+                statisticMonthResponses.add(new UserStatisticResponse.ChartMonth(formattedDate, totalDistance, averagePace));
+            }
+
+            rowIndex++;
+        }
+        return UserStatisticResponse.builder()
+                .user_id(user.getUserId())
+                .total_distance(user.getTotalDistance())
+                .chart_date(statisticDateResponses)
+                .chart_month(statisticMonthResponses)
+                .ranking(user.getRanking())
+                .avg_pace(user.getPace())
+                .first_name(user.getFirstName())
+                .last_name(user.getLastName())
+                .strava_user_link((user.getStravaId() != null) ? "https://www.strava.com/athletes/" + user.getStravaId().toString() : null)
+                .total_clubs(userClubRepository.countClubsByUserId(user_id))
+                .total_activities(runRepository.countRunsByUserId(user_id))
+                .total_event(userEventRepository.countEventsByUserId(user_id))
                 .build();
     }
 }

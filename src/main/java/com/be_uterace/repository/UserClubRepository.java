@@ -16,5 +16,9 @@ public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> 
     Optional<UserClub> findByClubIdAndUserId(@Param("clubId") Integer clubId, @Param("userId") Long userId);
 
 
+    @Query("SELECT COUNT(uc) FROM UserClub uc WHERE uc.user.userId = :userId")
+    int countClubsByUserId(@Param("userId") Long userId);
+
+
 
 }

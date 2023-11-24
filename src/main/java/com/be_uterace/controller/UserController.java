@@ -2,14 +2,12 @@ package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.ChangePasswordDto;
 import com.be_uterace.payload.request.UpdateDto;
-import com.be_uterace.payload.response.ManagePostSearchResponse;
-import com.be_uterace.payload.response.RecentActiveResponse;
-import com.be_uterace.payload.response.ResponseObject;
-import com.be_uterace.payload.response.UserResponse;
+import com.be_uterace.payload.response.*;
 import com.be_uterace.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,6 +54,19 @@ public class UserController {
                 current_page,per_page,user_id,search_name,hour);
 
         return ResponseEntity.ok(recentActiveResponse);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserStatisticResponse> UserStatisticOwnController() {
+        UserStatisticResponse userStatisticResponse = userService.getSummaryActivity(null);
+        return ResponseEntity.ok(userStatisticResponse);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/{user_id}")
+    public ResponseEntity<UserStatisticResponse> UserStatisticController(@PathVariable Long user_id) {
+        UserStatisticResponse userStatisticResponse = userService.getSummaryActivity(user_id);
+        return ResponseEntity.ok(userStatisticResponse);
     }
 
 }

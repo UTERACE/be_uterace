@@ -69,7 +69,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events",
                                 "/api/news","/api/clubs/**","/api/events/**",
                                 "/api/news/**","/api/area/**","/api/home", "/api/scoreboard"
-                                , "/api/user/recent-active/**","/api/decode-polyline","/api/strava/status").permitAll()
+                                , "/api/user/recent-active/**","/api/decode-polyline","/api/strava/status",
+                                "/api/webhook","/api/user/{user_id}").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth","/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/news/**","/api/clubs/**","/api/events/join-event/**","/api/events/leave-event/**"
                                 ,"/api/strava/**").hasAnyRole("USER","ADMIN")

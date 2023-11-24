@@ -2,6 +2,7 @@ package com.be_uterace.repository;
 
 import com.be_uterace.entity.Club;
 import com.be_uterace.entity.Run;
+import com.be_uterace.projection.ActivitySummaryProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,5 +27,15 @@ public interface RunRepository extends JpaRepository<Run,Long> {
             @Param("userId") Long userId,
             Pageable pageable
     );
+
+    @Query(nativeQuery = true, value = "SELECT * FROM get_user_run_stats(:userId)")
+    List<Object[]> getUserRunStats(@Param("userId") Long userId);
+//    @Query(nativeQuery = true, value = "SELECT * FROM GetRunSummary(:user_id);")
+//    List getEmployeeById(@Param("user_id") Long user_id);
+
+
+    @Query("SELECT COUNT(r) FROM Run r WHERE r.user.userId = :userId")
+    int countRunsByUserId(@Param("userId") Long userId);
+
 
 }
