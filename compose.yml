@@ -5,7 +5,7 @@ networks:
 services:
   user-service:
     container_name: user-service
-    image: doanquocbao4117/be-uterace:1.0
+    image: doanquocbao4117/be-uterace:1.1
     ports:
       - "8000:8000"
     networks:

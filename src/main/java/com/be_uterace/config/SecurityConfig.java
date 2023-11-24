@@ -65,9 +65,8 @@ public class SecurityConfig {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) ->requests
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events",
-                                "/api/news","/api/clubs/**","/api/events/**",
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events", "/api/news","/api/clubs/**","/api/events/**",
                                 "/api/news/**","/api/area/**","/api/home", "/api/scoreboard"
                                 , "/api/user/recent-active/**","/api/decode-polyline","/api/strava/status").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth","/api/auth/**").permitAll()
