@@ -1,9 +1,10 @@
 package com.be_uterace.service;
 
-import com.be_uterace.payload.response.ScoreboardResponse;
+import com.be_uterace.payload.response.ScoreboardClubResponse;
+import com.be_uterace.payload.response.ScoreboardUserResponse;
 
 public interface ScoreboardService {
-    ScoreboardResponse getScoreboardClub(int month, int year, int current_page, int per_page);
+    ScoreboardClubResponse getScoreboardClub(int month, int year, int current_page, int per_page, String search_name);
 
-    ScoreboardResponse getScoreboardUser(int month, int year, int current_page, int per_page);
+    ScoreboardUserResponse getScoreboardUser(int month, int year, int current_page, int per_page, String search_name);
 }

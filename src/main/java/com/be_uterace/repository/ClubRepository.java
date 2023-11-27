@@ -1,8 +1,6 @@
 package com.be_uterace.repository;
 
 import com.be_uterace.entity.Club;
-import com.be_uterace.entity.Event;
-import com.be_uterace.entity.User;
 import com.be_uterace.payload.response.ClubRankingResponse;
 import com.be_uterace.payload.response.ClubResponse;
 import com.be_uterace.projection.ClubDetailProjection;
@@ -34,20 +32,11 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
 
     List<Club> findTop6ClubsByOutstanding(String outstanding);
 
-    @Query("SELECT c.clubId AS clubId, " +
-            "c.clubName AS clubName, " +
-            "c.picturePath, COALESCE(SUM(r.distance), 0) AS clubTotalDistance, " +
-            "COALESCE(SUM(uc.user.userId),0) AS memberCount, COALESCE(SUM(r.runId), 0) AS totalActivities, " +
-            "ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(r.distance), 0) DESC) AS clubRanking " +
-            "FROM Club c " +
-            "LEFT JOIN UserClub uc ON c.clubId = uc.user.userId " +
-            "LEFT JOIN Run r ON uc.user.userId = r.user.userId " +
-            "WHERE (:month = 0 OR EXTRACT(MONTH FROM r.createdAt) = :month) " +
-            "AND (:year = 0 OR EXTRACT(YEAR FROM r.createdAt) = :year) " +
-            "GROUP BY c.clubId")
+    @Query(nativeQuery = true, value = "SELECT * FROM GetRankedClubs(:month,:year,:searchName)")
     Page<ClubRankingProjection> findScoreboardClub(
             @Param("month") int month,
             @Param("year") int year,
+            @Param("searchName") String searchName,
             Pageable pageable
     );
 

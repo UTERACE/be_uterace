@@ -1,6 +1,7 @@
 package com.be_uterace.controller;
 
-import com.be_uterace.payload.response.ScoreboardResponse;
+import com.be_uterace.payload.response.ScoreboardClubResponse;
+import com.be_uterace.payload.response.ScoreboardUserResponse;
 import com.be_uterace.service.ScoreboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,21 +19,22 @@ public class ScoreboardController {
     }
 
     @GetMapping
-    public ResponseEntity<ScoreboardResponse> getScoreboardController(
+    public ResponseEntity<?> getScoreboardController(
             @RequestParam String ranking,
             @RequestParam int month,
             @RequestParam int year,
             @RequestParam int current_page,
-            @RequestParam int per_page
+            @RequestParam int per_page,
+            @RequestParam(required=false) String search_name
     ) {
         if (Objects.equals(ranking, "club")){
-            ScoreboardResponse scoreboardResponse = scoreboardService.getScoreboardClub(
-                    month,year,current_page,per_page);
-            return ResponseEntity.ok(scoreboardResponse);
+            ScoreboardClubResponse scoreboardClubResponse = scoreboardService.getScoreboardClub(
+                    month,year,current_page,per_page, search_name);
+            return ResponseEntity.ok(scoreboardClubResponse);
         } else if (Objects.equals(ranking, "user")) {
-            ScoreboardResponse scoreboardResponse = scoreboardService.getScoreboardUser(
-                    month,year,current_page,per_page);
-            return ResponseEntity.ok(scoreboardResponse);
+            ScoreboardUserResponse scoreboardUserResponse = scoreboardService.getScoreboardUser(
+                    month,year,current_page,per_page,search_name);
+            return ResponseEntity.ok(scoreboardUserResponse);
         }
         else return null;
     }
