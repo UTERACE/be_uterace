@@ -4,10 +4,7 @@ import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.DeleteActivityEvent;
 import com.be_uterace.payload.request.RunningCategoryDto;
 import com.be_uterace.payload.request.UpdateEventDto;
-import com.be_uterace.payload.response.ClubPaginationResponse;
-import com.be_uterace.payload.response.EventDetailResponse;
-import com.be_uterace.payload.response.EventPaginationResponse;
-import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.response.*;
 import org.springframework.security.core.Authentication;
 
 public interface EventService {
@@ -32,4 +29,6 @@ public interface EventService {
     ResponseObject leaveEvent(int event_id, Authentication auth);
 
     boolean checkJoinEvent(int event_id, Authentication auth);
+
+    EventRankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name);
 }

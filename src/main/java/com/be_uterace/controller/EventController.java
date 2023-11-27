@@ -4,10 +4,7 @@ import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.DeleteActivityEvent;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.UpdateEventDto;
-import com.be_uterace.payload.response.EventDetailResponse;
-import com.be_uterace.payload.response.EventPaginationResponse;
-import com.be_uterace.payload.response.LoginResponse;
-import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.response.*;
 import com.be_uterace.repository.UEActivityRepository;
 import com.be_uterace.service.EventService;
 import com.be_uterace.service.UEActivityService;
@@ -120,6 +117,15 @@ public class EventController {
     @GetMapping(value = {"/check-join-event/{event_id}"})
     public ResponseEntity<Boolean> checkJoinEventController(@PathVariable Integer event_id, Authentication auth){
         Boolean res = eventService.checkJoinEvent(event_id, auth);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping(value = {"/rank-member/{event_id}"})
+    public ResponseEntity<EventRankingMemberResponse> checkJoinEventController(
+            @PathVariable Integer event_id, @RequestParam int current_page,
+            @RequestParam int per_page,
+            @RequestParam String search_name){
+        EventRankingMemberResponse res = eventService.getScoreBoardEventMember(event_id,current_page,per_page,search_name);
         return ResponseEntity.ok(res);
     }
 }

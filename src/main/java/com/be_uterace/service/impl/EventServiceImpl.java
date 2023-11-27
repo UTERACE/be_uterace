@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -419,6 +420,43 @@ public class EventServiceImpl implements EventService {
             }
         }
         return false;
+    }
+
+    @Override
+    public EventRankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name) {
+
+        Pageable pageable = PageRequest.of(current_page-1, per_page);
+        Event event = eventRepository.findById(event_id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        Page<UserEvent> userEventPage;
+        if(search_name==null || search_name.equals("")){
+            userEventPage = userEventRepository.findByEventIdAndSearchName(event_id,null,pageable);
+        }
+        else userEventPage = userEventRepository.findByEventIdAndSearchName(event_id, search_name,pageable);
+        List<UserEvent> userEventList = userEventPage.getContent();
+
+        List<EventRankingMemberResponse.RankingUser> rankingUserList = new ArrayList<>();
+        for (UserEvent userEvent : userEventList){
+            EventRankingMemberResponse.RankingUser rankingUser = new EventRankingMemberResponse.RankingUser();
+            User user = userEvent.getUser();
+            rankingUser.setUser_id(user.getUserId());
+            rankingUser.setRanking(userEvent.getRanking());
+            rankingUser.setFirst_name(user.getFirstName());
+            rankingUser.setLast_name(user.getLastName());
+            rankingUser.setGender(user.getGender());
+            rankingUser.setPace(userEvent.getPace());
+            rankingUser.setImage(user.getAvatarPath());
+            rankingUser.setTotal_distance(userEvent.getTotalDistance());
+            rankingUser.setJoin_date(userEvent.getJoinDate());
+            rankingUserList.add(rankingUser);
+        }
+        return EventRankingMemberResponse.builder()
+                .per_page(userEventPage.getSize())
+                .total_user((int) userEventPage.getTotalElements())
+                .current_page(userEventPage.getNumber()+1)
+                .total_page(userEventPage.getTotalPages())
+                .ranking_user(rankingUserList)
+                .build();
     }
 
 }

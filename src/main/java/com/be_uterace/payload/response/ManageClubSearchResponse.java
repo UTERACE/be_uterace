@@ -6,6 +6,8 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ManageClubSearchResponse {
     private int per_page;
     private int current_page;

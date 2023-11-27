@@ -1,12 +1,16 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Organization;
+import com.be_uterace.entity.User;
+import com.be_uterace.entity.UserEvent;
+import com.be_uterace.payload.response.EventRankingMemberResponse;
 import com.be_uterace.payload.response.ScoreboardClubResponse;
 import com.be_uterace.payload.response.ScoreboardUserResponse;
 import com.be_uterace.projection.ClubRankingProjection;
 import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.ClubRepository;
 import com.be_uterace.repository.OrganizationRepository;
+import com.be_uterace.repository.UserEventRepository;
 import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.ScoreboardService;
 import org.springframework.data.domain.Page;
@@ -24,13 +28,15 @@ public class ScoreboardServiceImpl implements ScoreboardService {
 
     private ClubRepository clubRepository;
     private OrganizationRepository organizationRepository;
-
+    private UserEventRepository userEventRepository;
     private UserRepository userRepository;
 
-    public ScoreboardServiceImpl(ClubRepository clubRepository, UserRepository userRepository, OrganizationRepository organizationRepository) {
+    public ScoreboardServiceImpl(ClubRepository clubRepository, UserRepository userRepository,
+                                 OrganizationRepository organizationRepository, UserEventRepository userEventRepository) {
         this.clubRepository = clubRepository;
         this.userRepository = userRepository;
         this.organizationRepository = organizationRepository;
+        this.userEventRepository = userEventRepository;
     }
 
     @Override
