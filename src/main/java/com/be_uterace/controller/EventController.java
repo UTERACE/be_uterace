@@ -126,4 +126,17 @@ public class EventController {
         RankingMemberResponse res = eventService.getScoreBoardEventMember(event_id,current_page,per_page,search_name);
         return ResponseEntity.ok(res);
     }
+
+    @GetMapping("/recent-active/{event_id}")
+    public ResponseEntity<RecentActiveResponse> recentActiveController(
+            @PathVariable Integer event_id,
+            @RequestParam (defaultValue = "1" )int current_page,
+            @RequestParam (defaultValue = "5" ) int per_page,
+            @RequestParam(required = false) String search_name,
+            @RequestParam(defaultValue = "48") int hour) {
+
+        RecentActiveResponse recentActiveResponse = eventService.getRecentActivity(
+                current_page,per_page,event_id,search_name,hour);
+        return ResponseEntity.ok(recentActiveResponse);
+    }
 }

@@ -29,4 +29,6 @@ public interface EventService {
     boolean checkJoinEvent(int event_id, Authentication auth);
 
     RankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name);
+
+    RecentActiveResponse getRecentActivity(int current_page, int per_page, Integer eventId, String search, int hours);
 }

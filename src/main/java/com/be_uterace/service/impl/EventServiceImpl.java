@@ -19,6 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -32,6 +34,8 @@ public class EventServiceImpl implements EventService {
     private UserRepository userRepository;
     private UserEventRepository userEventRepository;
 
+    private UEActivityRepository ueActivityRepository;
+
     private final EntityManager em;
     private FileService fileService;
     @Value("${path.image}")
@@ -40,7 +44,9 @@ public class EventServiceImpl implements EventService {
 
     public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository,
                             EventRunningCategoryRepository eventRunningCategoryRepository, UserEventRepository userEventRepository,
-                            UserRepository userRepository, EntityManager em, FileService fileService) {
+                            UserRepository userRepository, EntityManager em,
+                            FileService fileService,
+                            UEActivityRepository ueActivityRepository) {
         this.eventRepository = eventRepository;
         this.runningCategoryRepository = runningCategoryRepository;
         this.eventRunningCategoryRepository = eventRunningCategoryRepository;
@@ -48,6 +54,7 @@ public class EventServiceImpl implements EventService {
         this.userEventRepository = userEventRepository;
         this.em = em;
         this.fileService = fileService;
+        this.ueActivityRepository = ueActivityRepository;
     }
 
     @Override
@@ -452,6 +459,51 @@ public class EventServiceImpl implements EventService {
                 .current_page(userEventPage.getNumber()+1)
                 .total_page(userEventPage.getTotalPages())
                 .ranking_user(rankingUserList)
+                .build();
+    }
+
+    @Override
+    public RecentActiveResponse getRecentActivity(int current_page, int per_page, Integer eventId, String search, int hours) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
+        Page<UserEventActivity> activityPage;
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime thresholdDateTime = now.minusHours(hours);
+        Timestamp thresholdTimestamp = Timestamp.valueOf(thresholdDateTime);
+
+        if(search==null || search.isEmpty()) {
+            activityPage = ueActivityRepository.findRunsByDateTimeAndName(thresholdTimestamp, null, eventId,pageable);
+        } else {
+            activityPage = ueActivityRepository.findRunsByDateTimeAndName(thresholdTimestamp, search,eventId,pageable);
+        }
+        List<UserEventActivity> userEventActivityList = activityPage.getContent();
+        List<RecentActiveResponse.Activity> arrayList = new ArrayList<>();
+        for (UserEventActivity userEventActivity : userEventActivityList){
+            Run run = userEventActivity.getRun();
+            RecentActiveResponse.Activity activityResponse = new RecentActiveResponse.Activity();
+            activityResponse.setActivity_id(userEventActivity.getId());
+            activityResponse.setMember_id(run.getUser().getUserId());
+            activityResponse.setMember_image(run.getUser().getAvatarPath());
+            activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());
+            activityResponse.setActivity_start_date(run.getCreatedAt());
+            activityResponse.setActivity_distance(run.getDistance());
+            activityResponse.setActivity_pace(run.getPace());
+            activityResponse.setActivity_duration(run.getDuration());
+            activityResponse.setActivity_name(run.getName());
+            activityResponse.setActivity_type(run.getType());
+            activityResponse.setActivity_link_strava("https://www.strava.com/activities/"+run.getStravaRunId());
+            activityResponse.setActivity_map(run.getSummaryPolyline());
+            activityResponse.setStatus(run.getStatus());
+            activityResponse.setReason(run.getReason());
+            arrayList.add(activityResponse);
+        }
+        return RecentActiveResponse.builder()
+                .per_page(activityPage.getSize())
+                .total_activities((int) activityPage.getTotalElements())
+                .current_page(activityPage.getNumber() + 1)
+                .total_page(activityPage.getTotalPages())
+                .activities(arrayList)
                 .build();
     }
 

@@ -25,8 +25,30 @@ public class UserEventActivity {
     private Run run;
 
     @ManyToOne
+    @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID")
+    private User user;
+
+    @ManyToOne
     @JoinColumn(name = "EVENT_ID", referencedColumnName = "EVENT_ID")
     private Event event;
+
+    @Column(name = "NAME")
+    private String name;
+
+    @Column(name = "DISTANCE")
+    private Double distance;
+
+    @Column(name = "DURATION")
+    private String duration;
+
+    @Column(name = "PACE")
+    private Double pace;
+
+    @Column(name = "CALORI")
+    private Double calori;
+
+    @Column(name = "CREATED_AT")
+    private Date createdAt;
 
     @Column(name = "STATUS")
     private String status;
