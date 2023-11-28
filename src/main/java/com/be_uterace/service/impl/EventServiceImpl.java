@@ -2,11 +2,8 @@ package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.*;
 import com.be_uterace.payload.request.CreateEventDto;
-import com.be_uterace.payload.request.DeleteActivityEvent;
-import com.be_uterace.payload.request.RunningCategoryDto;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
-import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.*;
 import com.be_uterace.service.EventService;
 import com.be_uterace.service.FileService;
@@ -17,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -423,7 +419,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventRankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name) {
+    public RankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name) {
 
         Pageable pageable = PageRequest.of(current_page-1, per_page);
         Event event = eventRepository.findById(event_id)
@@ -435,9 +431,9 @@ public class EventServiceImpl implements EventService {
         else userEventPage = userEventRepository.findByEventIdAndSearchName(event_id, search_name,pageable);
         List<UserEvent> userEventList = userEventPage.getContent();
 
-        List<EventRankingMemberResponse.RankingUser> rankingUserList = new ArrayList<>();
+        List<RankingMemberResponse.RankingUser> rankingUserList = new ArrayList<>();
         for (UserEvent userEvent : userEventList){
-            EventRankingMemberResponse.RankingUser rankingUser = new EventRankingMemberResponse.RankingUser();
+            RankingMemberResponse.RankingUser rankingUser = new RankingMemberResponse.RankingUser();
             User user = userEvent.getUser();
             rankingUser.setUser_id(user.getUserId());
             rankingUser.setRanking(userEvent.getRanking());
@@ -450,7 +446,7 @@ public class EventServiceImpl implements EventService {
             rankingUser.setJoin_date(userEvent.getJoinDate());
             rankingUserList.add(rankingUser);
         }
-        return EventRankingMemberResponse.builder()
+        return RankingMemberResponse.builder()
                 .per_page(userEventPage.getSize())
                 .total_user((int) userEventPage.getTotalElements())
                 .current_page(userEventPage.getNumber()+1)

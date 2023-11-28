@@ -1,6 +1,5 @@
 package com.be_uterace.service;
 
-import com.be_uterace.payload.response.EventRankingMemberResponse;
 import com.be_uterace.payload.response.ScoreboardClubResponse;
 import com.be_uterace.payload.response.ScoreboardUserResponse;
 

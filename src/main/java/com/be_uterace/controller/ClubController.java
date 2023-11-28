@@ -1,9 +1,7 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.*;
-import com.be_uterace.payload.response.ClubDetailResponse;
-import com.be_uterace.payload.response.ClubPaginationResponse;
-import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.response.*;
 import com.be_uterace.service.ClubService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -101,6 +99,28 @@ public class ClubController {
     @PutMapping(value = {"/delete-activity"})
     public ResponseEntity<ResponseObject> deleteActivityController(@RequestBody DeleteActivityClub req){
         ResponseObject res = clubService.deleteActivity(req);
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/recent-active/{club_id}")
+    public ResponseEntity<RecentActiveResponse> recentActiveController(
+            @PathVariable Integer club_id,
+            @RequestParam (defaultValue = "1" )int current_page,
+            @RequestParam (defaultValue = "5" ) int per_page,
+            @RequestParam(required = false) String search_name,
+            @RequestParam(defaultValue = "48") int hour) {
+
+        RecentActiveResponse recentActiveResponse = clubService.getRecentActivity(
+                current_page,per_page,club_id,search_name,hour);
+        return ResponseEntity.ok(recentActiveResponse);
+    }
+
+    @GetMapping(value = {"/rank-member/{club_id}"})
+    public ResponseEntity<RankingMemberResponse> rankingMemberClubController(
+            @PathVariable Integer club_id, @RequestParam int current_page,
+            @RequestParam int per_page,
+            @RequestParam String search_name){
+        RankingMemberResponse res = clubService.getScoreBoardClubMember(club_id,current_page,per_page,search_name);
         return ResponseEntity.ok(res);
     }
 }

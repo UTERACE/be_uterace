@@ -1,9 +1,6 @@
 package com.be_uterace.service.impl;
 
-import com.be_uterace.entity.Club;
-import com.be_uterace.entity.Post;
-import com.be_uterace.entity.User;
-import com.be_uterace.entity.UserClub;
+import com.be_uterace.entity.*;
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
 import com.be_uterace.payload.request.DeleteActivityClub;
@@ -28,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -371,7 +369,84 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public RecentActiveResponse getRecentActivity(int current_page, int per_page, Long userId, String search, int hours) {
-        return null;
+    public RecentActiveResponse getRecentActivity(int current_page, int per_page, Integer clubId, String search, int hours) {
+
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found"));
+        Page<UserClubActivity> activityPage;
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime thresholdDateTime = now.minusHours(hours);
+        Timestamp thresholdTimestamp = Timestamp.valueOf(thresholdDateTime);
+
+        if(search==null || search.isEmpty()) {
+            activityPage = ucActivityRepository.findActivityByDateTimeAndName(thresholdTimestamp, null, clubId,pageable);
+        } else {
+            activityPage = ucActivityRepository.findActivityByDateTimeAndName(thresholdTimestamp, search,clubId,pageable);
+        }
+        List<UserClubActivity> userClubActivityList = activityPage.getContent();
+        List<RecentActiveResponse.Activity> arrayList = new ArrayList<>();
+        for (UserClubActivity userClubActivity : userClubActivityList){
+            Run run = userClubActivity.getRun();
+            RecentActiveResponse.Activity activityResponse = new RecentActiveResponse.Activity();
+            activityResponse.setActivity_id(userClubActivity.getId());
+            activityResponse.setMember_id(run.getUser().getUserId());
+            activityResponse.setMember_image(run.getUser().getAvatarPath());
+            activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());
+            activityResponse.setActivity_start_date(run.getCreatedAt());
+            activityResponse.setActivity_distance(run.getDistance());
+            activityResponse.setActivity_pace(run.getPace());
+            activityResponse.setActivity_duration(run.getDuration());
+            activityResponse.setActivity_name(run.getName());
+            activityResponse.setActivity_type(run.getType());
+            activityResponse.setActivity_link_strava("https://www.strava.com/activities/"+run.getStravaRunId());
+            activityResponse.setActivity_map(run.getSummaryPolyline());
+            activityResponse.setStatus(run.getStatus());
+            activityResponse.setReason(run.getReason());
+            arrayList.add(activityResponse);
+        }
+        return RecentActiveResponse.builder()
+                .per_page(activityPage.getSize())
+                .total_activities((int) activityPage.getTotalElements())
+                .current_page(activityPage.getNumber() + 1)
+                .total_page(activityPage.getTotalPages())
+                .activities(arrayList)
+                .build();
+    }
+
+    @Override
+    public RankingMemberResponse getScoreBoardClubMember(int club_id, int current_page, int per_page, String search_name) {
+        Pageable pageable = PageRequest.of(current_page-1, per_page);
+        Club club = clubRepository.findById(club_id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found"));
+        Page<UserClub> userClubPage;
+        if(search_name==null || search_name.equals("")){
+            userClubPage = userClubRepository.findByClubIdAndSearchName(club_id,null,pageable);
+        }
+        else userClubPage = userClubRepository.findByClubIdAndSearchName(club_id, search_name,pageable);
+        List<UserClub> userClubList = userClubPage.getContent();
+
+        List<RankingMemberResponse.RankingUser> rankingUserList = new ArrayList<>();
+        for (UserClub userClub : userClubList){
+            RankingMemberResponse.RankingUser rankingUser = new RankingMemberResponse.RankingUser();
+            User user = userClub.getUser();
+            rankingUser.setUser_id(user.getUserId());
+            rankingUser.setRanking(userClub.getRanking());
+            rankingUser.setFirst_name(user.getFirstName());
+            rankingUser.setLast_name(user.getLastName());
+            rankingUser.setGender(user.getGender());
+            rankingUser.setPace(userClub.getPace());
+            rankingUser.setImage(user.getAvatarPath());
+            rankingUser.setTotal_distance(userClub.getTotalDistance());
+            rankingUser.setJoin_date(userClub.getJoinDate());
+            rankingUserList.add(rankingUser);
+        }
+        return RankingMemberResponse.builder()
+                .per_page(userClubPage.getSize())
+                .total_user((int) userClubPage.getTotalElements())
+                .current_page(userClubPage.getNumber()+1)
+                .total_page(userClubPage.getTotalPages())
+                .ranking_user(rankingUserList)
+                .build();
     }
 }

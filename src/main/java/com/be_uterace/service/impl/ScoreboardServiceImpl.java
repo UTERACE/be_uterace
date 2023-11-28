@@ -1,9 +1,6 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Organization;
-import com.be_uterace.entity.User;
-import com.be_uterace.entity.UserEvent;
-import com.be_uterace.payload.response.EventRankingMemberResponse;
 import com.be_uterace.payload.response.ScoreboardClubResponse;
 import com.be_uterace.payload.response.ScoreboardUserResponse;
 import com.be_uterace.projection.ClubRankingProjection;

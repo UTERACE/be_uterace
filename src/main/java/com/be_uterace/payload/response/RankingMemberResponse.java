@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventRankingMemberResponse {
+public class RankingMemberResponse {
     private int per_page;
     private int total_user;
     private int current_page;

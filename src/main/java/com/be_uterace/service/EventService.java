@@ -1,8 +1,6 @@
 package com.be_uterace.service;
 
 import com.be_uterace.payload.request.CreateEventDto;
-import com.be_uterace.payload.request.DeleteActivityEvent;
-import com.be_uterace.payload.request.RunningCategoryDto;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
 import org.springframework.security.core.Authentication;
@@ -30,5 +28,5 @@ public interface EventService {
 
     boolean checkJoinEvent(int event_id, Authentication auth);
 
-    EventRankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name);
+    RankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name);
 }

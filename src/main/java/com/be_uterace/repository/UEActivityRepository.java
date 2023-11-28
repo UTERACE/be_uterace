@@ -10,6 +10,6 @@ public interface UEActivityRepository extends JpaRepository<UserEventActivity,Lo
     @Modifying
     @Transactional
     @Query("UPDATE UserEventActivity uea SET uea.status = '0', " +
-            "uea.reason = :reason WHERE uea.event.eventId = :eventId and uea.run.runId = :runId")
+            "uea.reason = :reason WHERE uea.event.eventId = :eventId and uea.id = :runId")
     int updateStatusAndReasonByEventIdAndRunId(String reason, Long eventId, Long runId);
 }

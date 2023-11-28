@@ -1,10 +1,7 @@
 package com.be_uterace.service;
 
 import com.be_uterace.payload.request.*;
-import com.be_uterace.payload.response.ClubDetailResponse;
-import com.be_uterace.payload.response.ClubPaginationResponse;
-import com.be_uterace.payload.response.RecentActiveResponse;
-import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.response.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
@@ -35,6 +32,8 @@ public interface ClubService {
 
     ResponseObject deleteActivity(DeleteActivityClub req);
 
-    RecentActiveResponse getRecentActivity(int current_page, int per_page, Long userId, String search, int hours);
+    RecentActiveResponse getRecentActivity(int current_page, int per_page, Integer clubId, String search, int hours);
+
+    RankingMemberResponse getScoreBoardClubMember(int club_id, int current_page, int per_page, String search_name);
 
 }
