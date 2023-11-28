@@ -6,14 +6,12 @@ import com.be_uterace.entity.User;
 import com.be_uterace.entity.UserClub;
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
+import com.be_uterace.payload.request.DeleteActivityClub;
 import com.be_uterace.payload.request.UserClubRequest;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.ClubDetailProjection;
 import com.be_uterace.projection.ClubProjection;
-import com.be_uterace.repository.ClubRepository;
-import com.be_uterace.repository.PostRepository;
-import com.be_uterace.repository.UserClubRepository;
-import com.be_uterace.repository.UserRepository;
+import com.be_uterace.repository.*;
 import com.be_uterace.service.ClubService;
 import com.be_uterace.service.FileService;
 import com.be_uterace.utils.StatusCode;
@@ -26,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -40,16 +40,22 @@ public class ClubServiceImpl implements ClubService {
     private UserRepository userRepository;
 
     private UserClubRepository userClubRepository;
+
+    private UCActivityRepository ucActivityRepository;
     private FileService fileService;
     @Value("${path.image}")
     private String path;
 
-    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository, UserClubRepository userClubRepository, FileService fileService) {
+    public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository,
+                           UserClubRepository userClubRepository,
+                           FileService fileService,
+                           UCActivityRepository ucActivityRepository) {
         this.clubRepository = clubRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.userClubRepository = userClubRepository;
         this.fileService = fileService;
+        this.ucActivityRepository = ucActivityRepository;
     }
 
     @Override
@@ -351,5 +357,21 @@ public class ClubServiceImpl implements ClubService {
             }
         }
         return false;
+    }
+
+    @Override
+    @Transactional
+    public ResponseObject deleteActivity(DeleteActivityClub req) {
+        int updatedRows = ucActivityRepository.updateStatusAndReasonByClubIdAndRunId(req.getReason(),req.getClub_id(),req.getActivity_id());
+
+        return Optional.of(updatedRows)
+                .filter(rows -> rows > 0)
+                .map(rows -> new ResponseObject(StatusCode.SUCCESS, "Xóa hoạt động thành công"))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Club hoặc Activity không tồn tại"));
+    }
+
+    @Override
+    public RecentActiveResponse getRecentActivity(int current_page, int per_page, Long userId, String search, int hours) {
+        return null;
     }
 }

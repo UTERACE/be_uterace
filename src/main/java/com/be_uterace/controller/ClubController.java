@@ -1,8 +1,6 @@
 package com.be_uterace.controller;
 
-import com.be_uterace.payload.request.ClubAddDto;
-import com.be_uterace.payload.request.ClubUpdateDto;
-import com.be_uterace.payload.request.UserClubRequest;
+import com.be_uterace.payload.request.*;
 import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
 import com.be_uterace.payload.response.ResponseObject;
@@ -98,5 +96,11 @@ public class ClubController {
     public ResponseEntity<Boolean> checkJoinClubController(@PathVariable Integer club_id, Authentication authentication) {
         Boolean responseObject = clubService.checkJoinClub(club_id,authentication);
         return ResponseEntity.ok(responseObject);
+    }
+
+    @PutMapping(value = {"/delete-activity"})
+    public ResponseEntity<ResponseObject> deleteActivityController(@RequestBody DeleteActivityClub req){
+        ResponseObject res = clubService.deleteActivity(req);
+        return ResponseEntity.ok(res);
     }
 }

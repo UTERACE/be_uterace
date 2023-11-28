@@ -1,10 +1,9 @@
 package com.be_uterace.service;
 
-import com.be_uterace.payload.request.ClubAddDto;
-import com.be_uterace.payload.request.ClubUpdateDto;
-import com.be_uterace.payload.request.UserClubRequest;
+import com.be_uterace.payload.request.*;
 import com.be_uterace.payload.response.ClubDetailResponse;
 import com.be_uterace.payload.response.ClubPaginationResponse;
+import com.be_uterace.payload.response.RecentActiveResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,5 +32,9 @@ public interface ClubService {
     ResponseObject leaveClub(int club_id, Authentication auth);
 
     Boolean checkJoinClub(int club_id, Authentication auth);
+
+    ResponseObject deleteActivity(DeleteActivityClub req);
+
+    RecentActiveResponse getRecentActivity(int current_page, int per_page, Long userId, String search, int hours);
 
 }
