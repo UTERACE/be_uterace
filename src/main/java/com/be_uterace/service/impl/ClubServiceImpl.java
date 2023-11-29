@@ -434,7 +434,7 @@ public class ClubServiceImpl implements ClubService {
             rankingUser.setRanking(userClub.getRanking());
             rankingUser.setFirst_name(user.getFirstName());
             rankingUser.setLast_name(user.getLastName());
-            rankingUser.setGender(user.getGender());
+            rankingUser.setGender(user.getGender().name());
             rankingUser.setPace(userClub.getPace());
             rankingUser.setImage(user.getAvatarPath());
             rankingUser.setTotal_distance(userClub.getTotalDistance());

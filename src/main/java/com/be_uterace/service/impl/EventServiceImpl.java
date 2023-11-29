@@ -446,7 +446,7 @@ public class EventServiceImpl implements EventService {
             rankingUser.setRanking(userEvent.getRanking());
             rankingUser.setFirst_name(user.getFirstName());
             rankingUser.setLast_name(user.getLastName());
-            rankingUser.setGender(user.getGender());
+            rankingUser.setGender(user.getGender().name());
             rankingUser.setPace(userEvent.getPace());
             rankingUser.setImage(user.getAvatarPath());
             rankingUser.setTotal_distance(userEvent.getTotalDistance());

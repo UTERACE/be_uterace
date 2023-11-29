@@ -1,5 +1,6 @@
 package com.be_uterace.entity;
 
+import com.be_uterace.enums.user.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,7 +29,7 @@ public class User {
     @Column(name = "PASSWORD")
     private String password;
 
-    @Column(name = "EMAIL")
+    @Column(name = "EMAIL", unique = true)
     private String email;
 
     @CreationTimestamp
@@ -45,7 +46,8 @@ public class User {
     private Date dateOfBirth;
 
     @Column(name = "GENDER")
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name = "TEL_NUM")
     private String telNum;
@@ -93,7 +95,7 @@ public class User {
     )
     private Set<Role> roles;
     // Other fields, getters, and setters
-    @Column(name = "STRAVA_ID")
+    @Column(name = "STRAVA_ID", unique = true)
     private Long stravaId;
     @Column(name = "STRAVA_ACCESS_TOKEN")
     private String stravaAccessToken;

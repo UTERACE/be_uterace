@@ -1,6 +1,9 @@
 package com.be_uterace.payload.request;
 
 import com.be_uterace.entity.Area;
+import com.be_uterace.enums.user.Gender;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -36,7 +39,10 @@ public class RegisterDto {
     private String type_account;
     private String telNumber;
     private String birthday;
-    private String gender;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
     private String address;
     private String province;
     private String district;

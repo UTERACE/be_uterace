@@ -40,7 +40,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .telNumber(user.getTelNum())
                 .birthday(convertDateToString(user.getDateOfBirth()))
-                .gender(user.getGender())
+                .gender(user.getGender().name())
                 .address(user.getHomeNumber())
                 .province(user.getArea() != null ? user.getArea().getProvince() : null)
                 .district(user.getArea() != null ? user.getArea().getDistrict() : null)

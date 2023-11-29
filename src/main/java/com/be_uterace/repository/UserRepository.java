@@ -56,5 +56,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
             "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName))")
     Page<User> searchUsers(@Param("searchName") String searchName, Pageable pageable);
 
+    Optional<User> findUserByStravaId(Long stravaId);
 
 }

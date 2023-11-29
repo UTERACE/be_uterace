@@ -56,7 +56,7 @@ public class ManageUserServiceImpl implements ManageUserService {
             userStatus.setFirst_name(user.getFirstName());
             userStatus.setLast_name(user.getLastName());
             userStatus.setImage(user.getAvatarPath());
-            userStatus.setGender(user.getGender());
+            userStatus.setGender(user.getGender().name());
             userStatus.setPace(user.getPace());
             userStatus.setTotalDistance(user.getTotalDistance());
             userStatus.setOrganization(user.getOrganization());

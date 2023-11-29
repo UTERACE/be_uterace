@@ -1,5 +1,8 @@
 package com.be_uterace.payload.request;
 
+import com.be_uterace.enums.user.Gender;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +18,8 @@ public class UpdateDto {
     private String email = "";
     private String telNumber = "";
     private String birthday = "";
-    private String gender = "";
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     private String address = "";
     private String province = "";
     private String district = "";

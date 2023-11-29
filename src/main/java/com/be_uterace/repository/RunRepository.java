@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 public interface RunRepository extends JpaRepository<Run,Long> {
     boolean existsByStravaRunId(Long aLong);
@@ -36,6 +37,8 @@ public interface RunRepository extends JpaRepository<Run,Long> {
 
     @Query("SELECT COUNT(r) FROM Run r WHERE r.user.userId = :userId")
     int countRunsByUserId(@Param("userId") Long userId);
+
+    Optional<Run> findRunByStravaRunId(Long stravaRunId);
 
 
 }

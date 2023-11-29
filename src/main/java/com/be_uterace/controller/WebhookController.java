@@ -1,16 +1,27 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.response.stravaresponse.WebhookResponse;
+import com.be_uterace.service.WebhookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/webhook")
 public class WebhookController {
+
+    private WebhookService webhookService;
+
+    public WebhookController(WebhookService webhookService) {
+        this.webhookService = webhookService;
+    }
 
     private static final String VERIFY_TOKEN = "STRAVA";
 
@@ -27,37 +38,14 @@ public class WebhookController {
         }
     }
 
-//    @PostMapping("/")
-//    public ResponseEntity<Object> processWebhook(@RequestBody WebhookResponse res) {
-//        // Assuming WebhookResponse class is created to match the structure of the incoming JSON
-//        // You need to implement updateRunEventWebhook and addRunEventWebhook methods accordingly
-//
-//        if (Router.RE_INIT_STATUS) {
-//            tempDataList.add(res);
-//            return ResponseEntity.ok().build();
-//        }
-//
-//        if ("update".equals(res.getAspectType())) {
-//            updateRunEventWebhook(res, db); // Implement this method
-//        } else {
-//            addRunEventWebhook(res, db); // Implement this method
-//        }
-//
-//        return ResponseEntity.ok().build();
-//    }
-
-//    @PostMapping("/webhook")
-//    public ResponseEntity<String> processWebhook(@RequestBody String request) {
-////        WebhookResponse res = new WebhookResponse(
-////                request.getAspectType(),
-////                request.getEventTime(),
-////                request.getObjectId(),
-////                request.getObjectType(),
-////                request.getOwnerId(),
-////                request.getSubscriptionId()
-////        );
-//
-//        System.out.println(request);
-//        return  null;
-//    }
+    @PostMapping()
+    public ResponseEntity<ResponseObject> processWebhook(@RequestBody WebhookResponse request) throws IOException, ParseException {
+        if (Objects.equals(request.getAspect_type(), "update")) {
+            ResponseObject res = webhookService.updateRunEventWebhook(request);
+            return ResponseEntity.ok(res);
+        } else {
+            ResponseObject res = webhookService.addRunEventWebhook(request);
+            return ResponseEntity.ok(res);
+        }
+    }
 }
