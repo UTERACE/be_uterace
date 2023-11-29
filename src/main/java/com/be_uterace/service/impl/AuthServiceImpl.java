@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -197,6 +199,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseObject register(RegisterDto registerDto) {
+        userRepository.findByUsername(registerDto.getUsername())
+                .ifPresent(user -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+                });
+        userRepository.findByEmail(registerDto.getEmail())
+                .ifPresent(user -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+                });
         String url = "https://www.google.com/recaptcha/api/siteverify";
         String params = "?secret=" + recaptchaSecret + "&response=" + registerDto.getRecaptcha_token();
         RestTemplate restTemplate = new RestTemplate();
