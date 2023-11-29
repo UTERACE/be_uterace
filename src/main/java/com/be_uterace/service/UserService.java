@@ -18,5 +18,7 @@ public interface UserService {
 
     RecentActiveResponse getRecentActivity(int current_page, int per_page, Long userId, String search, int hour);
 
+    RecentActiveResponse getRecentActivity(int current_page, int per_page, String search, int hour, Authentication authentication);
+
     UserStatisticResponse getSummaryActivity(Long user_id);
 }

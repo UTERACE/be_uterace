@@ -38,12 +38,9 @@ public class FileServiceImpl implements FileService {
                 throw new RuntimeException("Image size exceeds the maximum allowed size");
             }
             String imageName= UUID.randomUUID().toString()+".png";
-            String staticFolderPath = resourceLoader.getResource("classpath:static").getURI().getPath();
-
-            // Create the path for the new image
-            Path imagePath = Paths.get(staticFolderPath, "images", imageName);
-
-            Files.write(imagePath,decodedBytes);
+            Path path = Paths.get(UPLOAD_DIR+imageName);
+            System.out.println(path);
+            Files.write(path,decodedBytes);
             return imageName;
         } catch (Exception e) {
             throw new RuntimeException("Could not save image", e);
@@ -53,9 +50,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public boolean deleteImage(String imageName) {
         try {
-            String staticFolderPath = resourceLoader.getResource("classpath:static").getURI().getPath();
-
-            Path path = Paths.get(staticFolderPath+imageName.replace(PATH_IMAGE,""));
+            Path path = Paths.get(UPLOAD_DIR+imageName.replace(PATH_IMAGE,""));
             if (Files.exists(path)) {
                 Files.delete(path);
             }

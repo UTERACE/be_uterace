@@ -56,6 +56,20 @@ public class UserController {
         return ResponseEntity.ok(recentActiveResponse);
     }
 
+    @GetMapping("/recent-active")
+    public ResponseEntity<RecentActiveResponse> recentActiveOwnController(
+            @RequestParam (defaultValue = "1" )int current_page,
+            @RequestParam (defaultValue = "5" ) int per_page,
+            @RequestParam(required = false) String search_name,
+            @RequestParam(defaultValue = "48") int hour,
+            Authentication authentication) {
+
+        RecentActiveResponse recentActiveResponse = userService.getRecentActivity(
+                current_page,per_page,search_name,hour,authentication);
+
+        return ResponseEntity.ok(recentActiveResponse);
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<UserStatisticResponse> UserStatisticOwnController() {
         UserStatisticResponse userStatisticResponse = userService.getSummaryActivity(null);

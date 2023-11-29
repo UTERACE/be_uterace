@@ -185,6 +185,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public RecentActiveResponse getRecentActivity(int current_page, int per_page, String search, int hour, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                return getRecentActivity(current_page,per_page,user.getUserId(),search,hour);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public UserStatisticResponse getSummaryActivity(Long user_id) {
         if (user_id == null){
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -215,6 +228,7 @@ public class UserServiceImpl implements UserService {
         }
         return UserStatisticResponse.builder()
                 .user_id(user.getUserId())
+                .image(user.getAvatarPath())
                 .total_distance(user.getTotalDistance())
                 .chart_date(statisticDateResponses)
                 .chart_month(statisticMonthResponses)

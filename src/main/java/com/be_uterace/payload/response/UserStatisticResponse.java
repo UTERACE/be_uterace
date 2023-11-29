@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserStatisticResponse {
     private Long user_id;
+    private String image;
     private Double total_distance;
     private Integer total_clubs;
     private Integer total_event;

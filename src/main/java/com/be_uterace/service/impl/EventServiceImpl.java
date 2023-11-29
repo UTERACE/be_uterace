@@ -292,7 +292,7 @@ public class EventServiceImpl implements EventService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<Event> eventPage = eventRepository.findEventByJoinUserUserId(search_name, pageable, userOptional.get().getUserId());
+                Page<Event> eventPage = eventRepository.findEventByCreateUserAndTitleContaining(userOptional.get().getUserId(), search_name, pageable);
                 List<Event> eventList = eventPage.getContent();
                 List<EventResponse> eventResponses = new ArrayList<>();
                 for (Event event : eventList){
