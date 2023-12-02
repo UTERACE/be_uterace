@@ -16,8 +16,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecificationExecutor<Club> {
+
+    Optional<Club> findClubByClubName(String clubName);
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubRanking AS clubRanking, " +
             "c.clubName AS clubName, " +

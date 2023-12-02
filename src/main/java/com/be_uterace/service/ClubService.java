@@ -10,7 +10,7 @@ public interface ClubService {
 
     ClubDetailResponse getClubDetail(int club_id);
 
-    ResponseEntity<ResponseObject> createClub(ClubAddDto clubAddDto, Authentication authentication);
+    ResponseObject createClub(ClubAddDto clubAddDto, Authentication authentication);
 
     ResponseEntity<ResponseObject> updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication);
 

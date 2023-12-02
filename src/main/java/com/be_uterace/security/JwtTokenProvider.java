@@ -2,6 +2,7 @@ package com.be_uterace.security;
 
 import com.be_uterace.exception.APIException;
 import com.be_uterace.exception.ErrorHolder;
+import com.be_uterace.exception.JWTException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -111,6 +112,8 @@ public class JwtTokenProvider {
 
     // validate Jwt token
     public boolean validateToken(String token) {
+        if (token.isEmpty())
+            throw new JWTException("JWT claims string is empty");
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key())
@@ -120,14 +123,18 @@ public class JwtTokenProvider {
         } catch (JwtException e) {
             if (e instanceof MalformedJwtException) {
                 ErrorHolder.setErrorMessage("Invalid Token");
+                throw new JWTException("Invalid Token");
             } else if (e instanceof ExpiredJwtException) {
                 ErrorHolder.setErrorMessage("JWT token is expired");
+                throw new JWTException("Token is expired");
             } else if (e instanceof UnsupportedJwtException) {
-                ErrorHolder.setErrorMessage("JWT token is unsupported");
-            } else
+                throw new JWTException("JWT token is unsupported");
+            } else {
                 ErrorHolder.setErrorMessage("JWT claims string is empty");
+                throw new JWTException("JWT token is unsupported");
+            }
 
-            return false;
+
         }
     }
 }

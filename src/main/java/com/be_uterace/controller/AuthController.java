@@ -25,7 +25,6 @@ import java.util.Map;
 public class AuthController {
 
     private AuthService authService;
-    private UserRepository userRepository;
 
     public AuthController(AuthService authService) {
         this.authService = authService;
@@ -45,7 +44,7 @@ public class AuthController {
     }
 
     @PostMapping(value = {"/register", "/signup"})
-    public ResponseEntity<ResponseObject> registerController(@RequestBody RegisterDto registerDto){
+    public ResponseEntity<ResponseObject> registerController(@Valid @RequestBody RegisterDto registerDto){
         ResponseObject loginResponse = authService.register(registerDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
     }

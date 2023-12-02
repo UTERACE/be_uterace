@@ -39,7 +39,8 @@ public class ClubController {
 
     @PostMapping()
     public ResponseEntity<ResponseObject> createClubController(@RequestBody ClubAddDto clubAddDto, Authentication authentication) {
-        return clubService.createClub(clubAddDto, authentication);
+        ResponseObject responseObject = clubService.createClub(clubAddDto, authentication);
+        return ResponseEntity.ok(responseObject);
     }
 
     @PutMapping()

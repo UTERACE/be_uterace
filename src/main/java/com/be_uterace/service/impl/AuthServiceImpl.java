@@ -2,6 +2,8 @@ package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Role;
 import com.be_uterace.entity.User;
+import com.be_uterace.exception.JWTException;
+import com.be_uterace.exception.ResourceConflictException;
 import com.be_uterace.payload.request.LoginDto;
 import com.be_uterace.payload.request.RegisterDto;
 import com.be_uterace.payload.request.ResetPasswordDto;
@@ -196,7 +198,7 @@ public class AuthServiceImpl implements AuthService {
     public ResponseObject register(RegisterDto registerDto) {
         userRepository.findByUsername(registerDto.getUsername())
                 .ifPresent(user -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+                    throw new ResourceConflictException("Username");
                 });
         userRepository.findByEmail(registerDto.getEmail())
                 .ifPresent(user -> {
@@ -243,9 +245,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public RefreshTokenResponse refreshToken(String refreshToken) {
-        if(StringUtils.hasText(refreshToken) && jwtTokenProvider.validateToken(refreshToken)) {
+            jwtTokenProvider.validateToken(refreshToken);
 
-            // get username from token
             String username = jwtTokenProvider.getUsername(refreshToken);
             Optional<User> userOptional = userRepository.findByUsername(username);
             User user = userOptional.get();
@@ -257,8 +258,7 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(access_Token)
                     .refreshToken(refresh_Token)
                     .build();
-        }
-        return null;
+
     }
 
     @Override

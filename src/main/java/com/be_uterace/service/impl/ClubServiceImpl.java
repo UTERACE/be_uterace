@@ -1,6 +1,7 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.*;
+import com.be_uterace.exception.ResourceConflictException;
 import com.be_uterace.payload.request.ClubAddDto;
 import com.be_uterace.payload.request.ClubUpdateDto;
 import com.be_uterace.payload.request.DeleteActivityClub;
@@ -117,7 +118,12 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> createClub(ClubAddDto clubAddDto, Authentication authentication) {
+    public ResponseObject createClub(ClubAddDto clubAddDto, Authentication authentication) {
+        clubRepository.findClubByClubName(clubAddDto.getName())
+                .ifPresent(club -> {
+                    throw new ResourceConflictException("Club name");
+                });
+
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
@@ -140,11 +146,11 @@ public class ClubServiceImpl implements ClubService {
                 userClub.setUser(userOptional.get());
                 userClubRepository.save(userClub);
                 ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Tạo clb thành công");
-                return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+                return responseObject;
             }
         }
         ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Tạo clb thất bại");
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        return responseObject;
 
     }
 

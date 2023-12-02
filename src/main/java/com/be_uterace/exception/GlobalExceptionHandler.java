@@ -26,35 +26,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // handle specific exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException exception,
+    public ResponseEntity<ResponseObject> handleResourceNotFoundException(ResourceNotFoundException exception,
                                                                         WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(false, StatusCode.NOT_FOUND, exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+        ResponseObject responseObject = new ResponseObject(StatusCode.NOT_FOUND, exception.getMessage());
+        return new ResponseEntity<>(responseObject, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(APIException.class)
-    public ResponseEntity<ErrorDetails> handleAPIException(APIException exception,
+    public ResponseEntity<ResponseObject> handleAPIException(APIException exception,
                                                                         WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(false, StatusCode.UNAUTHORIZED, exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, exception.getMessage());
+        return new ResponseEntity<>(responseObject, HttpStatus.BAD_REQUEST);
     }
     // global exceptions
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
+    public ResponseEntity<ResponseObject> handleGlobalException(Exception exception,
                                                                WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(false, StatusCode.INTERNAL_SERVER_ERROR, exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR, exception.getMessage());
+        return new ResponseEntity<>(responseObject, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException exception,
+    public ResponseEntity<ResponseObject> handleAccessDeniedException(AccessDeniedException exception,
                                                                     WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(false, StatusCode.NOT_FOUND, exception.getMessage(),
-                webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+        ResponseObject responseObject = new ResponseObject(StatusCode.UNAUTHORIZED, exception.getMessage());
+        return new ResponseEntity<>(responseObject, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
@@ -72,55 +68,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-//    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
-//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//    ErrorDetails handleAuthenticationException(Exception ex) {
-//        return new ErrorDetails(new Date(), ex.getMessage(), "username or password is incorrect.");
-//    }
-//
-//    @ExceptionHandler(AccountStatusException.class)
-//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//    ErrorDetails handleAccountStatusException(AccountStatusException ex) {
-//        return new ErrorDetails(new Date(), ex.getMessage(), "User account is abnormal.");
-//    }
-//
-////    @ExceptionHandler(InvalidBearerTokenException.class)
-////    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-////    ErrorDetails handleInvalidBearerTokenException(InvalidBearerTokenException ex) {
-////        return new ErrorDetails(false, ex.getMessage(), "The access token provided is expired, revoked, malformed, or invalid for other reasons.");
-////    }
-//
-//
-//    @ExceptionHandler(AccessDeniedException.class)
-//    @ResponseStatus(HttpStatus.FORBIDDEN)
-//    ErrorDetails handleAccessDeniedException(AccessDeniedException ex) {
-//        return new ErrorDetails(new Date(), ex.getMessage(), "No permission.");
-//    }
-//
-//    @ExceptionHandler(NoHandlerFoundException.class)
-//    @ResponseStatus(HttpStatus.NOT_FOUND)
-//    ErrorDetails handleAccessDeniedException(NoHandlerFoundException ex) {
-//        return new ErrorDetails(new Date(), ex.getMessage(), "This API endpoint is not found.");
-//    }
-//
-//    @ExceptionHandler(Exception.class)
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    ErrorDetails handleOtherException(Exception ex) {
-//        return new ErrorDetails(new Date(), ex.getMessage(), "A server internal error occurs.");
-//    }
-
-//    @ExceptionHandler(value = {UserServiceException.class})
-//    public ResponseEntity<Object> handleUserServiceException(UserServiceException ex, WebRequest request) {
-//        String requestUri = ((ServletWebRequest)request).getRequest().getRequestURI().toString();
-//        ExceptionMessage exceptionMessage = new ExceptionMessage(ex.getMessage(), requestUri);
-//        return new ResponseEntity<>(exceptionMessage, new HttpHeaders(), ex.getStatus());
-//    }
-//    @ExceptionHandler(value = {ExpiredJwtException.class})
-//    public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex, WebRequest request) {
-//        String requestUri = ((ServletWebRequest)request).getRequest().getRequestURI().toString();
-//        ExceptionMessage exceptionMessage = new ExceptionMessage(ex.getMessage(), requestUri);
-//        return new ResponseEntity<>(exceptionMessage, new HttpHeaders(), HttpStatus.FORBIDDEN);
-//    }
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<ResponseObject> handleResourceConflictException(ResourceConflictException exception){
+        ResponseObject responseObject = new ResponseObject(StatusCode.CONFLICT, exception.getMessage());
+        return new ResponseEntity<>(responseObject, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ResponseObject> handleResourceNotFoundException(AuthenticationException exception,
@@ -129,23 +81,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(responseObject, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(MalformedJwtException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ResponseObject> handleMalformedJwtException(MalformedJwtException ex) {
-        ResponseObject responseObject = new ResponseObject(StatusCode.UNAUTHORIZED, "Invalid JWT token: " + ex.getMessage());
+
+
+
+
+    @ExceptionHandler(JWTException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ResponseObject> JwtException(JWTException ex) {
+        ErrorHolder.clearErrorMessage();
+        ResponseObject responseObject = new ResponseObject(StatusCode.UNAUTHORIZED, ex.getMessage());
         return new ResponseEntity<>(responseObject, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(ExpiredJwtException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Expired JWT token: " + ex.getMessage());
-    }
-
-    @ExceptionHandler(UnsupportedJwtException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleUnsupportedJwtException(UnsupportedJwtException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unsupported JWT token: " + ex.getMessage());
     }
 
 
