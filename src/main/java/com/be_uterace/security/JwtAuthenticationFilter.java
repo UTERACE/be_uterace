@@ -33,38 +33,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        try {
-            // get JWT token from http request
-            String token = getTokenFromRequest(request);
+        // get JWT token from http request
+        String token = getTokenFromRequest(request);
 
-            // validate token
-            if(StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)){
+        // validate token
+        if(StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)){
 
-                // get username from token
-                String username = jwtTokenProvider.getUsername(token);
+            // get username from token
+            String username = jwtTokenProvider.getUsername(token);
 
-                // load the user associated with token
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            // load the user associated with token
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
 
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-            }
-        }catch (ExpiredJwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }catch (JwtException e){
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         }
-        catch (Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
+
         filterChain.doFilter(request, response);
     }
 

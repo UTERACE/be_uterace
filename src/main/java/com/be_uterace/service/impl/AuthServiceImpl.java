@@ -71,39 +71,34 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginDto loginDto) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    loginDto.getUsername(), loginDto.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginDto.getUsername(), loginDto.getPassword()));
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            String accessToken = jwtTokenProvider.generateAccessToken(authentication);
-            String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-            Optional<User> userOptional = userRepository.findByUsername(loginDto.getUsername());
-            User user = userOptional.get();
-            Set<Role> roles = user.getRoles();
-            List<Map<String, Object>> roleInfoList = roles.stream()
-                    .map(role -> {
-                        Map<String, Object> roleInfo = new HashMap<>();
-                        roleInfo.put("roleId", role.getRoleId());
-                        roleInfo.put("roleName", role.getRoleName());
-                        return roleInfo;
-                    })
-                    .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
-                    .collect(Collectors.toList());
-            return LoginResponse.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .firstname(user.getFirstName())
-                    .lastname(user.getLastName())
-                    .email(user.getEmail())
-                    .image(user.getAvatarPath())
-                    .roles(roleInfoList)
-                    .build();
-        } catch (AuthenticationException ex) {
-            // Xử lý lỗi xác thực (tên người dùng hoặc mật khẩu không đúng)
-            throw new BadCredentialsException("Tên người dùng hoặc mật khẩu không đúng");
-        }
+        String accessToken = jwtTokenProvider.generateAccessToken(authentication);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+        Optional<User> userOptional = userRepository.findByUsername(loginDto.getUsername());
+        User user = userOptional.get();
+        Set<Role> roles = user.getRoles();
+        List<Map<String, Object>> roleInfoList = roles.stream()
+                .map(role -> {
+                    Map<String, Object> roleInfo = new HashMap<>();
+                    roleInfo.put("roleId", role.getRoleId());
+                    roleInfo.put("roleName", role.getRoleName());
+                    return roleInfo;
+                })
+                .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
+                .collect(Collectors.toList());
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .firstname(user.getFirstName())
+                .lastname(user.getLastName())
+                .email(user.getEmail())
+                .image(user.getAvatarPath())
+                .roles(roleInfoList)
+                .build();
     }
 
     @Override
