@@ -112,8 +112,10 @@ public class JwtTokenProvider {
 
     // validate Jwt token
     public boolean validateToken(String token) {
-        if (token.isEmpty())
+        if (token.isEmpty()){
+            ErrorHolder.setErrorMessage("JWT claims string is empty");
             throw new JWTException("JWT claims string is empty");
+        }
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key())
@@ -128,6 +130,7 @@ public class JwtTokenProvider {
                 ErrorHolder.setErrorMessage("JWT token is expired");
                 throw new JWTException("Token is expired");
             } else if (e instanceof UnsupportedJwtException) {
+                ErrorHolder.setErrorMessage("JWT token is unsupported");
                 throw new JWTException("JWT token is unsupported");
             } else {
                 ErrorHolder.setErrorMessage("JWT claims string is empty");
