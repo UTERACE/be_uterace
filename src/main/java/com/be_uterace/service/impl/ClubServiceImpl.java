@@ -13,7 +13,6 @@ import com.be_uterace.repository.*;
 import com.be_uterace.service.ClubService;
 import com.be_uterace.service.FileService;
 import com.be_uterace.utils.StatusCode;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,8 +41,6 @@ public class ClubServiceImpl implements ClubService {
 
     private UCActivityRepository ucActivityRepository;
     private FileService fileService;
-    @Value("${path.image}")
-    private String path;
 
     public ClubServiceImpl(ClubRepository clubRepository, PostRepository postRepository, UserRepository userRepository,
                            UserClubRepository userClubRepository,
@@ -132,7 +129,7 @@ public class ClubServiceImpl implements ClubService {
                 club.setClubName(clubAddDto.getName());
                 club.setDescription(clubAddDto.getDescription());
                 if (!Objects.equals(clubAddDto.getImage(), ""))
-                    club.setPicturePath(path + fileService.saveImage(clubAddDto.getImage()));
+                    club.setPicturePath(fileService.saveImage(clubAddDto.getImage()));
                 else
                     club.setPicturePath("");
                 club.setDetails(clubAddDto.getDetails());
@@ -174,10 +171,10 @@ public class ClubServiceImpl implements ClubService {
         club.setDescription(clubUpdateDto.getDescription() != null && !Objects.equals(clubUpdateDto.getDescription(), "") ? clubUpdateDto.getDescription() : club.getDescription());
         if (!club.getPicturePath().equals(clubUpdateDto.getImage()) && !Objects.equals(clubUpdateDto.getImage(), "")){
             if (Objects.equals(club.getPicturePath(), ""))
-                club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
+                club.setPicturePath(fileService.saveImage(clubUpdateDto.getImage()));
             else if (fileService.deleteImage(club.getPicturePath())){
                 System.out.println("Delete Image Successful");
-                club.setPicturePath(path + fileService.saveImage(clubUpdateDto.getImage()));
+                club.setPicturePath(fileService.saveImage(clubUpdateDto.getImage()));
             }
         }
         club.setDetails(clubUpdateDto.getDetails() != null && !Objects.equals(clubUpdateDto.getDetails(), "") ? clubUpdateDto.getDetails() : club.getDetails());

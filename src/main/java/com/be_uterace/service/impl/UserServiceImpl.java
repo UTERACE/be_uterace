@@ -46,8 +46,7 @@ public class UserServiceImpl implements UserService {
 
     private ModelMapper modelMapper;
     private FileService fileService;
-    @Value("${path.image}")
-    private String path;
+
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
                            AreaRepository areaRepository,
                            ModelMapper modelMapper,
@@ -120,10 +119,10 @@ public class UserServiceImpl implements UserService {
                 if (user.getTypeAccount().equals("default")){
                     if (!user.getAvatarPath().equals(updateDto.getImage()) && !Objects.equals(updateDto.getImage(), "")){
                         if (Objects.equals(user.getAvatarPath(), "")){
-                            user.setAvatarPath(path+ fileService.saveImage(updateDto.getImage()));
+                            user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
                         }else if (fileService.deleteImage(user.getAvatarPath())){
                             System.out.println("Delete image success");
-                            user.setAvatarPath(path+ fileService.saveImage(updateDto.getImage()));
+                            user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
                         }
                     }
                 }

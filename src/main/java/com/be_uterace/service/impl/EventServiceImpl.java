@@ -9,7 +9,6 @@ import com.be_uterace.service.EventService;
 import com.be_uterace.service.FileService;
 import com.be_uterace.utils.StatusCode;
 import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,8 +37,6 @@ public class EventServiceImpl implements EventService {
 
     private final EntityManager em;
     private FileService fileService;
-    @Value("${path.image}")
-    private String path;
 
 
     public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository,
@@ -132,7 +129,7 @@ public class EventServiceImpl implements EventService {
                 Event event = new Event();
                 event.setTitle(req.getName());
                 if (!Objects.equals(req.getImage(), "") && req.getImage() != null)
-                    event.setPicturePath(path+fileService.saveImage(req.getImage()));
+                    event.setPicturePath(fileService.saveImage(req.getImage()));
                 else
                     event.setPicturePath("");
                 event.setDescription(req.getDescription());
@@ -182,10 +179,10 @@ public class EventServiceImpl implements EventService {
         event.setTitle(req.getName() != null && !Objects.equals(req.getName(), "") ? req.getName() : event.getTitle());
         if (!event.getPicturePath().equals(req.getImage()) && !Objects.equals(req.getImage(), "")){
             if (Objects.equals(event.getPicturePath(), ""))
-                event.setPicturePath(path + fileService.saveImage(req.getImage()));
+                event.setPicturePath(fileService.saveImage(req.getImage()));
             else if (fileService.deleteImage(event.getPicturePath())){
                 System.out.println("Delete Image Successful");
-                event.setPicturePath(path + fileService.saveImage(req.getImage()));
+                event.setPicturePath(fileService.saveImage(req.getImage()));
             }
         }
         event.setDescription(req.getDescription() != null && !Objects.equals(req.getDescription(), "") ? req.getDescription() : event.getDescription());

@@ -1,7 +1,6 @@
 package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.Club;
-import com.be_uterace.entity.Event;
 import com.be_uterace.entity.Post;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.CreatePostDto;
@@ -13,7 +12,6 @@ import com.be_uterace.repository.UserRepository;
 import com.be_uterace.service.FileService;
 import com.be_uterace.service.PostService;
 import com.be_uterace.utils.StatusCode;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,8 +32,7 @@ public class PostServiceImpl implements PostService {
     private ClubRepository clubRepository;
 
     private FileService fileService;
-    @Value("${path.image}")
-    private String path;
+
     public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, ClubRepository clubRepository, FileService fileService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
@@ -133,7 +130,7 @@ public class PostServiceImpl implements PostService {
                 post.setTitle(createPostDto.getTitle());
                 post.setDescription(createPostDto.getDescription());
                 if (!Objects.equals(createPostDto.getImage(), ""))
-                    post.setImage(path+ fileService.saveImage(createPostDto.getImage()));
+                    post.setImage(fileService.saveImage(createPostDto.getImage()));
                 else
                     post.setImage("");
                 post.setHtmlContent(createPostDto.getContent());
@@ -166,10 +163,10 @@ public class PostServiceImpl implements PostService {
                     updatePostDto.getDescription() : post.getDescription());
             if (!post.getImage().equals(updatePostDto.getImage()) && !Objects.equals(updatePostDto.getImage(), "")){
                 if (Objects.equals(post.getImage(), "")){
-                    post.setImage(path+ fileService.saveImage(updatePostDto.getImage()));
+                    post.setImage(fileService.saveImage(updatePostDto.getImage()));
                 }else if (fileService.deleteImage(post.getImage())){
                     System.out.println("Delete image success");
-                    post.setImage(path+ fileService.saveImage(updatePostDto.getImage()));
+                    post.setImage(fileService.saveImage(updatePostDto.getImage()));
                 }
             }
             post.setHtmlContent(updatePostDto.getContent() != null && !Objects.equals(updatePostDto.getContent(), "") ?
