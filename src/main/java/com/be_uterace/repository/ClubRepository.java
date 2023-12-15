@@ -42,6 +42,8 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             @Param("searchName") String searchName,
             Pageable pageable
     );
+    @Query(nativeQuery = true, value = "SELECT * FROM GetRankedClubs(0,0,'') LIMIT 8")
+    List<ClubRankingProjection> findScoreboardTop8Club();
 
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubName AS clubName," +

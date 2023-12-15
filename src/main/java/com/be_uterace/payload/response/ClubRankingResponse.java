@@ -13,6 +13,6 @@ public class ClubRankingResponse {
     private String name;
     private String image;
     private Double total_distance;
-    private Long total_members;
+    private Integer total_members;
     private Long total_activities;
 }

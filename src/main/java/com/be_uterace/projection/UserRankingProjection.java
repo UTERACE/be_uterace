@@ -8,7 +8,7 @@ public interface UserRankingProjection {
     String getU_gender();
     Double getU_pace();
     Double getU_total_distance();
-    Long getU_ranking();
+    Integer getU_ranking();
     Long getU_org_id();
 }
 

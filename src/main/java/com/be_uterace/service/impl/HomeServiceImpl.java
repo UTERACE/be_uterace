@@ -6,6 +6,7 @@ import com.be_uterace.entity.Post;
 import com.be_uterace.entity.User;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.projection.ClubRankingProjection;
+import com.be_uterace.projection.UserRankingProjection;
 import com.be_uterace.repository.ClubRepository;
 import com.be_uterace.repository.EventRepository;
 import com.be_uterace.repository.PostRepository;
@@ -46,16 +47,36 @@ public class HomeServiceImpl implements HomeService {
 //        }
         List<OverviewResponse> overview = eventRepository.findTop3EventsByOutstandingAndStatusAndNumOfAttendeeContaining();
 
-        List<ClubRankingResponse> rankingClub = clubRepository.findTop8ClubsByTotalDistanceContaining();
-        for (int i = 0; i < rankingClub.size(); i++) {
-            rankingClub.get(i).setRanking(i + 1);
-        }
+//        List<ClubRankingResponse> rankingClub = clubRepository.findTop8ClubsByTotalDistanceContaining();
+        List<ClubRankingProjection> rankingClub = clubRepository.findScoreboardTop8Club();
+        List<ClubRankingResponse> rankingClubList = new ArrayList<>();
+        rankingClub.stream().map(
+                club -> ClubRankingResponse.builder()
+                        .club_id(club.getC_club_id())
+                        .ranking(club.getC_ranking())
+                        .name(club.getC_club_name())
+                        .image(club.getC_picture_path())
+                        .total_distance(club.getC_total_distance())
+                        .total_members(club.getC_num_of_attendee())
+                        .total_activities(club.getC_total_activities())
+                        .build()
+        ).forEach(rankingClubList::add);
 
-        List<RankingUserHomeResponse> rankingUser = userRepository.findTop8ByOrderByTotalDistanceAsc();
-        for (int i = 0; i < rankingUser.size(); i++) {
-            rankingUser.get(i).setRanking(i + 1);
-        }
 
+//        List<RankingUserHomeResponse> rankingUser = userRepository.findTop8ByOrderByTotalDistanceAsc();
+        List<UserRankingProjection> rankingUser = userRepository.findScoreboardTop8User();
+        List<RankingUserHomeResponse> rankingUserList = new ArrayList<>();
+        rankingUser.stream().map(
+                user -> RankingUserHomeResponse.builder()
+                        .user_id(user.getU_user_id())
+                        .ranking(user.getU_ranking())
+                        .first_name(user.getU_firstname())
+                        .last_name(user.getU_lastname())
+                        .image(user.getU_avatar_path())
+                        .total_distance(user.getU_total_distance())
+                        .pace(user.getU_pace())
+                        .build()
+        ).forEach(rankingUserList::add);
         List<EventResponse> events = eventRepository.findTop6EventsByOutstandingAndStatusAndNumOfAttendeeContaining();
 
         List<ClubResponse> clubs = clubRepository.findTop6ClubsByOutstandingAndStatusAndNumOfAttendeeContaining();
@@ -78,8 +99,8 @@ public class HomeServiceImpl implements HomeService {
 
         return HomePageResponse.builder()
                 .overview(overview)
-                .ranking_club(rankingClub)
-                .ranking_user(rankingUser)
+                .ranking_club(rankingClubList)
+                .ranking_user(rankingUserList)
                 .events(events)
                 .clubs(clubs)
                 .news(posts)

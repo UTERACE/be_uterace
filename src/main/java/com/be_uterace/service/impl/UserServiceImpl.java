@@ -116,16 +116,15 @@ public class UserServiceImpl implements UserService {
 //                user.setArea(areaRepository.findArea(updateDto.getProvince(),
 //                        updateDto.getDistrict(),
 //                        updateDto.getWard()));
-                if (user.getTypeAccount().equals("default")){
-                    if (!user.getAvatarPath().equals(updateDto.getImage()) && !Objects.equals(updateDto.getImage(), "")){
-                        if (Objects.equals(user.getAvatarPath(), "")){
-                            user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
-                        }else if (fileService.deleteImage(user.getAvatarPath())){
-                            System.out.println("Delete image success");
-                            user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
-                        }
+                if (!user.getAvatarPath().equals(updateDto.getImage()) && !Objects.equals(updateDto.getImage(), "")){
+                    if (Objects.equals(user.getAvatarPath(), "")){
+                        user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
+                    }else if (fileService.deleteImage(user.getAvatarPath())){
+                        System.out.println("Delete image success");
+                        user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
                     }
                 }
+
                 userRepository.save(user);
                 return ResponseObject.builder()
                         .status(200)

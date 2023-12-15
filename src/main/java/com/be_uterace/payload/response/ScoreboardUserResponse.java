@@ -26,7 +26,7 @@ public class ScoreboardUserResponse {
     @NoArgsConstructor
     public static class UserRanking {
         private Long user_id;
-        private Long ranking;
+        private Integer ranking;
         private String first_name;
         private String last_name;
         private String image;

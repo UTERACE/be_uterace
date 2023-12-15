@@ -77,14 +77,18 @@ public class FileServiceImpl implements FileService {
             // Lấy public ID từ path
             String[] parts = path.split("/");
             String publicId = parts[parts.length - 1].split("\\.")[0];
-            System.out.println(publicId);
             Map<?, ?> deletionResult = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+
+            // Kiểm tra kết quả xóa ảnh nếu không tìm thấy ảnh thì trả về true
             if (deletionResult.get("result").equals("ok")) {
+                System.out.println("Image deleted"+deletionResult.get("result"));
                 return true;
-            } else {
-                System.err.println("Error deleting image: " + deletionResult.get("result"));
-                return false;
             }
+            if (deletionResult.get("result").equals("not found")) {
+                System.out.println("Image not found"+deletionResult.get("result"));
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             return false;
         }

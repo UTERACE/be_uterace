@@ -71,6 +71,9 @@ public class ScoreboardServiceImpl implements ScoreboardService {
         if(Objects.equals(search_name, "")){
             search_name=null;
         }
+        if (month == 0){
+            year = 0;
+        }
         Pageable pageable = PageRequest.of(current_page-1, per_page);
         Page<UserRankingProjection> userRankingResponsePage = userRepository.findScoreboardUser(month,year,search_name,pageable);
         List<UserRankingProjection> userRankingResponseList = userRankingResponsePage.getContent();

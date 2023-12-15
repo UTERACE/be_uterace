@@ -73,15 +73,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginDto loginDto) {
+        User user = userRepository.findByUsername(loginDto.getUsername()).orElse(null);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found");
+        }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsername(), loginDto.getPassword()));
+        if (!authentication.isAuthenticated()) {
+            throw new BadCredentialsException("Password is incorrect");
+        }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String accessToken = jwtTokenProvider.generateAccessToken(authentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-        Optional<User> userOptional = userRepository.findByUsername(loginDto.getUsername());
-        User user = userOptional.get();
         Set<Role> roles = user.getRoles();
         List<Map<String, Object>> roleInfoList = roles.stream()
                 .map(role -> {
@@ -196,51 +200,73 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseObject register(RegisterDto registerDto) {
-        userRepository.findByUsername(registerDto.getUsername())
-                .ifPresent(user -> {
-                    throw new ResourceConflictException("Username");
-                });
-        userRepository.findByEmail(registerDto.getEmail())
-                .ifPresent(user -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
-                });
-        String url = "https://www.google.com/recaptcha/api/siteverify";
-        String params = "?secret=" + recaptchaSecret + "&response=" + registerDto.getRecaptcha_token();
-        RestTemplate restTemplate = new RestTemplate();
-        RecaptchaResponse response = restTemplate.getForObject(url + params, RecaptchaResponse.class);
-
-        if(response.isSuccess()&&response.getScore()>=0.5) {
+        try {
+            User userByUsername = userRepository.findByUsername(registerDto.getUsername()).orElse(null);
+            if (userByUsername != null) {
+                return ResponseObject.builder().status(409)
+                        .message("Username is already in use")
+                        .build();
+            }
+            if (!isUsernameValid(registerDto.getUsername())) {
+                return ResponseObject.builder().status(409)
+                        .message("Username is not valid")
+                        .build();
+            }
+            User userByEmail = userRepository.findByEmail(registerDto.getEmail()).orElse(null);
+            if (userByEmail != null) {
+                return ResponseObject.builder().status(409)
+                        .message("Email is already in use")
+                        .build();
+            }
+            if (!isPasswordValid(registerDto.getPassword())) {
+                return ResponseObject.builder().status(409)
+                        .message("Password is not valid")
+                        .build();
+            }
+            String url = "https://www.google.com/recaptcha/api/siteverify";
+            String params = "?secret=" + recaptchaSecret + "&response=" + registerDto.getRecaptcha_token();
+            RestTemplate restTemplate = new RestTemplate();
+            RecaptchaResponse response = restTemplate.getForObject(url + params, RecaptchaResponse.class);
+//            if (response.isSuccess() && response.getScore() >= 0.5) {
+            if (!response.isSuccess()) {
+                return ResponseObject.builder().status(409)
+                        .message("Captcha is not valid")
+                        .build();
+            }
+            if (response.getScore() < 0.5 && response.getScore() > 0) {
+                return ResponseObject.builder().status(409)
+                        .message("Are you a robot?")
+                        .build();
+            }
             // CAPTCHA xác thực thành công
             registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
             User user = convertFromRegisterDtoToUser(registerDto);
-            user.setArea(areaRepository.findArea(registerDto.getProvince(),
-                    registerDto.getDistrict(),
-                    registerDto.getWard()));
+//            user.setArea(areaRepository.findArea(registerDto.getProvince(),
+//                    registerDto.getDistrict(),
+//                    registerDto.getWard()));
             if (registerDto.getType_account().equals("google")) {
                 user.setTypeAccount("google");
                 user.setPassword(registerDto.getPassword());
                 user.setUsername(registerDto.getEmail());
                 user.setAvatarPath(registerDto.getImage());
-            }
-            else if (registerDto.getType_account().equals("facebook")) {
+            } else if (registerDto.getType_account().equals("facebook")) {
                 user.setTypeAccount("facebook");
-                user.setUsername(registerDto.getUsername()+"-fb");
+                user.setUsername(registerDto.getUsername() + "-fb");
                 user.setPassword(registerDto.getPassword());
                 user.setAvatarPath(registerDto.getImage());
-            }
-            else if (registerDto.getType_account().equals("default")) {
+            } else if (registerDto.getType_account().equals("default")) {
                 user.setTypeAccount("default");
                 user.setAvatarPath("");
             }
             user.setHomeNumber(registerDto.getAddress());
             userRepository.save(user);
-            return ResponseObject.builder().status(201)
+            return ResponseObject.builder().status(200)
                     .message(Constant.SUCCESS_REGISTER)
                     .build();
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
-        return ResponseObject.builder().status(400)
-                .message(Constant.REGISTER_FAIL)
-                .build();
     }
 
     @Override
@@ -287,5 +313,13 @@ public class AuthServiceImpl implements AuthService {
                 .status(200)
                 .message("Reset mật khẩu thành công")
                 .build();
+    }
+    private boolean isPasswordValid(String password) {
+        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$)(?=.*[a-zA-Z0-9]).{8,}$";
+        return password.matches(regex);
+    }
+    private boolean isUsernameValid(String username) {
+        String regex = "^(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*+=?-]).{12,}$";
+        return username.matches(regex);
     }
 }

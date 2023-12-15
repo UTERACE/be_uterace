@@ -45,8 +45,8 @@ public class AuthController {
 
     @PostMapping(value = {"/register", "/signup"})
     public ResponseEntity<ResponseObject> registerController(@Valid @RequestBody RegisterDto registerDto){
-        ResponseObject loginResponse = authService.register(registerDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
+        ResponseObject registerResponse = authService.register(registerDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
     }
 
     @PostMapping(value = {"/refresh-token"})

@@ -22,13 +22,14 @@ import java.util.Date;
 public class RegisterDto {
 
     @NotBlank(message = "The username is required.")
-    @Size(min = 3, max = 20, message = "The username must be from 3 to 20 characters.")
+    @Size(min = 8, max = 50, message = "The username must be between 8 and 50 characters.")
     private String username;
 
     @NotBlank(message = "The password is required.")
     private String password;
-
+    @NotBlank(message = "The firstname is required.")
     private String firstname;
+    @NotBlank(message = "The lastname is required.")
     private String lastname;
 
     @NotBlank(message = "The email is required.")

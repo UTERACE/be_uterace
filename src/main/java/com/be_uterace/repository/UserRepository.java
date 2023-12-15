@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User,Long> {
+    @Query("SELECT u FROM User u WHERE u.email = :email AND u.typeAccount = 'default'")
     Optional<User> findByEmail(String email);
 
 //    Optional<User> findByUsernameOrEmail(String username, String email);
@@ -38,10 +39,12 @@ public interface UserRepository extends JpaRepository<User,Long> {
             @Param("searchName") String searchName,
             Pageable pageable
     );
+    @Query(nativeQuery = true, value = "SELECT * FROM GetRankedUsers(0,0,'') LIMIT 8")
+    List<UserRankingProjection> findScoreboardTop8User();
     @Query("SELECT new com.be_uterace.payload.response.RankingUserHomeResponse(u.userId,u.ranking, u.firstName, u.lastName, u.avatarPath, u.totalDistance, u.pace) " +
             "FROM User u " +
             "WHERE u.status = '1' " +
-            "ORDER BY u.totalDistance DESC " +
+            "ORDER BY u.ranking ASC " +
             "LIMIT 8")
     List<RankingUserHomeResponse> findTop8ByOrderByTotalDistanceAsc();
 

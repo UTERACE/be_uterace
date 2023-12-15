@@ -420,10 +420,9 @@ public class ClubServiceImpl implements ClubService {
     @Override
     public RankingMemberResponse getScoreBoardClubMember(int club_id, int current_page, int per_page, String search_name) {
         Pageable pageable = PageRequest.of(current_page-1, per_page);
-        Club club = clubRepository.findById(club_id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found"));
+        clubRepository.findById(club_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found"));
         Page<UserClub> userClubPage;
-        if(search_name==null || search_name.equals("")){
+        if(search_name==null || search_name.isEmpty()){
             userClubPage = userClubRepository.findByClubIdAndSearchName(club_id,null,pageable);
         }
         else userClubPage = userClubRepository.findByClubIdAndSearchName(club_id, search_name,pageable);
