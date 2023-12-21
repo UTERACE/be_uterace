@@ -3,6 +3,7 @@ package com.be_uterace.controller;
 import com.be_uterace.payload.request.ChangePasswordDto;
 import com.be_uterace.payload.request.UpdateDto;
 import com.be_uterace.payload.response.*;
+import com.be_uterace.service.EventService;
 import com.be_uterace.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,9 +20,12 @@ import java.util.Map;
 public class UserController {
 
     private UserService userService;
+    private EventService eventService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+                          EventService eventService) {
         this.userService = userService;
+        this.eventService = eventService;
     }
 
     @GetMapping()
@@ -81,6 +85,20 @@ public class UserController {
     public ResponseEntity<UserStatisticResponse> UserStatisticController(@PathVariable Long user_id) {
         UserStatisticResponse userStatisticResponse = userService.getSummaryActivity(user_id);
         return ResponseEntity.ok(userStatisticResponse);
+    }
+
+    @GetMapping("/event-completed/{user_id}")
+    public ResponseEntity<EventPaginationResponse> eventCompletedController(
+            @PathVariable Long user_id,
+            @RequestParam (defaultValue = "1" )int current_page,
+            @RequestParam (defaultValue = "5" ) int per_page,
+            @RequestParam(required = false) String search_name,
+            @RequestParam(defaultValue = "false") boolean complete) {
+
+        EventPaginationResponse response = eventService.getEventCompletedOrNot(
+                user_id,current_page,per_page,search_name,complete);
+
+        return ResponseEntity.ok(response);
     }
 
 }

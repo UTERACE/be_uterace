@@ -48,7 +48,7 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubName AS clubName," +
             "c.picturePath AS picturePath, " +
-            "c.clubTotalDistance, " +
+            "c.clubTotalDistance as clubTotalDistance, " +
             "COUNT(uc.user.userId) AS memberCount " +
             "FROM Club c " +
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +

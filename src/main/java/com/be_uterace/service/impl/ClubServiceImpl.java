@@ -111,6 +111,7 @@ public class ClubServiceImpl implements ClubService {
                 .min_pace(clubDetailProjection.getMinPace())
                 .max_pace(clubDetailProjection.getMaxPace())
                 .details(clubDetailProjection.getDetails())
+                .total_news(postList.size())
                 .build();
     }
 

@@ -391,6 +391,9 @@ public class EventServiceImpl implements EventService {
                     userEvent.setJoinDate(new Date());
                     userEvent.setTotalDistance(0.0);
                     userEvent.setPace(0.0);
+                    userEvent.setStatus_complete("0");
+                    userEvent.setRunningCategory(runningCategoryRepository.findById(1).get());
+
                     userEventRepository.save(userEvent);
                     event.setNumOfAttendee(event.getNumOfAttendee() + 1);
                     if (Objects.equals(userOptional.get().getGender(), "Nam"))
@@ -525,6 +528,35 @@ public class EventServiceImpl implements EventService {
                 .current_page(activityPage.getNumber() + 1)
                 .total_page(activityPage.getTotalPages())
                 .activities(arrayList)
+                .build();
+    }
+
+    @Override
+    public EventPaginationResponse getEventCompletedOrNot(Long user_id, int current_page, int per_page, String search_name, boolean complete) {
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
+        Page<Event> eventPage;
+        if(complete==false){
+            eventPage = eventRepository.getEventEnded(pageable, search_name);
+        }
+        else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name);
+
+        List<Event> eventList = eventPage.getContent();
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for (Event event : eventList){
+            EventResponse eventResponse = new EventResponse();
+            eventResponse.setEvent_id(event.getEventId());
+            eventResponse.setName(event.getTitle());
+            eventResponse.setImage(event.getPicturePath());
+            eventResponse.setTotal_members(event.getNumOfAttendee());
+            eventResponse.setTotal_activities(event.getTotalActivities());
+            eventResponses.add(eventResponse);
+        }
+        return EventPaginationResponse.builder()
+                .per_page(eventPage.getSize())
+                .total_events((int) eventPage.getTotalElements())
+                .current_page(eventPage.getNumber() + 1)
+                .total_page(eventPage.getTotalPages())
+                .events(eventResponses)
                 .build();
     }
 

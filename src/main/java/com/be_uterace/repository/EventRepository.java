@@ -83,4 +83,16 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
     @Query("SELECT e FROM Event e WHERE unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
     Page<Event> searchEventManage(@Param("searchName") String searchName, Pageable pageable);
 
+
+    @Query("SELECT e FROM Event e WHERE e.startDate <= CURRENT_DATE AND e.endDate >= CURRENT_DATE " +
+            "and unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%'))) ORDER BY e.createAt ")
+    Page<Event> getEventInCurrentTime(Pageable pageable, String searchName);
+
+    @Query("SELECT e FROM Event e WHERE NOT (e.startDate <= CURRENT_DATE AND e.endDate >= CURRENT_DATE) AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%'))) ORDER BY e.createAt"
+    )
+    Page<Event> getEventNotInCurrentTime(Pageable pageable);
+
+    @Query("SELECT e FROM Event e WHERE e.endDate < CURRENT_DATE AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%'))) ORDER BY e.createAt" )
+    Page<Event> getEventEnded(Pageable pageable, String searchName);
+
 }
