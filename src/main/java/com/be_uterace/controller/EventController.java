@@ -139,4 +139,13 @@ public class EventController {
                 current_page,per_page,event_id,search_name,hour);
         return ResponseEntity.ok(recentActiveResponse);
     }
+    @GetMapping("/joined-event/{user_id}")
+    public ResponseEntity<EventPaginationResponse> getEventJoinedByUserController(
+            @PathVariable Long user_id,
+            @RequestParam int current_page,
+            @RequestParam int per_page,
+            @RequestParam String search_name){
+        EventPaginationResponse res = eventService.getEventCreatedByUser(user_id,current_page,per_page,search_name);
+        return ResponseEntity.ok(res);
+    }
 }

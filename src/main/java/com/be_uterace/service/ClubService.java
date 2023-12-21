@@ -24,6 +24,8 @@ public interface ClubService {
 
     ClubPaginationResponse getClubJoined(int current_page, int per_page, String search, Authentication authentication);
 
+    ClubPaginationResponse getClubCreatedByUser(Long user_id, int current_page, int per_page, String search, Authentication authentication);
+
     ResponseObject joinClub(int club_id, Authentication auth);
 
     ResponseObject leaveClub(int club_id, Authentication auth);

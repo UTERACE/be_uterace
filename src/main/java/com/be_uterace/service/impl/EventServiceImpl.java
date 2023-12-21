@@ -346,6 +346,30 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public EventPaginationResponse getEventCreatedByUser(Long user_id, int current_page, int per_page, String search_name) {
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
+        Page<Event> eventPage = eventRepository.findEventByCreateUserAndTitleContaining(user_id, search_name, pageable);
+        List<Event> eventList = eventPage.getContent();
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for (Event event : eventList){
+            EventResponse eventResponse = new EventResponse();
+            eventResponse.setEvent_id(event.getEventId());
+            eventResponse.setName(event.getTitle());
+            eventResponse.setImage(event.getPicturePath());
+            eventResponse.setTotal_members(event.getNumOfAttendee());
+            eventResponse.setTotal_activities(event.getTotalActivities());
+            eventResponses.add(eventResponse);
+        }
+        return EventPaginationResponse.builder()
+                .per_page(eventPage.getSize())
+                .total_events((int) eventPage.getTotalElements())
+                .current_page(eventPage.getNumber() + 1)
+                .total_page(eventPage.getTotalPages())
+                .events(eventResponses)
+                .build();
+    }
+
+    @Override
     public ResponseObject joinEvent(int event_id, Authentication auth) {
         if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();

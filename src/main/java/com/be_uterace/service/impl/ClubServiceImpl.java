@@ -290,6 +290,30 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
+    public ClubPaginationResponse getClubCreatedByUser(Long user_id, int current_page, int per_page, String search, Authentication authentication) {
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
+        Page<ClubProjection> clubPage = clubRepository.findOwnClubPagination(search, pageable, user_id);
+        List<ClubProjection> clubProjectionList = clubPage.getContent();
+        List<ClubResponse> clubResponseList = new ArrayList<>();
+        for (ClubProjection item : clubProjectionList) {
+            ClubResponse clubResponse = new ClubResponse();
+            clubResponse.setClub_id(item.getClubId());
+            clubResponse.setName(item.getClubName());
+            clubResponse.setImage(item.getPicturePath());
+            clubResponse.setTotal_member(item.getMemberCount());
+            clubResponse.setTotal_distance(item.getClubTotalDistance());
+            clubResponseList.add(clubResponse);
+        }
+        return ClubPaginationResponse.builder()
+                .per_page(clubPage.getSize())
+                .current_page(clubPage.getNumber() + 1)
+                .total_page(clubPage.getTotalPages())
+                .total_clubs((int) clubPage.getTotalElements())
+                .clubs(clubResponseList).build();
+
+    }
+
+    @Override
     public ResponseObject joinClub(int club_id, Authentication authentication) {
 
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {

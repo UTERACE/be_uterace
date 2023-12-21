@@ -22,6 +22,8 @@ public interface EventService {
 
     EventPaginationResponse getEventJoined(int current_page, int per_page,String search_name, Authentication authentication);
 
+    EventPaginationResponse getEventCreatedByUser(Long user_id, int current_page, int per_page,String search_name);
+
     ResponseObject joinEvent(int event_id, Authentication auth);
 
     ResponseObject leaveEvent(int event_id, Authentication auth);

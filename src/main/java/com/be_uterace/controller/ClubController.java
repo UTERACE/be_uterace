@@ -124,4 +124,14 @@ public class ClubController {
         RankingMemberResponse res = clubService.getScoreBoardClubMember(club_id,current_page,per_page,search_name);
         return ResponseEntity.ok(res);
     }
+    @GetMapping(value = {"/created-club/{user_id}"})
+    public ResponseEntity<ClubPaginationResponse> clubCreatedByUserController(
+            @PathVariable Long user_id,
+            @RequestParam int current_page,
+            @RequestParam int per_page,
+            @RequestParam String search_name, Authentication authentication){
+        ClubPaginationResponse clubPaginationResponse = clubService.getClubCreatedByUser(
+                user_id,current_page,per_page,search_name, authentication);
+        return ResponseEntity.ok(clubPaginationResponse);
+    }
 }
