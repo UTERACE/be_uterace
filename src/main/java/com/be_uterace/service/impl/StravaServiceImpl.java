@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.be_uterace.utils.Format.formatSeconds;
-import static com.be_uterace.utils.StravaUtils.getAllActivities;
+import static com.be_uterace.utils.StravaUtils.*;
 import static com.be_uterace.utils.Validation.checkPace;
 
 @Service
@@ -139,8 +139,15 @@ public class StravaServiceImpl implements StravaService {
                 .build();
     }
 
-    public void addRuns(User user, String accessToken) {
+    public void addRuns(User user, String accessToken) throws IOException {
         List<ActivityStravaResponse> activities = getAllActivities(accessToken);
+        if(activities==null){
+            Map<String, String> res = refreshStravaToken(user.getStravaRefreshToken());
+            user.setStravaAccessToken(res.get("access_token"));
+            user.setStravaRefreshToken(res.get("refresh_token"));
+            activities = getAllActivities(res.get("access_token"));
+            userRepository.save(user);
+        }
 
         List<Run> runsToSave = new ArrayList<>();
 

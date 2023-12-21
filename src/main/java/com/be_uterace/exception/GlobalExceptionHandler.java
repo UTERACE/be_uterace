@@ -38,6 +38,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, exception.getMessage());
         return new ResponseEntity<>(responseObject, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ResponseObject> handleBadRequestException(BadRequestException exception){
+        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, exception.getMessage());
+        return new ResponseEntity<>(responseObject, HttpStatus.BAD_REQUEST);
+    }
     // global exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseObject> handleGlobalException(Exception exception,

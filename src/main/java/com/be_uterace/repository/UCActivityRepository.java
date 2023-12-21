@@ -33,6 +33,8 @@ public interface UCActivityRepository extends JpaRepository<UserClubActivity,Lon
             Pageable pageable
     );
 
-
+    @Modifying
+    @Query("delete from UserClubActivity uca where uca.user.userId = :userId")
+    void deleteUserClubActivityByUserId(Long userId);
 
 }

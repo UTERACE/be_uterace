@@ -6,8 +6,10 @@ import com.be_uterace.projection.ActivitySummaryProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -41,4 +43,10 @@ public interface RunRepository extends JpaRepository<Run,Long> {
     Optional<Run> findRunByStravaRunId(Long stravaRunId);
 
 
+
+//    @Modifying
+//    @Query(value = "DELETE FROM Run WHERE user_id = :userId", nativeQuery = true)
+//    void deleteRunsByUserId(@Param("userId") Long userId);
+    @Query(value = "SELECT delete_users_data(:userIds)", nativeQuery = true)
+    void deleteUsersData(@Param("userIds") Long[] userIds);
 }

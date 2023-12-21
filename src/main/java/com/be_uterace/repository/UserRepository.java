@@ -29,6 +29,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     List<User> findTop8ByOrderByRankingAsc();
 
+    List<User> findAllByStravaIdIsNotNull();
+
     @Query("SELECT SUM(u.totalDistance) FROM User u")
     Double sumTotalDistance();
 
@@ -60,5 +62,23 @@ public interface UserRepository extends JpaRepository<User,Long> {
     Page<User> searchUsers(@Param("searchName") String searchName, Pageable pageable);
 
     Optional<User> findUserByStravaId(Long stravaId);
+
+//    @Transactional
+//    @Modifying
+//    @Query("UPDATE User u SET u.syncStatus = COALESCE(:syncStatus, u.syncStatus)," +
+//            "u.last_sync = COALESCE(:last_sync, u.last_sync) WHERE u.stravaId IS NOT NULL AND u.status = : status ")
+//    void updateAllUsersSyncStatus(@Param("syncStatus") String syncStatus,
+//                                  @Param("last_sync") String last_sync,
+//                                  @Param("status") String status);
+//
+//    @Transactional
+//    @Modifying
+//    @Query("UPDATE User u SET u.syncStatus = COALESCE(:syncStatus, u.syncStatus)," +
+//            "u.last_sync = COALESCE(:last_sync, u.last_sync) WHERE u.userId = :userId")
+//    void updateSyncStatusForUser(@Param("syncStatus") String syncStatus,
+//                                 @Param("last_sync") String last_sync,
+//                                 @Param("userId") Long userId);
+
+
 
 }

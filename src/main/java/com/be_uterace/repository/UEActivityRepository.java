@@ -31,4 +31,8 @@ public interface UEActivityRepository extends JpaRepository<UserEventActivity,Lo
             @Param("eventId") Integer eventId,
             Pageable pageable
     );
+
+    @Modifying
+    @Query("delete from UserEventActivity uea where uea.user.userId = :userId")
+    void deleteUserEventActivitiesByUserId(Long userId);
 }

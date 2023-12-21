@@ -111,7 +111,6 @@ public class User {
     @Column(name = "REASON")
     private String reason;
 
-    @CreationTimestamp
     @Column(name = "LAST_SYNC")
     private Timestamp last_sync;
 }
