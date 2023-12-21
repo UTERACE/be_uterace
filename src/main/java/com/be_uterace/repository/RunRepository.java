@@ -21,7 +21,7 @@ public interface RunRepository extends JpaRepository<Run,Long> {
             "(:searchName IS NULL OR unaccent(LOWER(r.name)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))) " +
             "AND r.createdAt >= :thresholdDateTime " +
             "AND r.user.userId = :userId " +
-            "ORDER BY r.runId DESC")
+            "ORDER BY r.runId ASC")
     Page<Run> findRunsByDateTimeAndName(
             @Param("thresholdDateTime") Timestamp thresholdDateTime,
             @Param("searchName") String searchName,

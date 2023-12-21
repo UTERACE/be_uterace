@@ -29,7 +29,8 @@ public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> 
             "WHERE uc.club.clubId = :clubId " +
             "AND (:searchName IS NULL " +
             "OR (unaccent(LOWER(u.firstName)) ILIKE unaccent(LOWER(:searchName)) " +
-            "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName))))")
+            "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName))))" +
+            "ORDER BY uc.ranking ASC")
     Page<UserClub> findByClubIdAndSearchName(
             @Param("clubId") Integer clubId,
             @Param("searchName") String searchName,
