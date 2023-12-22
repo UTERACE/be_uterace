@@ -54,7 +54,7 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
     Event findEventByEventId(Integer eventId);
 
     @Query("SELECT e FROM Event e WHERE e.createUser.userId = :user_id " +
-            "AND Lunaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) ")
+            "AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) ")
     Page<Event> findEventByCreateUserAndTitleContaining(
             @Param("user_id") Long user_id,
             @Param("search_name") String search_name,
