@@ -536,9 +536,9 @@ public class EventServiceImpl implements EventService {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Page<Event> eventPage;
         if(complete==false){
-            eventPage = eventRepository.getEventEnded(pageable, search_name);
+            eventPage = eventRepository.getEventEnded(pageable, search_name,user_id);
         }
-        else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name);
+        else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name,user_id);
 
         List<Event> eventList = eventPage.getContent();
         List<EventResponse> eventResponses = new ArrayList<>();
