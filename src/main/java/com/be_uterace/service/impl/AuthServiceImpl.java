@@ -292,6 +292,20 @@ public class AuthServiceImpl implements AuthService {
         Boolean userBoolean = userRepository.existsByUsername(registerDto.getUsername());
         Boolean email = userRepository.existsByEmail(registerDto.getEmail());
 
+        if (!userBoolean) {
+            return ResponseObject.builder()
+                    .status(409)
+                    .message("Username not found")
+                    .build();
+        }
+
+        if (!email) {
+            return ResponseObject.builder()
+                    .status(409)
+                    .message("Email not found")
+                    .build();
+        }
+
         int passwordLength = 12;
         String randomPassword = generateRandomPassword(passwordLength);
         String randomPasswordEncoder = passwordEncoder.encode(randomPassword);
@@ -304,14 +318,21 @@ public class AuthServiceImpl implements AuthService {
         EmailDetails emailDetails = EmailDetails.builder()
                 .recipient(registerDto.getEmail())
                 .subject("Password Reset Request")
-                .msgBody("New password:" + randomPassword)
+                .msgBody("New password: " + randomPassword)
                 .build();
         Boolean status
                 = emailService.sendSimpleMail(emailDetails);
 
+        if (!status) {
+            return ResponseObject.builder()
+                    .status(409)
+                    .message("Reset password failed")
+                    .build();
+        }
+
         return ResponseObject.builder()
                 .status(200)
-                .message("Reset mật khẩu thành công")
+                .message("Reset password success")
                 .build();
     }
     private boolean isPasswordValid(String password) {
