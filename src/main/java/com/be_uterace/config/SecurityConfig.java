@@ -77,7 +77,7 @@ public class SecurityConfig {
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events", "/api/news","/api/clubs/**","/api/events/**",
                                 "/api/news/**","/api/area/**","/api/home", "/api/scoreboard"
-                                , "/api/user/recent-active/**","/api/decode-polyline","/api/strava/status",
+                                , "/api/user/recent-active/**","/api/decode-polyline/**","/api/strava/status",
                                 "/api/webhook/**","/api/user/{user_id}","/api/user/event-completed/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth","/api/auth/**","/api/webhook/**", "/api/re-initialize/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/news/**","/api/clubs/**","/api/events/join-event/**","/api/events/leave-event/**"

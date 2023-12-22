@@ -37,7 +37,7 @@ public class UtilsController {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping("/decode_polyline/{activityId}")
+    @GetMapping("/decode-polyline/{activityId}")
     @Transactional
     public ResponseEntity<Object> decodePolyline(@PathVariable Long activityId) throws IOException {
         Run run = runRepository.findById(activityId)
