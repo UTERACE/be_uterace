@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface EventRunningCategoryRepository extends JpaRepository<EventRunningCategory, Integer> {
     EventRunningCategory findEventRunningCategoryByEventAndRunningCategory(Event event, RunningCategory runningCategory);
+    void deleteAllByEvent_EventId(Integer eventId);
 }

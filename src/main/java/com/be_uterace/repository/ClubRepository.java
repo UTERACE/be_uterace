@@ -20,6 +20,7 @@ import java.util.Optional;
 
 public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecificationExecutor<Club> {
 
+    Optional<Club> findClubByClubIdAndAdminUser_UserId(Integer clubId, Long userId);
     Optional<Club> findClubByClubName(String clubName);
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubRanking AS clubRanking, " +

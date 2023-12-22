@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event,Integer> {
+
+    Optional<Event> findEventByEventIdAndAdminUser_UserId(Integer eventId, Long userId);
     @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
             "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
     List<Event> findEventsWithStatusOnGoing();

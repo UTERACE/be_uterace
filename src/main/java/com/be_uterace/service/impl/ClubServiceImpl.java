@@ -191,11 +191,15 @@ public class ClubServiceImpl implements ClubService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                    clubRepository.deleteById(club_id);
-                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Xóa clb thành công");
-                return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+                Optional<Club> clubOptional = clubRepository.findClubByClubIdAndAdminUser_UserId(club_id,userOptional.get().getUserId());
+                if (clubOptional.isPresent()){
+                    clubRepository.delete(clubOptional.get());
+                    ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS, "Xóa clb thành công");
+                    return ResponseEntity.status(HttpStatus.OK).body(responseObject);
                 }
+
             }
+        }
 
         ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Xóa clb thất bại");
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);

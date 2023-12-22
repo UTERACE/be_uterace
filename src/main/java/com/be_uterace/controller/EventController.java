@@ -55,8 +55,9 @@ public class EventController {
     }
 
     @DeleteMapping(value = {"/{event_id}"})
-    public ResponseEntity<ResponseObject> deleteEventController(@PathVariable Integer event_id){
-        ResponseObject res = eventService.deleteEvent(event_id);
+    public ResponseEntity<ResponseObject> deleteEventController(@PathVariable Integer event_id,
+                                                                Authentication authentication){
+        ResponseObject res = eventService.deleteEvent(event_id, authentication);
         return ResponseEntity.ok(res);
     }
 

@@ -14,7 +14,7 @@ public interface EventService {
 
     ResponseObject updateEvent(UpdateEventDto req, Authentication authentication);
 
-    ResponseObject deleteEvent(int event_id);
+    ResponseObject deleteEvent(int event_id, Authentication authentication);
     ResponseObject addDistanceToEvent(int event_id, int distance_id, Authentication authentication);
     ResponseObject deleteDistanceFromEvent(int event_id, int distance_id, Authentication authentication);
 

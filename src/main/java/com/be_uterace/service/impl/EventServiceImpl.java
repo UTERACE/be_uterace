@@ -213,7 +213,21 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ResponseObject deleteEvent(int event_id) {
+    public ResponseObject deleteEvent(int event_id, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)){
+            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        }
+        Optional<Event> eventOptional = eventRepository.findEventByEventIdAndAdminUser_UserId(event_id, userOptional.get().getUserId());
+        if (eventOptional.isEmpty()) {
+            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+        }
+        eventRunningCategoryRepository.deleteAllByEvent_EventId(event_id);
         eventRepository.deleteById(event_id);
         return new ResponseObject(StatusCode.SUCCESS,"Xóa giải chạy thành công");
 
