@@ -29,6 +29,9 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
     List<Post> getPostsByClubClubId(Integer clubId);
     Page<Post> getPostsByTitleContainingAndUserCreateUserId(String search_name,Pageable pageable,Integer userId);
 
+    @Query("SELECT p FROM Post p WHERE p.status='1' " +
+            "AND unaccent(LOWER(p.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
+            "ORDER BY p.createdAt DESC ")
     Page<Post> findAllByTitleContaining(String search_name,Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE p.postId = :postId and p.club.clubId=:clubId")

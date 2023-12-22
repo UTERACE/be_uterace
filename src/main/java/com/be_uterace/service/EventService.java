@@ -35,4 +35,6 @@ public interface EventService {
     RecentActiveResponse getRecentActivity(int current_page, int per_page, Integer eventId, String search, int hours);
 
     EventPaginationResponse getEventCompletedOrNot(Long user_id,int current_page, int per_page, String search_name, boolean complete);
+
+    EventPaginationResponse getEventCompletedOrNot(int current_page, int per_page, String search_name, boolean complete, Authentication auth);
 }

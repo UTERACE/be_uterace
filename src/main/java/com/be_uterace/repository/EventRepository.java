@@ -27,7 +27,8 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
     List<Event> findTop6EventsByOutstanding(String outstanding);
 
     @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
-            " AND LOWER(e.title) LIKE %:search_name%") // Thêm điều kiện tìm kiếm
+            " AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
+            " ORDER BY e.createAt DESC ") // Thêm điều kiện tìm kiếm
     Page<Event> findEventsWithStatusOnGoing(
             @Param("search_name") String search_name,
             Pageable pageable);
@@ -35,13 +36,15 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
             " AND e.eventId=:eventId ") // Thêm điều kiện tìm kiếm
     Optional<Event> findEventsWithStatusOnGoing(@Param("eventId") Integer eventId);
 
-    @Query("SELECT e FROM Event e WHERE e.endDate < CURRENT_TIMESTAMP AND LOWER(e.title) LIKE %:search_name% "
+    @Query("SELECT e FROM Event e WHERE e.endDate < CURRENT_TIMESTAMP " +
+            "AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) "
             + "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
     Page<Event> findEventsWithStatusFinished(
             @Param("search_name") String search_name,
             Pageable pageable);
 
-    @Query("SELECT e FROM Event e WHERE e.startDate > CURRENT_TIMESTAMP AND LOWER(e.title) LIKE %:search_name% "
+    @Query("SELECT e FROM Event e WHERE e.startDate > CURRENT_TIMESTAMP " +
+            "AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) "
             + "ORDER BY e.startDate ASC") // Thêm điều kiện tìm kiếm
     Page<Event> findEventsWithStatusUpcoming(
             @Param("search_name") String search_name,
@@ -50,13 +53,15 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
 
     Event findEventByEventId(Integer eventId);
 
-    @Query("SELECT e FROM Event e WHERE e.createUser.userId = :user_id AND LOWER(e.title) LIKE %:search_name%")
+    @Query("SELECT e FROM Event e WHERE e.createUser.userId = :user_id " +
+            "AND Lunaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) ")
     Page<Event> findEventByCreateUserAndTitleContaining(
             @Param("user_id") Long user_id,
             @Param("search_name") String search_name,
             Pageable pageable);
-    @Query("SELECT e FROM Event e LEFT JOIN UserEvent ue ON e.eventId = ue.event.eventId WHERE ue.user.userId = :userId AND " +
-            "LOWER(e.title) LIKE %:search_name%")
+    @Query("SELECT e FROM Event e LEFT JOIN UserEvent ue ON e.eventId = ue.event.eventId " +
+            "WHERE ue.user.userId = :userId AND " +
+            "unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) ")
     Page<Event> findEventByJoinUserUserId(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
     @Query("SELECT new com.be_uterace.payload.response.EventResponse(e.eventId, e.title, e.picturePath, e.numOfAttendee, e.totalActivities) " +
             "FROM Event e " +

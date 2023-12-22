@@ -53,8 +53,9 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "COUNT(uc.user.userId) AS memberCount " +
             "FROM Club c " +
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
-            "WHERE LOWER(c.clubName) LIKE %:search_name% " +
-            "GROUP BY c.clubId")
+            "WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
+            "GROUP BY c.clubId " +
+            "ORDER BY c.clubTotalDistance DESC")
     Page<ClubProjection> findAllClubPagination(@Param("search_name") String search_name,Pageable pageable);
 
 
@@ -89,12 +90,12 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubName AS clubName," +
             "c.picturePath AS picturePath, " +
-            "c.clubTotalDistance, " +
+            "c.clubTotalDistance AS clubTotalDistance, " +
             "COUNT(uc.user.userId) AS memberCount " +
             "FROM Club c " +
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
             "WHERE c.creatorUser.userId = :creatorId " +
-            "AND LOWER(c.clubName) LIKE %:search_name% " +
+            "AND unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId")
     Page<ClubProjection> findOwnClubPagination(@Param("search_name") String search_name,Pageable pageable, @Param("creatorId") Long creatorId);
 
@@ -102,13 +103,13 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubName AS clubName," +
             "c.picturePath AS picturePath, " +
-            "c.clubTotalDistance, " +
+            "c.clubTotalDistance AS clubTotalDistance, " +
             "COUNT(uc.user.userId) AS memberCount " +
             "FROM Club c " +
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
             "WHERE EXISTS (SELECT 1 FROM UserClub uc2 WHERE uc2.club.clubId = c.clubId " +
             "AND uc2.user.userId = :userId) " +
-            "AND LOWER(c.clubName) LIKE %:search_name% " +
+            "AND unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId")
     Page<ClubProjection> findClubJoined(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
     @Query("SELECT  new com.be_uterace.payload.response.ClubResponse(c.clubId, c.clubName, c.picturePath, c.numOfAttendee, c.clubTotalDistance) " +

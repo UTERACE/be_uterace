@@ -194,21 +194,6 @@ public class EventServiceImpl implements EventService {
         event.setMinPace(req.getMin_pace() != null ? req.getMin_pace() : event.getMinPace());
         event.setMaxPace(req.getMax_pace() != null ? req.getMax_pace() : event.getMaxPace());
         eventRepository.save(event);
-
-//        List<RunningCategory> runningCategoriesEntity = runningCategoryRepository.findRunningCategoriesByEvent(event);
-//
-//        List<RunningCategoryResponse> runningCategories = req.getDistance();
-//        for (RunningCategoryResponse item : runningCategories) {
-//            for (RunningCategory runningCategory : runningCategoriesEntity) {
-//                if (Objects.equals(item.getId(), runningCategory.getRunningCategoryID())) {
-//                    runningCategory.setRunningCategoryName(item.getName());
-//                    runningCategory.setRunningCategoryDistance(item.getDistance());
-//                    runningCategoryRepository.save(runningCategory);
-//                    break;
-//                }
-//            }
-//        }
-
         return new ResponseObject(StatusCode.SUCCESS,"Cập nhật giải chạy thành công");
     }
 
@@ -549,7 +534,7 @@ public class EventServiceImpl implements EventService {
     public EventPaginationResponse getEventCompletedOrNot(Long user_id, int current_page, int per_page, String search_name, boolean complete) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Page<Event> eventPage;
-        if(complete==false){
+        if(complete){
             eventPage = eventRepository.getEventEnded(pageable, search_name,user_id);
         }
         else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name,user_id);
@@ -572,6 +557,42 @@ public class EventServiceImpl implements EventService {
                 .total_page(eventPage.getTotalPages())
                 .events(eventResponses)
                 .build();
+    }
+
+    @Override
+    public EventPaginationResponse getEventCompletedOrNot(int current_page, int per_page, String search_name, boolean complete, Authentication auth) {
+        if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Pageable pageable = PageRequest.of(current_page - 1, per_page);
+                Page<Event> eventPage;
+                if(complete){
+                    eventPage = eventRepository.getEventEnded(pageable, search_name,userOptional.get().getUserId());
+                }
+                else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name,userOptional.get().getUserId());
+
+                List<Event> eventList = eventPage.getContent();
+                List<EventResponse> eventResponses = new ArrayList<>();
+                for (Event event : eventList){
+                    EventResponse eventResponse = new EventResponse();
+                    eventResponse.setEvent_id(event.getEventId());
+                    eventResponse.setName(event.getTitle());
+                    eventResponse.setImage(event.getPicturePath());
+                    eventResponse.setTotal_members(event.getNumOfAttendee());
+                    eventResponse.setTotal_activities(event.getTotalActivities());
+                    eventResponses.add(eventResponse);
+                }
+                return EventPaginationResponse.builder()
+                        .per_page(eventPage.getSize())
+                        .total_events((int) eventPage.getTotalElements())
+                        .current_page(eventPage.getNumber() + 1)
+                        .total_page(eventPage.getTotalPages())
+                        .events(eventResponses)
+                        .build();
+            }
+        }
+        return null;
     }
 
 }

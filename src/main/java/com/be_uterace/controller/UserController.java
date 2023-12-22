@@ -101,4 +101,18 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/event-completed")
+    public ResponseEntity<EventPaginationResponse> eventCompletedOwnController(
+            @RequestParam (defaultValue = "1" )int current_page,
+            @RequestParam (defaultValue = "5" ) int per_page,
+            @RequestParam(required = false) String search_name,
+            @RequestParam(defaultValue = "false") boolean complete,
+            Authentication authentication) {
+
+        EventPaginationResponse response = eventService.getEventCompletedOrNot(
+                current_page,per_page,search_name,complete,authentication);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
