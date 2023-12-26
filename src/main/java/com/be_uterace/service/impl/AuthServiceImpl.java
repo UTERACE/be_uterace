@@ -207,11 +207,6 @@ public class AuthServiceImpl implements AuthService {
                         .message("Username is already in use")
                         .build();
             }
-            if (!isUsernameValid(registerDto.getUsername())) {
-                return ResponseObject.builder().status(409)
-                        .message("Username is not valid")
-                        .build();
-            }
             User userByEmail = userRepository.findByEmail(registerDto.getEmail()).orElse(null);
             if (userByEmail != null) {
                 return ResponseObject.builder().status(409)
@@ -338,9 +333,5 @@ public class AuthServiceImpl implements AuthService {
     private boolean isPasswordValid(String password) {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$)(?=.*[a-zA-Z0-9]).{8,}$";
         return password.matches(regex);
-    }
-    private boolean isUsernameValid(String username) {
-        String regex = "^(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*+=?-]).{12,}$";
-        return username.matches(regex);
     }
 }
