@@ -376,7 +376,7 @@ public class EventServiceImpl implements EventService {
             if (userOptional.isPresent()) {
                 Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
                 if (eventOptional.isEmpty()) {
-                    return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy hoặc giải chạy đã kết thúc");
+                    return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
                 }
                 if (eventOptional.isPresent()) {
                     Event event = eventOptional.get();
@@ -413,7 +413,7 @@ public class EventServiceImpl implements EventService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Optional<Event> eventOptional = eventRepository.findById(event_id);
+                Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
                 if (eventOptional.isPresent()) {
                     Event event = eventOptional.get();
                     Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
@@ -429,7 +429,7 @@ public class EventServiceImpl implements EventService {
                         return new ResponseObject(StatusCode.SUCCESS,"Rời khỏi giải chạy thành công");
                     }
                 }
-                return new ResponseObject(StatusCode.NOT_FOUND,"Bạn chưa tham gia giải chạy này");
+                return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
             }
         }
         return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
