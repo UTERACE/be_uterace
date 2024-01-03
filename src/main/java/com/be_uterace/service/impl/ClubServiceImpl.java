@@ -421,7 +421,7 @@ public class ClubServiceImpl implements ClubService {
         for (UserClubActivity userClubActivity : userClubActivityList){
             Run run = userClubActivity.getRun();
             RecentActiveResponse.Activity activityResponse = new RecentActiveResponse.Activity();
-            activityResponse.setActivity_id(userClubActivity.getId());
+            activityResponse.setActivity_id(run.getRunId());
             activityResponse.setMember_id(run.getUser().getUserId());
             activityResponse.setMember_image(run.getUser().getAvatarPath());
             activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());

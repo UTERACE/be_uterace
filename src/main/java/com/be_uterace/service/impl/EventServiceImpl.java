@@ -505,7 +505,7 @@ public class EventServiceImpl implements EventService {
         for (UserEventActivity userEventActivity : userEventActivityList){
             Run run = userEventActivity.getRun();
             RecentActiveResponse.Activity activityResponse = new RecentActiveResponse.Activity();
-            activityResponse.setActivity_id(userEventActivity.getId());
+            activityResponse.setActivity_id(run.getRunId());
             activityResponse.setMember_id(run.getUser().getUserId());
             activityResponse.setMember_image(run.getUser().getAvatarPath());
             activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());
