@@ -253,6 +253,8 @@ public class AuthServiceImpl implements AuthService {
                 user.setTypeAccount("default");
                 user.setAvatarPath("");
             }
+            user.setTotalDistance(0.0);
+            user.setStatus("1");
             user.setHomeNumber(registerDto.getAddress());
             userRepository.save(user);
             return ResponseObject.builder().status(200)
