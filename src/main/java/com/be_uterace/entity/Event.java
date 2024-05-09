@@ -91,13 +91,13 @@ public class Event {
     @Column(name = "TOTAL_ACTIVITIES")
     private Integer totalActivities=0;
 
-    @Column(name = "DETAILS")
+    @Column(name = "DETAILS", columnDefinition = "TEXT")
     private String details;
 
-    @Column(name = "REGULATIONS")
+    @Column(name = "REGULATIONS", columnDefinition = "TEXT")
     private String regulations;
 
-    @Column(name = "PRIZE")
+    @Column(name = "PRIZE", columnDefinition = "TEXT")
     private String prize;
 
     @Column(name = "REASON")

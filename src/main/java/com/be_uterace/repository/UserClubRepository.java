@@ -1,6 +1,7 @@
 package com.be_uterace.repository;
 
 
+import com.be_uterace.entity.Club;
 import com.be_uterace.entity.User;
 import com.be_uterace.entity.UserClub;
 import com.be_uterace.entity.UserEvent;
@@ -36,6 +37,6 @@ public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> 
             @Param("searchName") String searchName,
             Pageable pageable
     );
-
+    boolean existsByClubAndUser(Club club, User user);
 
 }

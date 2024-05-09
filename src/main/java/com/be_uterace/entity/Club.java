@@ -26,7 +26,7 @@ public class Club {
     @Column(name = "CLUB_NAME", unique = true, length = 100)
     private String clubName;
 
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", columnDefinition = "TEXT")
     private String description;
 
     @CreationTimestamp
@@ -71,7 +71,7 @@ public class Club {
     @Column(name = "TOTAL_ACTIVITIES")
     private Long totalActivities = 0L;
 
-    @Column(name = "DETAILS")
+    @Column(name = "DETAILS", columnDefinition = "TEXT")
     private String details;
 
     @Column(name = "OUTSTANDING")

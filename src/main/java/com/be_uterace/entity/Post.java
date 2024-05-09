@@ -33,7 +33,7 @@ public class Post {
     @Column(name = "CREATED_AT")
     private Timestamp createdAt;
 
-    @Column(name = "HTML_CONTENT", length = 10000)
+    @Column(name = "HTML_CONTENT", columnDefinition = "TEXT")
     private String htmlContent;
 
     @Column(name = "IMAGE")
@@ -42,7 +42,7 @@ public class Post {
     @Column(name = "OUTSTANDING")
     private String outstanding;
 
-    @Column(name = "DESCRIPTION", length = 500)
+    @Column(name = "DESCRIPTION", columnDefinition = "TEXT")
     private String description;
 
     @CreationTimestamp

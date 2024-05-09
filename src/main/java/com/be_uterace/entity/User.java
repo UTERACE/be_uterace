@@ -113,5 +113,9 @@ public class User {
 
     @Column(name = "LAST_SYNC")
     private Timestamp last_sync;
+
+    public User(Long userId) {
+        this.userId = userId;
+    }
 }
 

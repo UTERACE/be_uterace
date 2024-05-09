@@ -2,14 +2,13 @@ package com.be_uterace.service;
 
 import com.be_uterace.payload.request.CreatePostDto;
 import com.be_uterace.payload.request.UpdatePostDto;
-import com.be_uterace.payload.response.PostDetailResponse;
-import com.be_uterace.payload.response.PostPaginationResponse;
-import com.be_uterace.payload.response.PostResponse;
-import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.response.*;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+
 public interface PostService {
-    PostPaginationResponse getPost(int current_page, int per_page,String search_name);
+    PostPaginationResponse getPost(int current_page, int per_page, String search_name);
 
     PostPaginationResponse getPostByUserCreated(int current_page, int per_page, String search_name, Authentication authentication);
 
@@ -22,4 +21,6 @@ public interface PostService {
     ResponseObject deletePost(Integer post_id, Authentication authentication);
 
     ResponseObject hidePost(Integer post_id, Authentication authentication);
+
+    List<PostClubPaginationResponse> getPostClub(int club_id, int current_page, int per_page, String search_name);
 }

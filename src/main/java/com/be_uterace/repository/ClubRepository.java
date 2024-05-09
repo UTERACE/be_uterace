@@ -139,6 +139,6 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     @Query("SELECT c FROM Club c WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
     Page<Club> searchClubManage(@Param("searchName") String searchName, Pageable pageable);
 
-
-
+    boolean existsByCreatorUserUserId(Long userId);
+    boolean existsByAdminUserUserId(Long userId);
 }

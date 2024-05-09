@@ -53,14 +53,14 @@ public class SecurityConfig {
 
     public SecurityConfig(UserDetailsService userDetailsService,
                           JwtAuthenticationEntryPoint authenticationEntryPoint,
-                          JwtAuthenticationFilter authenticationFilter){
+                          JwtAuthenticationFilter authenticationFilter) {
         this.userDetailsService = userDetailsService;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.authenticationFilter = authenticationFilter;
     }
 
     @Bean
-    public static PasswordEncoder passwordEncoder(){
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -73,22 +73,22 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests((requests) ->requests
+                .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/images/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events", "/api/news","/api/clubs/**","/api/events/**",
-                                "/api/news/**","/api/area/**","/api/home", "/api/scoreboard"
-                                , "/api/user/recent-active/**","/api/decode-polyline/**","/api/strava/status",
-                                "/api/webhook/**","/api/user/{user_id}","/api/user/event-completed/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/auth","/api/auth/**","/api/webhook/**", "/api/re-initialize/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/news/**","/api/clubs/**","/api/events/join-event/**","/api/events/leave-event/**"
-                                ,"/api/strava/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.PUT,"/api/news/**","/api/clubs/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/news/**","/api/clubs/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/api/events").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/api/events/*/add-distance/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/clubs", "/api/events", "/api/news", "/api/clubs/**", "/api/events/**",
+                                "/api/news/**", "/api/area/**", "/api/home", "/api/scoreboard"
+                                , "/api/user/recent-active/**", "/api/decode-polyline/**", "/api/strava/status",
+                                "/api/webhook/**", "/api/user/{user_id}", "/api/user/event-completed/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth", "/api/auth/**", "/api/webhook/**", "/api/re-initialize/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/news/**", "/api/clubs/**", "/api/events/join-event/**", "/api/events/leave-event/**"
+                                , "/api/strava/**", "/api/comment", "/api/reaction/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/news/**", "/api/clubs/**", "/api/comment").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/news/**", "/api/clubs/**", "/api/comment/**", "/api/reaction/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/events").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/events/*/add-distance/**").hasAnyRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PUT,"/api/events/**").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/events/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/events/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/events/**").hasAnyRole("ADMIN")
                         .requestMatchers("/api/user").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/admin", "/api/manage-news", "/api/manage-club", "/api/manage-user", "/api/manage-event",
                                 "/api/distance", "/api/manage-news/**", "/api/manage-club/**", "/api/manage-user/**", "/api/manage-event/**",
@@ -97,10 +97,10 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
 
-                ).exceptionHandling( exception -> exception
+                ).exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler())
-                ).sessionManagement( session -> session
+                ).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
@@ -109,6 +109,7 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults());
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -121,7 +122,8 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-//    private OncePerRequestFilter corsFilter() {
+
+    //    private OncePerRequestFilter corsFilter() {
 //        return new OncePerRequestFilter() {
 //            @Override
 //            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

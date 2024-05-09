@@ -6,9 +6,7 @@ import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.CreatePostDto;
 import com.be_uterace.payload.request.UpdatePostDto;
 import com.be_uterace.payload.response.*;
-import com.be_uterace.repository.ClubRepository;
-import com.be_uterace.repository.PostRepository;
-import com.be_uterace.repository.UserRepository;
+import com.be_uterace.repository.*;
 import com.be_uterace.service.FileService;
 import com.be_uterace.service.PostService;
 import com.be_uterace.utils.StatusCode;
@@ -16,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -25,29 +24,34 @@ import java.util.*;
 
 @Service
 public class PostServiceImpl implements PostService {
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private ClubRepository clubRepository;
+    private final ClubRepository clubRepository;
 
-    private FileService fileService;
+    private final FileService fileService;
 
-    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, ClubRepository clubRepository, FileService fileService) {
+    private final ReactionPostRepository reactionPostRepository;
+    private final CommentPostRepository commentPostRepository;
+
+    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, ClubRepository clubRepository, FileService fileService, ReactionPostRepository reactionPostRepository, CommentPostRepository commentPostRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.clubRepository = clubRepository;
         this.fileService = fileService;
+        this.reactionPostRepository = reactionPostRepository;
+        this.commentPostRepository = commentPostRepository;
     }
 
     @Override
     public PostPaginationResponse getPost(int current_page, int per_page, String search_name) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
-        Page<Post> postPage = postRepository.findAllByTitleContaining(search_name,pageable);
+        Page<Post> postPage = postRepository.findAllByTitleContaining(search_name, pageable);
 
         List<Post> postList = postPage.getContent();
         List<PostResponse> postResponses = new ArrayList<>();
-        for (Post post : postList){
+        for (Post post : postList) {
             PostResponse item = new PostResponse();
             item.setNews_id(post.getPostId());
             item.setName(post.getTitle());
@@ -73,7 +77,7 @@ public class PostServiceImpl implements PostService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<Post> postPage = postRepository.getPostsByTitleContainingAndUserCreateUserId(search_name,pageable, userOptional.get().getUserId().intValue());
+                Page<Post> postPage = postRepository.getPostsByTitleContainingAndUserCreateUserId(search_name, pageable, userOptional.get().getUserId().intValue());
                 List<Post> postList = postPage.getContent();
                 List<PostResponse> postResponses = new ArrayList<>();
                 for (Post post : postList) {
@@ -120,9 +124,9 @@ public class PostServiceImpl implements PostService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Post post = new Post();
-                if(createPostDto.getClub_id()==null){
+                if (createPostDto.getClub_id() == null) {
                     post.setClub(null);
-                }else {
+                } else {
                     Optional<Club> clubOptional = clubRepository.findById(createPostDto.getClub_id());
                     post.setClub(clubOptional.get());
                 }
@@ -138,7 +142,7 @@ public class PostServiceImpl implements PostService {
                 post.setOutstanding("0");
                 post.setStatus("1");
                 postRepository.save(post);
-                return new ResponseObject(StatusCode.SUCCESS,"Tạo bài viết thành công");
+                return new ResponseObject(StatusCode.SUCCESS, "Tạo bài viết thành công");
 
             }
         }
@@ -149,10 +153,10 @@ public class PostServiceImpl implements PostService {
     @Override
     public ResponseObject updatePost(UpdatePostDto updatePostDto) {
         Optional<Post> postOptional;
-        if (updatePostDto.getClub_id()!=null){
+        if (updatePostDto.getClub_id() != null) {
             postOptional = postRepository.findByClubIdAndPostId(updatePostDto.getNews_id(),
                     updatePostDto.getClub_id());
-        }else {
+        } else {
             postOptional = postRepository.findById(updatePostDto.getNews_id());
         }
         if (postOptional.isPresent()) {
@@ -161,10 +165,10 @@ public class PostServiceImpl implements PostService {
                     updatePostDto.getTitle() : post.getTitle());
             post.setDescription(updatePostDto.getDescription() != null && !Objects.equals(updatePostDto.getDescription(), "") ?
                     updatePostDto.getDescription() : post.getDescription());
-            if (!post.getImage().equals(updatePostDto.getImage()) && !Objects.equals(updatePostDto.getImage(), "")){
-                if (Objects.equals(post.getImage(), "")){
+            if (!post.getImage().equals(updatePostDto.getImage()) && !Objects.equals(updatePostDto.getImage(), "")) {
+                if (Objects.equals(post.getImage(), "")) {
                     post.setImage(fileService.saveImage(updatePostDto.getImage()));
-                }else if (fileService.deleteImage(post.getImage())){
+                } else if (fileService.deleteImage(post.getImage())) {
                     System.out.println("Delete image success");
                     post.setImage(fileService.saveImage(updatePostDto.getImage()));
                 }
@@ -175,7 +179,7 @@ public class PostServiceImpl implements PostService {
             LocalDateTime currentDateTime = LocalDateTime.now();
             post.setUpdatedAt(Timestamp.valueOf(currentDateTime));
             postRepository.save(post);
-            return new ResponseObject(StatusCode.SUCCESS,"Cập nhât bài viết thành công");
+            return new ResponseObject(StatusCode.SUCCESS, "Cập nhât bài viết thành công");
 
         }
         return null;
@@ -192,7 +196,7 @@ public class PostServiceImpl implements PostService {
                     Post post = postOptional.get();
                     if (post.getUserCreate().getUserId().equals(userOptional.get().getUserId())) {
                         postRepository.delete(post);
-                        return new ResponseObject(StatusCode.SUCCESS,"Xóa bài viết thành công");
+                        return new ResponseObject(StatusCode.SUCCESS, "Xóa bài viết thành công");
                     }
                 }
             }
@@ -211,10 +215,52 @@ public class PostServiceImpl implements PostService {
                     Post post = postOptional.get();
                     post.setStatus("0");
                     postRepository.save(post);
-                    return new ResponseObject(StatusCode.SUCCESS,"Ẩn bài viết thành công");
+                    return new ResponseObject(StatusCode.SUCCESS, "Ẩn bài viết thành công");
                 }
             }
         }
         return null;
+    }
+
+    @Override
+    public List<PostClubPaginationResponse> getPostClub(int club_id, int current_page, int per_page, String search_name) {
+        Optional<User> userOptional = authenticatedUser();
+        List<Post> postList = postRepository.getPostsByClubClubIdAndTitleContaining(club_id, search_name, PageRequest.of(current_page - 1, per_page)).getContent();
+        List<PostClubPaginationResponse> postClubPaginationResponses = new ArrayList<>();
+        for (Post post : postList) {
+            PostClubPaginationResponse postClubPaginationResponse = new PostClubPaginationResponse();
+            postClubPaginationResponse.setPost_id(post.getPostId());
+            postClubPaginationResponse.setPost_title(post.getTitle());
+            postClubPaginationResponse.setPost_content(post.getDescription());
+            postClubPaginationResponse.setPost_description(post.getHtmlContent());
+            postClubPaginationResponse.setPost_image(post.getImage());
+            postClubPaginationResponse.setPost_date(post.getCreatedAt().toString());
+            postClubPaginationResponse.setPost_outstanding(post.getOutstanding());
+            postClubPaginationResponse.setPost_status(post.getStatus());
+            boolean isLiked = reactionPostRepository.existsByPostPostIdAndReactionTypeAndUserUserId(post.getPostId(), "like", userOptional.orElseThrow().getUserId());
+            postClubPaginationResponse.set_liked(isLiked);
+            int countLikes = reactionPostRepository.countByPostPostId(post.getPostId());
+            postClubPaginationResponse.setCount_likes(countLikes);
+            int countComments = commentPostRepository.countByPostPostId(post.getPostId());
+            postClubPaginationResponse.setCount_comments(countComments);
+            boolean isAdmin = clubRepository.existsByAdminUserUserId(post.getUserCreate().getUserId());
+            boolean isOwner = clubRepository.existsByCreatorUserUserId(post.getUserCreate().getUserId());
+            postClubPaginationResponse.setUser_id(post.getUserCreate().getUserId());
+            postClubPaginationResponse.setUser_name(post.getUserCreate().getFirstName() + " " + post.getUserCreate().getLastName());
+            postClubPaginationResponse.setUser_avatar(post.getUserCreate().getAvatarPath());
+            postClubPaginationResponse.setUser_role(isAdmin ? "admin" : isOwner ? "owner" : "member");
+            postClubPaginationResponses.add(postClubPaginationResponse);
+        }
+        return postClubPaginationResponses;
+    }
+
+    private Optional<User> authenticatedUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            return userRepository.findByUsername(username);
+        }
+        return Optional.empty();
     }
 }

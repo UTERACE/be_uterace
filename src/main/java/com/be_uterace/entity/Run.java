@@ -58,8 +58,7 @@ public class Run {
 
     @Column(name = "STEP_RATE")
     private Double stepRate;
-
-    @Column(name = "SUMMARY_POLYLINE")
+    @Column(name = "SUMMARY_POLYLINE", columnDefinition = "TEXT")
     private String summaryPolyline;
 
     @Column(name = "REASON")
