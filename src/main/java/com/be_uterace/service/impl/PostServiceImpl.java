@@ -243,8 +243,8 @@ public class PostServiceImpl implements PostService {
             postClubPaginationResponse.setCount_likes(countLikes);
             int countComments = commentPostRepository.countByPostPostId(post.getPostId());
             postClubPaginationResponse.setCount_comments(countComments);
-            boolean isAdmin = clubRepository.existsByAdminUserUserId(post.getUserCreate().getUserId());
-            boolean isOwner = clubRepository.existsByCreatorUserUserId(post.getUserCreate().getUserId());
+            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
+            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
             postClubPaginationResponse.setUser_id(post.getUserCreate().getUserId());
             postClubPaginationResponse.setUser_name(post.getUserCreate().getFirstName() + " " + post.getUserCreate().getLastName());
             postClubPaginationResponse.setUser_avatar(post.getUserCreate().getAvatarPath());

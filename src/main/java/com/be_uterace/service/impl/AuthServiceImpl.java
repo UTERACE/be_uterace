@@ -97,6 +97,7 @@ public class AuthServiceImpl implements AuthService {
                 .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
                 .collect(Collectors.toList());
         return LoginResponse.builder()
+                .id(user.getUserId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .firstname(user.getFirstName())
@@ -143,6 +144,7 @@ public class AuthServiceImpl implements AuthService {
                         .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
                         .collect(Collectors.toList());
                 return ThirdPartyResponse.builder()
+                        .id(String.valueOf(user.getUserId()))
                         .accessToken(jwtTokenProvider.generateAccessToken(user.getUsername()))
                         .refreshToken(jwtTokenProvider.generateRefreshToken(user.getUsername()))
                         .isNewUser(false)
@@ -181,6 +183,7 @@ public class AuthServiceImpl implements AuthService {
                         .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
                         .collect(Collectors.toList());
                 return ThirdPartyResponse.builder()
+                        .id(String.valueOf(user.getUserId()))
                         .accessToken(jwtTokenProvider.generateAccessToken(user.getUsername()))
                         .refreshToken(jwtTokenProvider.generateRefreshToken(user.getUsername()))
                         .isNewUser(false)
@@ -192,8 +195,6 @@ public class AuthServiceImpl implements AuthService {
                         .build();
             }
         }
-
-
         return null;
     }
 
@@ -256,6 +257,7 @@ public class AuthServiceImpl implements AuthService {
             user.setTotalDistance(0.0);
             user.setStatus("1");
             user.setHomeNumber(registerDto.getAddress());
+            user.setName(registerDto.getLastname().trim() + " " + registerDto.getFirstname().trim());
             userRepository.save(user);
             return ResponseObject.builder().status(200)
                     .message(Constant.SUCCESS_REGISTER)

@@ -5,6 +5,8 @@ import com.be_uterace.entity.Club;
 import com.be_uterace.entity.User;
 import com.be_uterace.entity.UserClub;
 import com.be_uterace.entity.UserEvent;
+import com.be_uterace.payload.response.UserFindResponse;
+import com.be_uterace.payload.response.UserResponse;
 import com.be_uterace.utils.key.UserClubId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> {
@@ -37,6 +40,12 @@ public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> 
             @Param("searchName") String searchName,
             Pageable pageable
     );
+
     boolean existsByClubAndUser(Club club, User user);
+    @Query("SELECT new com.be_uterace.payload.response.UserFindResponse(uc.user.userId, uc.user.email, uc.user.firstName, " +
+            "uc.user.lastName, uc.user.dateOfBirth, uc.user.gender) " +
+            "FROM UserClub uc WHERE uc.club.clubId = :clubId AND " +
+            "(uc.user.email = :search OR uc.user.name LIKE %:search%)")
+    List<UserFindResponse> findUserByClub(int clubId, String search);
 
 }

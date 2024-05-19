@@ -51,7 +51,7 @@ public class CommentPostServiceImpl implements CommentPostService {
                 commentPostRepository.save(commentPost);
                 return new ResponseObject(200, "Comment added successfully");
             }
-            return new ResponseObject(400, "Comment already exists");
+            return new ResponseObject(401, "You are not authorized to comment on this post");
         } catch (Exception e) {
             return new ResponseObject(400, "Error adding comment");
         }
@@ -60,8 +60,8 @@ public class CommentPostServiceImpl implements CommentPostService {
     @Override
     public ResponseObject updateComment(CommentDto commentDto) {
         Optional<User> user = authenticatedUser();
-        if (commentPostRepository.existsByPostPostIdAndUserUserId(commentDto.getId(), user.orElseThrow().getUserId())) {
-            CommentPost commentPost = commentPostRepository.findByPostPostIdAndUserUserId(commentDto.getId(), user.orElseThrow().getUserId());
+        if (commentPostRepository.existsByCommentIdAndUserUserId(commentDto.getId(), user.orElseThrow().getUserId())) {
+            CommentPost commentPost = commentPostRepository.findByCommentIdAndUserUserId(commentDto.getId(), user.orElseThrow().getUserId());
             commentPost.setCommentContent(commentDto.getContent());
             commentPostRepository.save(commentPost);
             return new ResponseObject(200, "Comment updated successfully");
@@ -74,6 +74,7 @@ public class CommentPostServiceImpl implements CommentPostService {
         if (commentPostRepository.existsById(comment_id)) {
             CommentPost commentPost = commentPostRepository.findById(comment_id).orElseThrow();
             if (commentPost.getUser().getUserId().equals(user.orElseThrow().getUserId())) {
+                reactionCommentRepository.deleteAll(reactionCommentRepository.findByComment(commentPost));
                 commentPostRepository.delete(commentPost);
                 return new ResponseObject(200, "Comment deleted successfully");
             }
@@ -83,8 +84,37 @@ public class CommentPostServiceImpl implements CommentPostService {
     }
 
     @Override
+    public ResponseObject hideComment(Integer postId) {
+        Optional<User> user = authenticatedUser();
+        CommentPost commentPost = commentPostRepository.findById(postId).orElseThrow();
+        if (clubRepository.existsByAdminUserUserIdAndClubId(user.orElseThrow().getUserId(), commentPost.getPost().getClub().getClubId())) {
+            commentPost.setStatus("1");
+            commentPostRepository.save(commentPost);
+            return new ResponseObject(200, "Comment hidden successfully");
+        }
+        return new ResponseObject(400, "Comment does not exist");
+    }
+
+    @Override
+    public ResponseObject unhideComment(Integer postId) {
+        Optional<User> user = authenticatedUser();
+        CommentPost commentPost = commentPostRepository.findById(postId).orElseThrow();
+        if (clubRepository.existsByAdminUserUserIdAndClubId(user.orElseThrow().getUserId(), commentPost.getPost().getClub().getClubId())) {
+            commentPost.setStatus("0");
+            commentPostRepository.save(commentPost);
+            return new ResponseObject(200, "Comment unhidden successfully");
+        }
+        return new ResponseObject(400, "Comment does not exist");
+    }
+
+    @Override
+    public ResponseObject reportComment(Integer postId) {
+        return null;
+    }
+
+    @Override
     public List<CommentResponse> getComments(Integer postId, Integer page) {
-        Page<CommentPost> commentPosts = commentPostRepository.findByPostPostIdAndReplyToIsNull(postId, Pageable.ofSize(10).withPage(page - 1));
+        Page<CommentPost> commentPosts = commentPostRepository.findByPostPostIdAndReplyToIsNullAndStatusOrderByCreatedAtAsc(postId, Pageable.ofSize(10).withPage(page - 1), "0");
         return commentResponses(commentPosts);
     }
 
@@ -120,8 +150,8 @@ public class CommentPostServiceImpl implements CommentPostService {
             commentResponse.setUser_id(commentPost.getUser().getUserId());
             commentResponse.setUser_name(commentPost.getUser().getFirstName() + " " + commentPost.getUser().getLastName());
             commentResponse.setUser_avatar(commentPost.getUser().getAvatarPath());
-            boolean isAdmin = clubRepository.existsByAdminUserUserId(commentPost.getUser().getUserId());
-            boolean isOwner = clubRepository.existsByCreatorUserUserId(commentPost.getUser().getUserId());
+            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(commentPost.getUser().getUserId(), commentPost.getPost().getClub().getClubId());
+            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(commentPost.getUser().getUserId(), commentPost.getPost().getClub().getClubId());
             commentResponse.setUser_role(isAdmin ? "admin" : isOwner ? "owner" : "member");
             boolean is_liked = reactionCommentRepository.existsByCommentCommentIdAndUserUserId(commentPost.getCommentId(), user.orElseThrow().getUserId());
             commentResponse.set_liked(is_liked);

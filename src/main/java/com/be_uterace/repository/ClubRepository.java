@@ -68,6 +68,7 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "c.totalActivities AS totalActivities, " +
             "c.createdAt AS createdAt, " +
             "CONCAT(u.firstName, ' ', u.lastName) AS admin, " +
+            "u.userId AS adminId, " +
             "c.numOfMales AS numMales, " +
             "c.numOfFemales AS numFemales, " +
             "c.minPace AS minPace, " +
@@ -84,7 +85,7 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "c.clubTotalDistance, " +
             "c.totalActivities, " +
             "c.createdAt, " +
-            "u.firstName, u.lastName")
+            "u.firstName, u.lastName, u.userId")
     ClubDetailProjection getClubDetails(@Param("clubId") int clubId);
 
     @Query("SELECT c.clubId AS clubId, " +
@@ -98,6 +99,17 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "AND unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId")
     Page<ClubProjection> findOwnClubPagination(@Param("search_name") String search_name,Pageable pageable, @Param("creatorId") Long creatorId);
+    @Query("SELECT c.clubId AS clubId, " +
+            "c.clubName AS clubName," +
+            "c.picturePath AS picturePath, " +
+            "c.clubTotalDistance AS clubTotalDistance, " +
+            "COUNT(uc.user.userId) AS memberCount " +
+            "FROM Club c " +
+            "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "WHERE c.adminUser.userId = :creatorId " +
+            "AND unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
+            "GROUP BY c.clubId")
+    Page<ClubProjection> findManageClubPagination(@Param("search_name") String search_name,Pageable pageable, @Param("creatorId") Long creatorId);
 
 
     @Query("SELECT c.clubId AS clubId, " +
@@ -139,6 +151,6 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     @Query("SELECT c FROM Club c WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
     Page<Club> searchClubManage(@Param("searchName") String searchName, Pageable pageable);
 
-    boolean existsByCreatorUserUserId(Long userId);
-    boolean existsByAdminUserUserId(Long userId);
+    boolean existsByCreatorUserUserIdAndClubId(Long userId, Integer clubId);
+    boolean existsByAdminUserUserIdAndClubId(Long userId, Integer clubId);
 }

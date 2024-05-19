@@ -1,6 +1,7 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.ReactionDto;
+import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.service.ReactionService;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,32 +15,32 @@ public class ReactionController {
     }
 
     @PostMapping("/club")
-    public void addReactionClub(@RequestBody ReactionDto reactionDto) {
-        reactionService.addReactionClub(reactionDto);
+    public ResponseObject addReactionClub(@RequestBody ReactionDto reactionDto) {
+        return reactionService.addReactionClub(reactionDto);
     }
 
     @DeleteMapping("/club/{club_id}")
-    public void deleteReactionClub(@PathVariable Integer club_id) {
-        reactionService.deleteReactionClub(club_id);
+    public ResponseObject deleteReactionClub(@PathVariable Integer club_id) {
+        return reactionService.deleteReactionClub(club_id);
     }
 
     @PostMapping("/post")
-    public void addReaction(@RequestBody ReactionDto reactionDto) {
-        reactionService.addReaction(reactionDto);
+    public ResponseObject addReaction(@RequestBody ReactionDto reactionDto) {
+        return reactionService.addReaction(reactionDto);
     }
 
     @DeleteMapping("/post/{post_id}")
-    public void deleteReaction(@PathVariable Integer post_id) {
-        reactionService.deleteReaction(post_id);
+    public ResponseObject deleteReaction(@PathVariable Integer post_id) {
+        return reactionService.deleteReaction(post_id);
     }
 
     @PostMapping("/comment")
-    public void addReactionComment(@RequestBody ReactionDto reactionDto) {
-        reactionService.addReactionComment(reactionDto);
+    public ResponseObject addReactionComment(@RequestBody ReactionDto reactionDto) {
+        return reactionService.addReactionComment(reactionDto);
     }
 
     @DeleteMapping("/comment/{comment_id}")
-    public void deleteReactionComment(@PathVariable Integer comment_id) {
-        reactionService.deleteReactionComment(comment_id);
+    public ResponseObject deleteReactionComment(@PathVariable Integer comment_id) {
+        return reactionService.deleteReactionComment(comment_id);
     }
 }

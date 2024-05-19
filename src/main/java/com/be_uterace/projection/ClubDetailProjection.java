@@ -12,6 +12,7 @@ public interface ClubDetailProjection {
     Integer getTotalActivities();
     Date getCreatedAt();
     String getAdmin();
+    Long getAdminId();
     Integer getNumMales();
     Integer getNumFemales();
     Double getMinPace();

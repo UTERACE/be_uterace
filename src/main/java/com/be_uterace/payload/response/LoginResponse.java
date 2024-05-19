@@ -9,6 +9,7 @@ import java.util.Map;
 @Setter
 @Builder
 public class LoginResponse {
+    private Long id;
     private String accessToken;
     private String refreshToken;
     private String firstname;

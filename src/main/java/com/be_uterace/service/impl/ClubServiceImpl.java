@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,10 +58,10 @@ public class ClubServiceImpl implements ClubService {
     @Override
     public ClubPaginationResponse getAllClub(int current_page, int per_page, String search) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
-        Page<ClubProjection> clubProjectionPage = clubRepository.findAllClubPagination(search ,pageable);
+        Page<ClubProjection> clubProjectionPage = clubRepository.findAllClubPagination(search, pageable);
         List<ClubProjection> clubProjectionList = clubProjectionPage.getContent();
         List<ClubResponse> clubResponseList = new ArrayList<>();
-        for (ClubProjection item : clubProjectionList){
+        for (ClubProjection item : clubProjectionList) {
             ClubResponse clubResponse = new ClubResponse();
             clubResponse.setClub_id(item.getClubId());
             clubResponse.setName(item.getClubName());
@@ -72,7 +73,7 @@ public class ClubServiceImpl implements ClubService {
 
         return ClubPaginationResponse.builder()
                 .per_page(clubProjectionPage.getSize())
-                .current_page(clubProjectionPage.getNumber()+1)
+                .current_page(clubProjectionPage.getNumber() + 1)
                 .total_page(clubProjectionPage.getTotalPages())
                 .total_clubs((int) clubProjectionPage.getTotalElements())
                 .clubs(clubResponseList).build();
@@ -84,7 +85,7 @@ public class ClubServiceImpl implements ClubService {
 //        List<Post> postList = postRepository.findPostsCreatedByClubAdmin(club_id);
         List<Post> postList = postRepository.getPostsByClubClubId(club_id);
         List<PostResponse> postResponses = new ArrayList<>();
-        for (Post item : postList){
+        for (Post item : postList) {
             PostResponse response = new PostResponse();
             response.setNews_id(item.getPostId());
             response.setName(item.getTitle());
@@ -106,6 +107,7 @@ public class ClubServiceImpl implements ClubService {
                 .news(postResponses)
                 .created_at(clubDetailProjection.getCreatedAt())
                 .manager(clubDetailProjection.getAdmin())
+                .manager_id(clubDetailProjection.getAdminId())
                 .male(clubDetailProjection.getNumMales())
                 .female(clubDetailProjection.getNumFemales())
                 .min_pace(clubDetailProjection.getMinPace())
@@ -143,37 +145,37 @@ public class ClubServiceImpl implements ClubService {
                 userClub.setClub(club);
                 userClub.setUser(userOptional.get());
                 userClubRepository.save(userClub);
-                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Tạo clb thành công");
+                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS, "Tạo clb thành công");
                 return responseObject;
             }
         }
-        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Tạo clb thất bại");
+        ResponseObject responseObject = new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR, "Tạo clb thất bại");
         return responseObject;
 
     }
 
     @Override
     public ResponseEntity<ResponseObject> updateClub(ClubUpdateDto clubUpdateDto, Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.UNAUTHORIZED,"Bạn không có quyền thực hiện hành động này"));
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.UNAUTHORIZED, "Bạn không có quyền thực hiện hành động này"));
         }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy user"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy user"));
         }
         Optional<Club> clubOptional = clubRepository.findById(clubUpdateDto.getClub_id());
-        if (clubOptional.isEmpty()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy clb"));
+        if (clubOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy clb"));
         }
         Club club = clubOptional.get();
         club.setClubName(clubUpdateDto.getName() != null && !Objects.equals(clubUpdateDto.getName(), "") ? clubUpdateDto.getName() : club.getClubName());
         club.setDescription(clubUpdateDto.getDescription() != null && !Objects.equals(clubUpdateDto.getDescription(), "") ? clubUpdateDto.getDescription() : club.getDescription());
-        if (!club.getPicturePath().equals(clubUpdateDto.getImage()) && !Objects.equals(clubUpdateDto.getImage(), "")){
+        if (!club.getPicturePath().equals(clubUpdateDto.getImage()) && !Objects.equals(clubUpdateDto.getImage(), "")) {
             if (Objects.equals(club.getPicturePath(), ""))
                 club.setPicturePath(fileService.saveImage(clubUpdateDto.getImage()));
-            else if (fileService.deleteImage(club.getPicturePath())){
+            else if (fileService.deleteImage(club.getPicturePath())) {
                 System.out.println("Delete Image Successful");
                 club.setPicturePath(fileService.saveImage(clubUpdateDto.getImage()));
             }
@@ -182,7 +184,7 @@ public class ClubServiceImpl implements ClubService {
         club.setMinPace(clubUpdateDto.getMin_pace() != null ? clubUpdateDto.getMin_pace() : club.getMinPace());
         club.setMaxPace(clubUpdateDto.getMax_pace() != null ? clubUpdateDto.getMax_pace() : club.getMaxPace());
         clubRepository.save(club);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(StatusCode.SUCCESS,"Cập nhật clb thành công"));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject(StatusCode.SUCCESS, "Cập nhật clb thành công"));
     }
 
     @Override
@@ -191,8 +193,8 @@ public class ClubServiceImpl implements ClubService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Optional<Club> clubOptional = clubRepository.findClubByClubIdAndAdminUser_UserId(club_id,userOptional.get().getUserId());
-                if (clubOptional.isPresent()){
+                Optional<Club> clubOptional = clubRepository.findClubByClubIdAndAdminUser_UserId(club_id, userOptional.get().getUserId());
+                if (clubOptional.isPresent()) {
                     clubRepository.delete(clubOptional.get());
                     ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS, "Xóa clb thành công");
                     return ResponseEntity.status(HttpStatus.OK).body(responseObject);
@@ -201,37 +203,48 @@ public class ClubServiceImpl implements ClubService {
             }
         }
 
-        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Xóa clb thất bại");
+        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, "Xóa clb thất bại");
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @Override
     public ResponseEntity<ResponseObject> deleteMember(UserClubRequest req) {
-        Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(),req.getUser_id());
+        Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(), req.getUser_id());
         if (userClubOptional.isPresent()) {
             userClubRepository.delete(userClubOptional.get());
-            ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Xóa thành viên thành công");
+            ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS, "Xóa thành viên thành công");
             return ResponseEntity.status(HttpStatus.OK).body(responseObject);
         }
-        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Xóa thành viên thất bại");
+        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, "Xóa thành viên thất bại");
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @Override
     public ResponseEntity<ResponseObject> changeAdmin(UserClubRequest req) {
-        Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(),req.getUser_id());
-        if (userClubOptional.isPresent()) {
-            Optional<Club> clubOptional = clubRepository.findById(req.getClub_id());
-            if (clubOptional.isPresent()){
-                Club club = clubOptional.get();
-                club.setAdminUser(userClubOptional.get().getUser());
-                clubRepository.save(club);
-                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Đổi admin thành công");
-                return ResponseEntity.status(HttpStatus.OK).body(responseObject);
-            }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
+
+        Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(), req.getUser_id());
+        if (userClubOptional.isEmpty()) {
+            ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, "Người dùng không tồn tại trong clb");
+            return ResponseEntity.status(HttpStatus.OK).body(responseObject);
         }
-        ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT,"Đổi admin thất bại");
+        Optional<Club> clubOptional = clubRepository.findClubByClubIdAndAdminUser_UserId(req.getClub_id(), user.get().getUserId());
+        if (clubOptional.isEmpty()) {
+            ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, "Câu lạc bộ không tồn tại");
+            return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        }
+        Club club = clubOptional.get();
+        club.setAdminUser(userClubOptional.get().getUser());
+        clubRepository.save(club);
+        ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS, "Đổi admin thành công");
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @Override
+    public List<UserFindResponse> findUserByClubId(int club_id, String search) {
+        return userClubRepository.findUserByClub(club_id, search);
     }
 
     @Override
@@ -241,10 +254,40 @@ public class ClubServiceImpl implements ClubService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
-                Page<ClubProjection> clubPage = clubRepository.findOwnClubPagination(search ,pageable, userOptional.get().getUserId());
+                Page<ClubProjection> clubPage = clubRepository.findOwnClubPagination(search, pageable, userOptional.get().getUserId());
                 List<ClubProjection> clubProjectionList = clubPage.getContent();
                 List<ClubResponse> clubResponseList = new ArrayList<>();
-                for (ClubProjection item : clubProjectionList){
+                for (ClubProjection item : clubProjectionList) {
+                    ClubResponse clubResponse = new ClubResponse();
+                    clubResponse.setClub_id(item.getClubId());
+                    clubResponse.setName(item.getClubName());
+                    clubResponse.setImage(item.getPicturePath());
+                    clubResponse.setTotal_member(item.getMemberCount());
+                    clubResponse.setTotal_distance(item.getClubTotalDistance());
+                    clubResponseList.add(clubResponse);
+                }
+                return ClubPaginationResponse.builder()
+                        .per_page(clubPage.getSize())
+                        .current_page(clubPage.getNumber() + 1)
+                        .total_page(clubPage.getTotalPages())
+                        .total_clubs((int) clubPage.getTotalElements())
+                        .clubs(clubResponseList).build();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ClubPaginationResponse getManageClubCreated(int current_page, int per_page, String search, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if (userOptional.isPresent()) {
+                Pageable pageable = PageRequest.of(current_page - 1, per_page);
+                Page<ClubProjection> clubPage = clubRepository.findManageClubPagination(search, pageable, userOptional.get().getUserId());
+                List<ClubProjection> clubProjectionList = clubPage.getContent();
+                List<ClubResponse> clubResponseList = new ArrayList<>();
+                for (ClubProjection item : clubProjectionList) {
                     ClubResponse clubResponse = new ClubResponse();
                     clubResponse.setClub_id(item.getClubId());
                     clubResponse.setName(item.getClubName());
@@ -274,7 +317,7 @@ public class ClubServiceImpl implements ClubService {
                 Page<ClubProjection> clubPage = clubRepository.findClubJoined(search, pageable, userOptional.get().getUserId());
                 List<ClubProjection> clubProjectionList = clubPage.getContent();
                 List<ClubResponse> clubResponseList = new ArrayList<>();
-                for (ClubProjection item : clubProjectionList){
+                for (ClubProjection item : clubProjectionList) {
                     ClubResponse clubResponse = new ClubResponse();
                     clubResponse.setClub_id(item.getClubId());
                     clubResponse.setName(item.getClubName());
@@ -327,9 +370,9 @@ public class ClubServiceImpl implements ClubService {
             if (userOptional.isPresent()) {
                 Optional<Club> clubOptional = clubRepository.findById(club_id);
                 Optional<UserClub> userClubbool = userClubRepository.findByClubIdAndUserId(
-                        clubOptional.get().getClubId(),userOptional.get().getUserId());
-                if(userClubbool.isPresent()){
-                    return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"User đã tham gia club này");
+                        clubOptional.get().getClubId(), userOptional.get().getUserId());
+                if (userClubbool.isPresent()) {
+                    return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR, "User đã tham gia club này");
 
                 }
                 UserClub userClub = new UserClub();
@@ -346,10 +389,10 @@ public class ClubServiceImpl implements ClubService {
                 else
                     club.setNumOfFemales(club.getNumOfFemales() + 1);
                 clubRepository.save(club);
-                return new ResponseObject(StatusCode.SUCCESS,"Tham gia clb thành công");
+                return new ResponseObject(StatusCode.SUCCESS, "Tham gia clb thành công");
             }
         }
-        return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Tham gia clb thất bại");
+        return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR, "Tham gia clb thất bại");
     }
 
     @Override
@@ -359,7 +402,7 @@ public class ClubServiceImpl implements ClubService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
-                        club_id,userOptional.get().getUserId());
+                        club_id, userOptional.get().getUserId());
                 userClubRepository.delete(userClubOptional.get());
                 Club club = clubRepository.findById(club_id).get();
                 club.setNumOfAttendee(club.getNumOfAttendee() - 1);
@@ -368,11 +411,11 @@ public class ClubServiceImpl implements ClubService {
                 else if (Objects.equals(userOptional.get().getGender(), "Nữ") && club.getNumOfFemales() > 0)
                     club.setNumOfFemales(club.getNumOfFemales() - 1);
                 clubRepository.save(club);
-                return new ResponseObject(StatusCode.SUCCESS,"Rời clb thành công");
+                return new ResponseObject(StatusCode.SUCCESS, "Rời clb thành công");
 
             }
         }
-        return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR,"Rời clb thất bại");
+        return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR, "Rời clb thất bại");
     }
 
     @Override
@@ -382,7 +425,7 @@ public class ClubServiceImpl implements ClubService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
-                        club_id,userOptional.get().getUserId());
+                        club_id, userOptional.get().getUserId());
                 return userClubOptional.isPresent();
             }
         }
@@ -392,7 +435,7 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public ResponseObject deleteActivity(DeleteActivityClub req) {
-        int updatedRows = ucActivityRepository.updateStatusAndReasonByClubIdAndRunId(req.getReason(),req.getClub_id(),req.getActivity_id());
+        int updatedRows = ucActivityRepository.updateStatusAndReasonByClubIdAndRunId(req.getReason(), req.getClub_id(), req.getActivity_id());
 
         return Optional.of(updatedRows)
                 .filter(rows -> rows > 0)
@@ -411,27 +454,27 @@ public class ClubServiceImpl implements ClubService {
         LocalDateTime thresholdDateTime = now.minusHours(hours);
         Timestamp thresholdTimestamp = Timestamp.valueOf(thresholdDateTime);
 
-        if(search==null || search.isEmpty()) {
-            activityPage = ucActivityRepository.findActivityByDateTimeAndName(thresholdTimestamp, null, clubId,pageable);
+        if (search == null || search.isEmpty()) {
+            activityPage = ucActivityRepository.findActivityByDateTimeAndName(thresholdTimestamp, null, clubId, pageable);
         } else {
-            activityPage = ucActivityRepository.findActivityByDateTimeAndName(thresholdTimestamp, search,clubId,pageable);
+            activityPage = ucActivityRepository.findActivityByDateTimeAndName(thresholdTimestamp, search, clubId, pageable);
         }
         List<UserClubActivity> userClubActivityList = activityPage.getContent();
         List<RecentActiveResponse.Activity> arrayList = new ArrayList<>();
-        for (UserClubActivity userClubActivity : userClubActivityList){
+        for (UserClubActivity userClubActivity : userClubActivityList) {
             Run run = userClubActivity.getRun();
             RecentActiveResponse.Activity activityResponse = new RecentActiveResponse.Activity();
             activityResponse.setActivity_id(run.getRunId());
             activityResponse.setMember_id(run.getUser().getUserId());
             activityResponse.setMember_image(run.getUser().getAvatarPath());
-            activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());
+            activityResponse.setMember_name(run.getUser().getFirstName() + " " + run.getUser().getLastName());
             activityResponse.setActivity_start_date(run.getCreatedAt());
             activityResponse.setActivity_distance(run.getDistance());
             activityResponse.setActivity_pace(run.getPace());
             activityResponse.setActivity_duration(run.getDuration());
             activityResponse.setActivity_name(run.getName());
             activityResponse.setActivity_type(run.getType());
-            activityResponse.setActivity_link_strava("https://www.strava.com/activities/"+run.getStravaRunId());
+            activityResponse.setActivity_link_strava("https://www.strava.com/activities/" + run.getStravaRunId());
             activityResponse.setActivity_map(run.getSummaryPolyline());
             activityResponse.setStatus(run.getStatus());
             activityResponse.setReason(run.getReason());
@@ -448,17 +491,16 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public RankingMemberResponse getScoreBoardClubMember(int club_id, int current_page, int per_page, String search_name) {
-        Pageable pageable = PageRequest.of(current_page-1, per_page);
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
         clubRepository.findById(club_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found"));
         Page<UserClub> userClubPage;
-        if(search_name==null || search_name.isEmpty()){
-            userClubPage = userClubRepository.findByClubIdAndSearchName(club_id,null,pageable);
-        }
-        else userClubPage = userClubRepository.findByClubIdAndSearchName(club_id, search_name,pageable);
+        if (search_name == null || search_name.isEmpty()) {
+            userClubPage = userClubRepository.findByClubIdAndSearchName(club_id, null, pageable);
+        } else userClubPage = userClubRepository.findByClubIdAndSearchName(club_id, search_name, pageable);
         List<UserClub> userClubList = userClubPage.getContent();
 
         List<RankingMemberResponse.RankingUser> rankingUserList = new ArrayList<>();
-        for (UserClub userClub : userClubList){
+        for (UserClub userClub : userClubList) {
             RankingMemberResponse.RankingUser rankingUser = new RankingMemberResponse.RankingUser();
             User user = userClub.getUser();
             rankingUser.setUser_id(user.getUserId());
@@ -475,7 +517,7 @@ public class ClubServiceImpl implements ClubService {
         return RankingMemberResponse.builder()
                 .per_page(userClubPage.getSize())
                 .total_user((int) userClubPage.getTotalElements())
-                .current_page(userClubPage.getNumber()+1)
+                .current_page(userClubPage.getNumber() + 1)
                 .total_page(userClubPage.getTotalPages())
                 .ranking_user(rankingUserList)
                 .build();

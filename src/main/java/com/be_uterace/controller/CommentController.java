@@ -41,4 +41,12 @@ public class CommentController {
     public ResponseObject deleteComment(@PathVariable Integer post_id) {
         return commentPostService.deleteComment(post_id);
     }
+    @PutMapping("/hide/{post_id}")
+    public ResponseObject hideComment(@PathVariable Integer post_id) {
+        return commentPostService.hideComment(post_id);
+    }
+    @PutMapping("/unhide/{post_id}")
+    public ResponseObject unhideComment(@PathVariable Integer post_id) {
+        return commentPostService.unhideComment(post_id);
+    }
 }

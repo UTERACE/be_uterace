@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
 @Service
 public class ReactionServiceImpl implements ReactionService {
     private final ReactionPostRepository reactionPostRepository;
@@ -20,8 +21,9 @@ public class ReactionServiceImpl implements ReactionService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final ClubRepository clubRepository;
+    private final UserClubRepository userClubRepository;
 
-    public ReactionServiceImpl(ReactionPostRepository reactionPostRepository, ReactionClubRepository reactionClubRepository, ReactionCommentRepository reactionCommentRepository, CommentPostRepository commentPostRepository, UserRepository userRepository, PostRepository postRepository, ClubRepository clubRepository) {
+    public ReactionServiceImpl(ReactionPostRepository reactionPostRepository, ReactionClubRepository reactionClubRepository, ReactionCommentRepository reactionCommentRepository, CommentPostRepository commentPostRepository, UserRepository userRepository, PostRepository postRepository, ClubRepository clubRepository, UserClubRepository userClubRepository) {
         this.reactionPostRepository = reactionPostRepository;
         this.reactionClubRepository = reactionClubRepository;
         this.reactionCommentRepository = reactionCommentRepository;
@@ -29,15 +31,19 @@ public class ReactionServiceImpl implements ReactionService {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.clubRepository = clubRepository;
+        this.userClubRepository = userClubRepository;
     }
 
     @Override
     public ResponseObject addReaction(ReactionDto reactionDto) {
         Optional<User> user = authenticatedUser();
+        Optional<Post> post = postRepository.findById(reactionDto.getId());
+        if (!userClubRepository.existsByClubAndUser(post.orElseThrow().getClub(), user.orElseThrow())) {
+            return new ResponseObject(401, "You are not authorized to react to this post");
+        }
         if (!reactionPostRepository.existsByPostPostIdAndUserUserId(reactionDto.getId(), user.orElseThrow().getUserId())) {
             ReactionPost reactionPost = new ReactionPost(reactionDto.getReactionType());
             reactionPost.setUser(user.orElseThrow());
-            Optional<Post> post = postRepository.findById(reactionDto.getId());
             reactionPost.setPost(post.orElseThrow());
             reactionPostRepository.save(reactionPost);
             return new ResponseObject(200, "Reaction added successfully");
@@ -49,7 +55,7 @@ public class ReactionServiceImpl implements ReactionService {
     public ResponseObject deleteReaction(Integer postId) {
         Optional<User> user = authenticatedUser();
         if (reactionPostRepository.existsByPostPostIdAndUserUserId(postId, user.orElseThrow().getUserId())) {
-            ReactionPost reactionPost= reactionPostRepository.findByPostPostIdAndUserUserId(postId, user.orElseThrow().getUserId());
+            ReactionPost reactionPost = reactionPostRepository.findByPostPostIdAndUserUserId(postId, user.orElseThrow().getUserId());
             reactionPostRepository.delete(reactionPost);
             return new ResponseObject(200, "Reaction deleted successfully");
         }

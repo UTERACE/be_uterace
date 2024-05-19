@@ -22,6 +22,7 @@ public class ClubDetailResponse {
     private Integer total_news;
     private Date created_at;
     private String manager;
+    private Long manager_id;
     private Integer male;
     private Integer female;
     private Double min_pace;

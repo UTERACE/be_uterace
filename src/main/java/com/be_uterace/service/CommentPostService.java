@@ -10,6 +10,9 @@ public interface CommentPostService {
     ResponseObject addComment(CommentDto commentDto);
     ResponseObject updateComment(CommentDto commentDto);
     ResponseObject deleteComment(Integer postId);
+    ResponseObject hideComment(Integer postId);
+    ResponseObject unhideComment(Integer postId);
+    ResponseObject reportComment(Integer postId);
     List<CommentResponse> getComments(Integer postId, Integer page);
     List<CommentResponse> getCommentsByReplyTo(Integer replyTo, Integer page);
 }

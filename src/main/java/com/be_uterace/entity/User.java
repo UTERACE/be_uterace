@@ -36,6 +36,8 @@ public class User {
     @Column(name = "CREATED_AT")
     private Timestamp createdAt;
 
+    @Column(name = "NAME")
+    private String name;
     @Column(name = "FIRSTNAME")
     private String firstName;
 
@@ -59,13 +61,13 @@ public class User {
     private Double totalDistance;
 
     @Column(name = "PACE")
-    private Double pace=0.0;
+    private Double pace = 0.0;
 
     @Column(name = "RANKING")
     private Integer ranking;
 
     @Column(name = "STATUS")
-    private String status="1";
+    private String status = "1";
 
     @Column(name = "LINK_FB")
     private String linkFb;

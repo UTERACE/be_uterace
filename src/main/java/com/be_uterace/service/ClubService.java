@@ -1,9 +1,12 @@
 package com.be_uterace.service;
 
+import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.*;
 import com.be_uterace.payload.response.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 public interface ClubService {
     ClubPaginationResponse getAllClub(int current_page, int per_page, String search);
@@ -20,7 +23,11 @@ public interface ClubService {
 
     ResponseEntity<ResponseObject> changeAdmin(UserClubRequest userClubRequest);
 
+    List<UserFindResponse> findUserByClubId(int club_id, String search);
+
     ClubPaginationResponse getOwnClubCreated(int current_page, int per_page, String search, Authentication authentication);
+
+    ClubPaginationResponse getManageClubCreated(int current_page, int per_page, String search, Authentication authentication);
 
     ClubPaginationResponse getClubJoined(int current_page, int per_page, String search, Authentication authentication);
 
