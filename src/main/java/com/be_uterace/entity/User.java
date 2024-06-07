@@ -116,6 +116,9 @@ public class User {
     @Column(name = "LAST_SYNC")
     private Timestamp last_sync;
 
+//    @OneToMany(mappedBy = "USER", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<Payment> payments;
+
     public User(Long userId) {
         this.userId = userId;
     }

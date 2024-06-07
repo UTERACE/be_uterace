@@ -1,0 +1,31 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="BeUteraceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="db_password" value="fCMqhn9fZpXUuVoscmSOS1x1rQ9ykJfu" />
+      <env name="db_url" value="jdbc:postgresql://dpg-clims9fjc5ks739aofag-a.singapore-postgres.render.com:5432/uterace_3cvy" />
+      <env name="db_username" value="sinhhung" />
+      <env name="jwt-secret" value="184b6620c10ef0bfc396fbf3205caa3bd3347910100ec32e772f912a1b45ca60" />
+      <env name="mail_password" value="nqgcxptiaomdicyr" />
+      <env name="mail_username" value="hung66522@gmail.com" />
+      <env name="recaptcha_secret" value="6LdE3BQoAAAAABUqM73N9WvK_MLN2tVxhPC4aLSC" />
+      <env name="strava.client_id" value="110763" />
+      <env name="strava.client_secret" value="d5ce586f678bf958731f5b8371dbe69ce27c061e" />
+    </envs>
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <module name="be_uterace" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.be_uterace.BeUteraceApplication" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
