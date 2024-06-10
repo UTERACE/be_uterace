@@ -1,9 +1,10 @@
 package com.be_uterace.service;
 
-import com.be_uterace.payload.request.LockRequest;
+import com.be_uterace.payload.momo.MomoCreateVm;
+import com.be_uterace.payload.momo.MomoResponseCreate;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.vnpay.PaymentReturnVNPAY;
-import com.be_uterace.payload.vnpay.VnPayQuery;
+import com.be_uterace.utils.MomoEncoder;
 import com.be_uterace.utils.VNPay;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,8 +27,52 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
-    public ResponseObject createOrderMOMO(Integer user_id, LockRequest lockRequest) {
-        return null;
+    private final MomoEncoder momoEncoder;
+    public MomoResponseCreate createOrderMOMO(Integer user_id) throws IOException, InterruptedException {
+        String idrandom = MomoEncoder.generateRequestId();
+
+        MomoCreateVm momoRequest = new MomoCreateVm();
+        momoRequest.setPartnerCode(momoEncoder.getPartnerCode());
+        momoRequest.setRequestId(idrandom);
+        momoRequest.setAmount(10000);
+        momoRequest.setOrderId(idrandom);
+        momoRequest.setOrderInfo("testthanhtoanmomo");
+        momoRequest.setRedirectUrl("http://localhost:8080/Shopee/pay/result");
+        momoRequest.setIpnUrl("http://localhost:8080/Shopee/pay/result");
+        momoRequest.setRequestType("captureWallet");
+        momoRequest.setExtraData("eyJ1c2VybmFtZSI6ICJtb21vIn0");
+        momoRequest.setLang("vi");
+
+        String decode = "accessKey=" + momoEncoder.getAccessKey()
+                + "&amount=" + momoRequest.getAmount()
+                + "&extraData=" + momoRequest.getExtraData()
+                + "&ipnUrl=" + momoRequest.getIpnUrl()
+                + "&orderId=" + momoRequest.getOrderId()
+                + "&orderInfo=" + momoRequest.getOrderInfo()
+                + "&partnerCode=" + momoRequest.getPartnerCode()
+                + "&redirectUrl=" + momoRequest.getRedirectUrl()
+                + "&requestId=" + momoRequest.getRequestId()
+                + "&requestType=" + momoRequest.getRequestType();
+
+        String signature = momoEncoder.encode(decode);
+        momoRequest.setSignature(signature);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequest = objectMapper.writeValueAsString(momoRequest);
+        System.out.println("JSON Request: " + jsonRequest);
+
+        // Create HttpClient and HttpRequest
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://test-payment.momo.vn/v2/gateway/api/create"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
+                .build();
+
+        // Send request and get response
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        MomoResponseCreate momoResponse = objectMapper.readValue(response.body(), MomoResponseCreate.class);
+        return momoResponse;
     }
 
     public ResponseObject createOrderVNPAY(int total, String orderInfor, String urlReturn){

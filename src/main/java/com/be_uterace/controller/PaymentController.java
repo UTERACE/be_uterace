@@ -1,5 +1,6 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.payload.momo.MomoResponseCreate;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.service.PaymentService;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,12 @@ public class PaymentController {
 
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
+    }
+
+    @PostMapping("/momo")
+    public ResponseEntity<MomoResponseCreate> momoController() throws IOException, InterruptedException {
+        MomoResponseCreate responseObject = paymentService.createOrderMOMO(1000000);
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @PostMapping("/vnpay")

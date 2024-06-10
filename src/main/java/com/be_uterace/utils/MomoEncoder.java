@@ -3,7 +3,11 @@ package com.be_uterace.utils;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
+@Component
 public class MomoEncoder {
 
     @Value("${momo.partner-code}")
@@ -13,9 +17,21 @@ public class MomoEncoder {
     @Value("${momo.secret-key}")
     private String secretKey;
 
-    public static String encode(String key, String data) {
+    public String getPartnerCode() {
+        return partnerCode;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public String encode(String data) {
         try {
-            byte[] keySect = "at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa".getBytes();
+            byte[] keySect = secretKey.getBytes();
             HmacUtils hm256 = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, keySect);
             //hm256 object can be used again and again
             String hmac = hm256.hmacHex(data);
@@ -24,6 +40,10 @@ public class MomoEncoder {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static String generateRequestId() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
 }
