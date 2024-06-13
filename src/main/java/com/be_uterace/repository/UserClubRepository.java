@@ -31,6 +31,7 @@ public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> 
     @Query("SELECT uc FROM UserClub uc " +
             "INNER JOIN uc.user u " +
             "WHERE uc.club.clubId = :clubId " +
+            "AND uc.status = '1' " +
             "AND (:searchName IS NULL " +
             "OR (unaccent(LOWER(u.firstName)) ILIKE unaccent(LOWER(:searchName)) " +
             "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName))))" +

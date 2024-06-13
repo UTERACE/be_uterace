@@ -209,9 +209,18 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public ResponseEntity<ResponseObject> deleteMember(UserClubRequest req) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
+        Optional<Club> clubOpt = clubRepository.findClubByClubIdAndAdminUser_UserId(req.getClub_id(), user.get().getUserId());
+        if (clubOpt.isEmpty()) {
+            ResponseObject responseObject = new ResponseObject(StatusCode.INVALID_ARGUMENT, "Bạn không có quyền xóa thành viên");
+            return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        }
         Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(req.getClub_id(), req.getUser_id());
         if (userClubOptional.isPresent()) {
-            userClubRepository.delete(userClubOptional.get());
+            userClubOptional.get().setStatus("0");
+            userClubRepository.save(userClubOptional.get());
             ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS, "Xóa thành viên thành công");
             return ResponseEntity.status(HttpStatus.OK).body(responseObject);
         }
@@ -363,17 +372,24 @@ public class ClubServiceImpl implements ClubService {
 
     @Override
     public ResponseObject joinClub(int club_id, Authentication authentication) {
-
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Optional<Club> clubOptional = clubRepository.findById(club_id);
-                Optional<UserClub> userClubbool = userClubRepository.findByClubIdAndUserId(
+                Club club = clubOptional.get();
+                club.setNumOfAttendee(club.getNumOfAttendee() + 1);
+                if (Objects.equals(userOptional.get().getGender(), "Nam"))
+                    club.setNumOfMales(club.getNumOfMales() + 1);
+                else
+                    club.setNumOfFemales(club.getNumOfFemales() + 1);
+                clubRepository.save(club);
+                Optional<UserClub> userClubOpt = userClubRepository.findByClubIdAndUserId(
                         clubOptional.get().getClubId(), userOptional.get().getUserId());
-                if (userClubbool.isPresent()) {
-                    return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR, "User đã tham gia club này");
-
+                if (userClubOpt.isPresent()) {
+                    userClubOpt.get().setStatus("1");
+                    userClubRepository.save(userClubOpt.get());
+                    return new ResponseObject(StatusCode.SUCCESS, "Tham gia clb thành công");
                 }
                 UserClub userClub = new UserClub();
                 userClub.setClub(clubOptional.get());
@@ -382,13 +398,6 @@ public class ClubServiceImpl implements ClubService {
                 userClub.setTotalDistance(0.0);
                 userClub.setPace(0.0);
                 userClubRepository.save(userClub);
-                Club club = clubOptional.get();
-                club.setNumOfAttendee(club.getNumOfAttendee() + 1);
-                if (Objects.equals(userOptional.get().getGender(), "Nam"))
-                    club.setNumOfMales(club.getNumOfMales() + 1);
-                else
-                    club.setNumOfFemales(club.getNumOfFemales() + 1);
-                clubRepository.save(club);
                 return new ResponseObject(StatusCode.SUCCESS, "Tham gia clb thành công");
             }
         }
@@ -400,19 +409,19 @@ public class ClubServiceImpl implements ClubService {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
-            if (userOptional.isPresent()) {
-                Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
-                        club_id, userOptional.get().getUserId());
-                userClubRepository.delete(userClubOptional.get());
-                Club club = clubRepository.findById(club_id).get();
-                club.setNumOfAttendee(club.getNumOfAttendee() - 1);
-                if (Objects.equals(userOptional.get().getGender(), "Nam") && club.getNumOfMales() > 0)
-                    club.setNumOfMales(club.getNumOfMales() - 1);
-                else if (Objects.equals(userOptional.get().getGender(), "Nữ") && club.getNumOfFemales() > 0)
-                    club.setNumOfFemales(club.getNumOfFemales() - 1);
-                clubRepository.save(club);
+            Club club = clubRepository.findById(club_id).get();
+            club.setNumOfAttendee(club.getNumOfAttendee() - 1);
+            if (Objects.equals(userOptional.get().getGender(), "Nam") && club.getNumOfMales() > 0)
+                club.setNumOfMales(club.getNumOfMales() - 1);
+            else if (Objects.equals(userOptional.get().getGender(), "Nữ") && club.getNumOfFemales() > 0)
+                club.setNumOfFemales(club.getNumOfFemales() - 1);
+            clubRepository.save(club);
+            Optional<UserClub> userClubOpt = userClubRepository.findByClubIdAndUserId(
+                    club_id, userOptional.get().getUserId());
+            if (userClubOpt.isPresent()) {
+                userClubOpt.get().setStatus("0");
+                userClubRepository.save(userClubOpt.get());
                 return new ResponseObject(StatusCode.SUCCESS, "Rời clb thành công");
-
             }
         }
         return new ResponseObject(StatusCode.INTERNAL_SERVER_ERROR, "Rời clb thất bại");

@@ -50,5 +50,8 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
     @Query("SELECT p FROM Post p WHERE unaccent(LOWER(p.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
     Page<Post> searchPostManage(@Param("searchName") String searchName, Pageable pageable);
 
-    Page<Post> getPostsByClubClubIdAndTitleContaining(Integer clubId, String search_name, Pageable pageable);
+    Page<Post> getPostsByClubClubIdAndTitleContainingOrderByCreatedAtDesc
+            (Integer clubId, String search_name, Pageable pageable);
+
+    Page<Post> getPostsByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(Integer club_clubId, String title, User userCreate, Pageable pageable);
 }

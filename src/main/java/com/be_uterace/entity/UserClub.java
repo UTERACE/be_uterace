@@ -42,5 +42,7 @@ public class UserClub {
     @Column(name = "PACE")
     private Double pace = 0.0;
 
+    @Column(name = "STATUS")
+    private String status = "1";
     // Getters and setters
 }

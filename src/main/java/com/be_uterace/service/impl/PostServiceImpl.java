@@ -225,7 +225,39 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostClubPaginationResponse> getPostClub(int club_id, int current_page, int per_page, String search_name) {
         Optional<User> userOptional = authenticatedUser();
-        List<Post> postList = postRepository.getPostsByClubClubIdAndTitleContaining(club_id, search_name, PageRequest.of(current_page - 1, per_page)).getContent();
+        List<Post> postList = postRepository.getPostsByClubClubIdAndTitleContainingOrderByCreatedAtDesc(club_id, search_name, PageRequest.of(current_page - 1, per_page)).getContent();
+        List<PostClubPaginationResponse> postClubPaginationResponses = new ArrayList<>();
+        for (Post post : postList) {
+            PostClubPaginationResponse postClubPaginationResponse = new PostClubPaginationResponse();
+            postClubPaginationResponse.setPost_id(post.getPostId());
+            postClubPaginationResponse.setPost_title(post.getTitle());
+            postClubPaginationResponse.setPost_content(post.getDescription());
+            postClubPaginationResponse.setPost_description(post.getHtmlContent());
+            postClubPaginationResponse.setPost_image(post.getImage());
+            postClubPaginationResponse.setPost_date(post.getCreatedAt().toString());
+            postClubPaginationResponse.setPost_outstanding(post.getOutstanding());
+            postClubPaginationResponse.setPost_status(post.getStatus());
+            boolean isLiked = reactionPostRepository.existsByPostPostIdAndReactionTypeAndUserUserId(post.getPostId(), "like", userOptional.orElseThrow().getUserId());
+            postClubPaginationResponse.set_liked(isLiked);
+            int countLikes = reactionPostRepository.countByPostPostId(post.getPostId());
+            postClubPaginationResponse.setCount_likes(countLikes);
+            int countComments = commentPostRepository.countByPostPostId(post.getPostId());
+            postClubPaginationResponse.setCount_comments(countComments);
+            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
+            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
+            postClubPaginationResponse.setUser_id(post.getUserCreate().getUserId());
+            postClubPaginationResponse.setUser_name(post.getUserCreate().getFirstName() + " " + post.getUserCreate().getLastName());
+            postClubPaginationResponse.setUser_avatar(post.getUserCreate().getAvatarPath());
+            postClubPaginationResponse.setUser_role(isAdmin ? "admin" : isOwner ? "owner" : "member");
+            postClubPaginationResponses.add(postClubPaginationResponse);
+        }
+        return postClubPaginationResponses;
+    }
+
+    @Override
+    public List<PostClubPaginationResponse> getMyPostClub(int club_id, int current_page, int per_page, String search_name) {
+        Optional<User> userOptional = authenticatedUser();
+        List<Post> postList = postRepository.getPostsByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(club_id, search_name, userOptional.orElseThrow(), PageRequest.of(current_page - 1, per_page)).getContent();
         List<PostClubPaginationResponse> postClubPaginationResponses = new ArrayList<>();
         for (Post post : postList) {
             PostClubPaginationResponse postClubPaginationResponse = new PostClubPaginationResponse();

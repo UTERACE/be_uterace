@@ -15,9 +15,10 @@ import java.util.Optional;
 
 @Repository
 public interface UserEventRepository extends JpaRepository<UserEvent, UserEventId> {
-    Optional<UserEvent> findByUserUserIdAndEventEventId(Long user_userId, Integer event_eventId);
+    @Query("SELECT ue FROM UserEvent ue WHERE ue.user.userId = :userId AND ue.event.eventId = :eventId")
+    Optional<UserEvent> findByUserUserIdAndEventEventId(@Param("userId") Long userId, @Param("eventId") Integer eventId);
 
-    @Query("SELECT COUNT(ue) FROM UserEvent ue WHERE ue.user.userId = :userId")
+    @Query("SELECT COUNT(ue) FROM UserEvent ue WHERE ue.user.userId = :userId AND ue.status = '1'")
     int countEventsByUserId(@Param("userId") Long userId);
 
     Page<UserEvent> findAllByEvent(Event event, Pageable pageable);
@@ -25,6 +26,7 @@ public interface UserEventRepository extends JpaRepository<UserEvent, UserEventI
     @Query("SELECT ue FROM UserEvent ue " +
             "INNER JOIN ue.user u " +
             "WHERE ue.event.eventId = :eventId " +
+            "AND ue.status = '1' " +
             "AND (:searchName IS NULL " +
             "OR (unaccent(LOWER(u.firstName)) ILIKE unaccent(LOWER(:searchName)) " +
             "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName))))")

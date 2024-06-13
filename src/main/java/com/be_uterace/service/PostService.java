@@ -23,4 +23,6 @@ public interface PostService {
     ResponseObject hidePost(Integer post_id, Authentication authentication);
 
     List<PostClubPaginationResponse> getPostClub(int club_id, int current_page, int per_page, String search_name);
+
+    List<PostClubPaginationResponse> getMyPostClub(int club_id, int current_page, int per_page, String search_name);
 }
