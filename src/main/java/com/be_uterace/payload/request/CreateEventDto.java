@@ -29,4 +29,6 @@ public class CreateEventDto {
     private String details;
     private String regulations;
     private String prize;
+    private Boolean is_free;
+    private Double registration_fee;
 }

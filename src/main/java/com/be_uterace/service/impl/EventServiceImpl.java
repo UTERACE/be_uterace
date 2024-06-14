@@ -117,6 +117,8 @@ public class EventServiceImpl implements EventService {
                 .details(event.getDetails())
                 .regulations(event.getRegulations())
                 .prize(event.getPrize())
+                .is_free(event.getIsFree())
+                .registration_fee(event.getRegistrationFee())
                 .build();
     }
 
@@ -142,6 +144,8 @@ public class EventServiceImpl implements EventService {
                 event.setMaxPace(req.getMax_pace());
                 event.setAdminUser(userOptional.get());
                 event.setCreateUser(userOptional.get());
+                event.setIsFree(req.getIs_free());
+                event.setRegistrationFee(req.getIs_free() ? 0.0 : req.getRegistration_fee());
                 event.setOutstanding("0");
                 eventRepository.save(event);
                 em.refresh(event);
@@ -181,7 +185,6 @@ public class EventServiceImpl implements EventService {
             if (Objects.equals(event.getPicturePath(), ""))
                 event.setPicturePath(fileService.saveImage(req.getImage()));
             else if (fileService.deleteImage(event.getPicturePath())){
-                System.out.println("Delete Image Successful");
                 event.setPicturePath(fileService.saveImage(req.getImage()));
             }
         }
@@ -193,6 +196,8 @@ public class EventServiceImpl implements EventService {
         event.setPrize(req.getPrize() != null && !Objects.equals(req.getPrize(), "") ? req.getPrize() : event.getPrize());
         event.setMinPace(req.getMin_pace() != null ? req.getMin_pace() : event.getMinPace());
         event.setMaxPace(req.getMax_pace() != null ? req.getMax_pace() : event.getMaxPace());
+        event.setIsFree(req.getIs_free() != null ? req.getIs_free() : event.getIsFree());
+        event.setRegistrationFee(req.getRegistration_fee() != null ? req.getRegistration_fee() : event.getRegistrationFee());
         eventRepository.save(event);
         return new ResponseObject(StatusCode.SUCCESS,"Cập nhật giải chạy thành công");
     }

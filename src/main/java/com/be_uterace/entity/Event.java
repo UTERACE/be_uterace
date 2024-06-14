@@ -103,6 +103,12 @@ public class Event {
     @Column(name = "REASON")
     private String reason;
 
+    @Column(name = "IS_FREE")
+    private Boolean isFree;
+
+    @Column(name = "REGISTRATION_FEE")
+    private Double registrationFee;
+
 
     // Getters and setters
 }
