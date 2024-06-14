@@ -383,30 +383,30 @@ public class EventServiceImpl implements EventService {
                 if (eventOptional.isEmpty()) {
                     return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
                 }
-                if (eventOptional.isPresent()) {
-                    Event event = eventOptional.get();
-                    Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
-                    if (userEventOptional.isPresent()) {
-                        return new ResponseObject(StatusCode.NOT_FOUND,"Bạn đã tham gia giải chạy này");
-                    }
-                    UserEvent userEvent = new UserEvent();
-                    userEvent.setEvent(event);
-                    userEvent.setUser(userOptional.get());
-                    userEvent.setJoinDate(new Date());
-                    userEvent.setTotalDistance(0.0);
-                    userEvent.setPace(0.0);
-                    userEvent.setStatus_complete("0");
-                    userEvent.setRunningCategory(runningCategoryRepository.findById(1).get());
-
-                    userEventRepository.save(userEvent);
-                    event.setNumOfAttendee(event.getNumOfAttendee() + 1);
-                    if (Objects.equals(userOptional.get().getGender(), "Nam"))
-                        event.setNumOfMales(event.getNumOfMales() + 1);
-                    else
-                        event.setNumOfFemales(event.getNumOfFemales() + 1);
-                    eventRepository.save(event);
+                Event event = eventOptional.get();
+                event.setNumOfAttendee(event.getNumOfAttendee() + 1);
+                if (Objects.equals(userOptional.get().getGender(), "Nam"))
+                    event.setNumOfMales(event.getNumOfMales() + 1);
+                else
+                    event.setNumOfFemales(event.getNumOfFemales() + 1);
+                eventRepository.save(event);
+                Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
+                if (userEventOptional.isPresent()) {
+                    userEventOptional.get().setStatus("1");
+                    userEventRepository.save(userEventOptional.get());
                     return new ResponseObject(StatusCode.SUCCESS,"Tham gia giải chạy thành công");
                 }
+                UserEvent userEvent = new UserEvent();
+                userEvent.setEvent(event);
+                userEvent.setUser(userOptional.get());
+                userEvent.setJoinDate(new Timestamp(System.currentTimeMillis()));
+                userEvent.setTotalDistance(0.0);
+                userEvent.setPace(0.0);
+                userEvent.setStatus_complete("0");
+                userEvent.setRunningCategory(runningCategoryRepository.findById(1).get());
+                userEvent.setStatus("1");
+                userEventRepository.save(userEvent);
+                return new ResponseObject(StatusCode.SUCCESS,"Tham gia giải chạy thành công");
             }
         }
         return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
@@ -419,20 +419,22 @@ public class EventServiceImpl implements EventService {
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
-                if (eventOptional.isPresent()) {
-                    Event event = eventOptional.get();
-                    Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
-                    if (userEventOptional.isPresent()) {
-                        UserEvent userEvent = userEventOptional.get();
-                        userEventRepository.delete(userEvent);
-                        event.setNumOfAttendee(event.getNumOfAttendee() - 1);
-                        if (Objects.equals(userOptional.get().getGender(), "Nam") && event.getNumOfMales() > 0)
-                            event.setNumOfMales(event.getNumOfMales() - 1);
-                        else if (Objects.equals(userOptional.get().getGender(), "Nữ") && event.getNumOfFemales() > 0)
-                            event.setNumOfFemales(event.getNumOfFemales() - 1);
-                        eventRepository.save(event);
-                        return new ResponseObject(StatusCode.SUCCESS,"Rời khỏi giải chạy thành công");
-                    }
+                if (eventOptional.isEmpty()) {
+                    return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
+                }
+                Event event = eventOptional.get();
+                event.setNumOfAttendee(event.getNumOfAttendee() - 1);
+                if (Objects.equals(userOptional.get().getGender(), "Nam") && event.getNumOfMales() > 0)
+                    event.setNumOfMales(event.getNumOfMales() - 1);
+                else if (Objects.equals(userOptional.get().getGender(), "Nữ") && event.getNumOfFemales() > 0)
+                    event.setNumOfFemales(event.getNumOfFemales() - 1);
+                eventRepository.save(event);
+                Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
+                if (userEventOptional.isPresent()) {
+                    UserEvent userEvent = userEventOptional.get();
+                    userEvent.setStatus("0");
+                    userEventRepository.save(userEvent);
+                    return new ResponseObject(StatusCode.SUCCESS,"Rời khỏi giải chạy thành công");
                 }
                 return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
             }

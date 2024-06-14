@@ -29,6 +29,14 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @GetMapping("/my-news/{club_id}")
+    public ResponseEntity<List<PostClubPaginationResponse>> getMyPostClubController(@PathVariable Integer club_id,
+                                                                                  @RequestParam int current_page,
+                                                                                  @RequestParam int per_page, @RequestParam String search_name) {
+        List<PostClubPaginationResponse> res = postService.getMyPostClub(club_id, current_page, per_page, search_name);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
     @GetMapping()
     public ResponseEntity<PostPaginationResponse> getPostPaginationController(@RequestParam int current_page,
                                                                               @RequestParam int per_page, @RequestParam String search_name) {
