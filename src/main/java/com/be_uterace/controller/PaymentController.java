@@ -2,7 +2,9 @@ package com.be_uterace.controller;
 
 import com.be_uterace.payload.momo.MomoResponseCreate;
 import com.be_uterace.payload.response.ResponseObject;
+import com.be_uterace.payload.vnpay.VnPayCreateDto;
 import com.be_uterace.service.PaymentService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +28,8 @@ public class PaymentController {
     }
 
     @PostMapping("/vnpay")
-    public ResponseEntity<ResponseObject> vnPayController(){
-        ResponseObject responseObject = paymentService.createOrderVNPAY(10000000,"ahihi","http://localhost:8080");
+    public ResponseEntity<ResponseObject> vnPayController(@RequestBody VnPayCreateDto vnPayCreateDto, HttpServletRequest request){
+        ResponseObject responseObject = paymentService.createOrderVNPAY(vnPayCreateDto, request);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
@@ -38,6 +40,13 @@ public class PaymentController {
 //    }
     @GetMapping("/vnpay-payment")
     public String checkParams(@RequestParam Map<String, String> allParams) {
+        StringBuilder response = new StringBuilder();
+        allParams.forEach((key, value) -> response.append(key).append(" = ").append(value).append("<br>"));
+        return response.toString();
+    }
+
+    @GetMapping("/momo-payment")
+    public String checkParamsMomo(@RequestParam Map<String, String> allParams) {
         StringBuilder response = new StringBuilder();
         allParams.forEach((key, value) -> response.append(key).append(" = ").append(value).append("<br>"));
         return response.toString();

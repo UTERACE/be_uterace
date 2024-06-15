@@ -107,7 +107,7 @@ public class Event {
     private Boolean isFree;
 
     @Column(name = "REGISTRATION_FEE")
-    private Double registrationFee;
+    private Long registrationFee;
 
 
     // Getters and setters

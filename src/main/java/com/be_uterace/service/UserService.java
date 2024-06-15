@@ -10,6 +10,8 @@ import com.be_uterace.payload.response.UserStatisticResponse;
 import org.springframework.security.core.Authentication;
 
 public interface UserService {
+
+    User getCurrentLogin();
     UserResponse getUserInfo(Authentication authentication);
 
     ResponseObject changePassword(ChangePasswordDto changePasswordDto, Authentication authentication);

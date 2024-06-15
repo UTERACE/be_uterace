@@ -27,5 +27,5 @@ public class UpdateEventDto {
     private String regulations;
     private String prize;
     private Boolean is_free;
-    private Double registration_fee;
+    private Long registration_fee;
 }

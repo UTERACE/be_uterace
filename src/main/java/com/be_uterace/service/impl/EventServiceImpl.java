@@ -145,7 +145,7 @@ public class EventServiceImpl implements EventService {
                 event.setAdminUser(userOptional.get());
                 event.setCreateUser(userOptional.get());
                 event.setIsFree(req.getIs_free());
-                event.setRegistrationFee(req.getIs_free() ? 0.0 : req.getRegistration_fee());
+                event.setRegistrationFee(req.getIs_free() ? 0 : req.getRegistration_fee());
                 event.setOutstanding("0");
                 eventRepository.save(event);
                 em.refresh(event);

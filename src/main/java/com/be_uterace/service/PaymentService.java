@@ -1,15 +1,20 @@
 package com.be_uterace.service;
 
+import com.be_uterace.entity.Event;
+import com.be_uterace.exception.BadRequestException;
 import com.be_uterace.payload.momo.MomoCreateVm;
 import com.be_uterace.payload.momo.MomoResponseCreate;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.vnpay.PaymentReturnVNPAY;
+import com.be_uterace.payload.vnpay.VnPayCreateDto;
+import com.be_uterace.repository.EventRepository;
 import com.be_uterace.utils.MomoEncoder;
 import com.be_uterace.utils.VNPay;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,6 +33,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PaymentService {
     private final MomoEncoder momoEncoder;
+    private final EventRepository eventRepository;
+
+
     public MomoResponseCreate createOrderMOMO(Integer user_id) throws IOException, InterruptedException {
         String idrandom = MomoEncoder.generateRequestId();
 
@@ -37,8 +45,8 @@ public class PaymentService {
         momoRequest.setAmount(10000);
         momoRequest.setOrderId(idrandom);
         momoRequest.setOrderInfo("testthanhtoanmomo");
-        momoRequest.setRedirectUrl("http://localhost:8080/Shopee/pay/result");
-        momoRequest.setIpnUrl("http://localhost:8080/Shopee/pay/result");
+        momoRequest.setRedirectUrl("http://localhost:8080/api/payment/momo-payment");
+        momoRequest.setIpnUrl("http://localhost:8080/api/payment/momo-payment");
         momoRequest.setRequestType("captureWallet");
         momoRequest.setExtraData("eyJ1c2VybmFtZSI6ICJtb21vIn0");
         momoRequest.setLang("vi");
@@ -75,11 +83,16 @@ public class PaymentService {
         return momoResponse;
     }
 
-    public ResponseObject createOrderVNPAY(int total, String orderInfor, String urlReturn){
+    public ResponseObject createOrderVNPAY(VnPayCreateDto vnPayCreateDto, HttpServletRequest request){
+
+        Event event = eventRepository.findEventByEventId(vnPayCreateDto.getEvent_id());
+        if(event.getIsFree()){
+            throw new BadRequestException(HttpStatus.BAD_REQUEST, "This event is free of charge.");
+        }
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String vnp_TxnRef = VNPay.getRandomNumber(8);
-        String vnp_IpAddr = "127.0.0.1";
+        String vnp_IpAddr = VNPay.getIpAddress(request);
         String vnp_TmnCode = VNPay.vnp_TmnCode;
         String orderType = "order-type";
 
@@ -87,26 +100,24 @@ public class PaymentService {
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Command", vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-        vnp_Params.put("vnp_Amount", String.valueOf(total*100));
+        vnp_Params.put("vnp_Amount", String.valueOf(event.getRegistrationFee()*100));
         vnp_Params.put("vnp_CurrCode", "VND");
 
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", orderInfor);
+        vnp_Params.put("vnp_OrderInfo", "orderInfor");
         vnp_Params.put("vnp_OrderType", orderType);
 
         String locate = "vn";
         vnp_Params.put("vnp_Locale", locate);
 
-        urlReturn += VNPay.vnp_Returnurl;
-        vnp_Params.put("vnp_ReturnUrl", urlReturn);
+        //urlReturn += VNPay.vnp_Returnurl;
+        vnp_Params.put("vnp_ReturnUrl", vnPayCreateDto.getRedirect_url());
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-        System.out.println("vnp_CreateDate  :"+vnp_CreateDate );
-
         cld.add(Calendar.MINUTE, 15);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
