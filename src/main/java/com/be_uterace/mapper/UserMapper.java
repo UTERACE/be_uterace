@@ -45,6 +45,7 @@ public class UserMapper {
                 .province(user.getArea() != null ? user.getArea().getProvince() : null)
                 .district(user.getArea() != null ? user.getArea().getDistrict() : null)
                 .ward(user.getArea() != null ? user.getArea().getPrecinct() : null)
+                .address_name(user.getArea() != null ? user.getHomeNumber() != null ? user.getHomeNumber() + ", " + user.getArea().getFullName(): user.getArea().getFullName(): null)
                 .build();
     }
 }

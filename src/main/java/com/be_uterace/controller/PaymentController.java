@@ -23,7 +23,7 @@ public class PaymentController {
 
     @PostMapping("/momo")
     public ResponseEntity<MomoResponseCreate> momoController() throws IOException, InterruptedException {
-        MomoResponseCreate responseObject = paymentService.createOrderMOMO(1000000);
+        MomoResponseCreate responseObject = paymentService.createOrderMOMO(11);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 

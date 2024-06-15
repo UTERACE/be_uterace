@@ -36,7 +36,7 @@ public class PaymentService {
     private final EventRepository eventRepository;
 
 
-    public MomoResponseCreate createOrderMOMO(Integer user_id) throws IOException, InterruptedException {
+    public MomoResponseCreate createOrderMOMO(Integer event_id) throws IOException, InterruptedException {
         String idrandom = MomoEncoder.generateRequestId();
 
         MomoCreateVm momoRequest = new MomoCreateVm();
@@ -45,7 +45,7 @@ public class PaymentService {
         momoRequest.setAmount(10000);
         momoRequest.setOrderId(idrandom);
         momoRequest.setOrderInfo("testthanhtoanmomo");
-        momoRequest.setRedirectUrl("http://localhost:8080/api/payment/momo-payment");
+        momoRequest.setRedirectUrl("http://localhost:3000/events/payment/success/"+event_id);
         momoRequest.setIpnUrl("http://localhost:8080/api/payment/momo-payment");
         momoRequest.setRequestType("captureWallet");
         momoRequest.setExtraData("eyJ1c2VybmFtZSI6ICJtb21vIn0");

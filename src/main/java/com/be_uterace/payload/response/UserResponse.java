@@ -18,6 +18,7 @@ public class UserResponse {
     private String province;
     private String district;
     private String ward;
+    private String address_name;
     private int org_id;
     private int child_org_id;
     private String image;

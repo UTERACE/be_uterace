@@ -18,6 +18,9 @@ public interface UserEventRepository extends JpaRepository<UserEvent, UserEventI
     @Query("SELECT ue FROM UserEvent ue WHERE ue.user.userId = :userId AND ue.event.eventId = :eventId")
     Optional<UserEvent> findByUserUserIdAndEventEventId(@Param("userId") Long userId, @Param("eventId") Integer eventId);
 
+    @Query("SELECT ue FROM UserEvent ue WHERE ue.user.userId = :userId AND ue.event.eventId = :eventId AND ue.status = '1'")
+    Optional<UserEvent> findByUserUserIdAndEventEventIdAndStatus(@Param("userId") Long userId, @Param("eventId") Integer eventId);
+
     @Query("SELECT COUNT(ue) FROM UserEvent ue WHERE ue.user.userId = :userId AND ue.status = '1'")
     int countEventsByUserId(@Param("userId") Long userId);
 

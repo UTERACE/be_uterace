@@ -433,7 +433,7 @@ public class ClubServiceImpl implements ClubService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserId(
+                Optional<UserClub> userClubOptional = userClubRepository.findByClubIdAndUserIdAndStatus(
                         club_id, userOptional.get().getUserId());
                 return userClubOptional.isPresent();
             }

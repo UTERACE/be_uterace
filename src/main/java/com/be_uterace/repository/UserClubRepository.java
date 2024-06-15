@@ -19,10 +19,11 @@ import java.util.Optional;
 
 public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> {
 
-    // Tìm các bản ghi UserClub dựa trên clubId và userId
     @Query("SELECT uc FROM UserClub uc WHERE uc.club.clubId = :clubId AND uc.user.userId = :userId")
     Optional<UserClub> findByClubIdAndUserId(@Param("clubId") Integer clubId, @Param("userId") Long userId);
 
+    @Query("SELECT uc FROM UserClub uc WHERE uc.club.clubId = :clubId AND uc.user.userId = :userId AND uc.status = '1'")
+    Optional<UserClub> findByClubIdAndUserIdAndStatus(@Param("clubId") Integer clubId, @Param("userId") Long userId);
 
     @Query("SELECT COUNT(uc) FROM UserClub uc WHERE uc.user.userId = :userId")
     int countClubsByUserId(@Param("userId") Long userId);
