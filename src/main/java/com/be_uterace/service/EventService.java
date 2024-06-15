@@ -3,6 +3,7 @@ package com.be_uterace.service;
 import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
 public interface EventService {
@@ -37,4 +38,6 @@ public interface EventService {
     EventPaginationResponse getEventCompletedOrNot(Long user_id,int current_page, int per_page, String search_name, boolean complete);
 
     EventPaginationResponse getEventCompletedOrNot(int current_page, int per_page, String search_name, boolean complete, Authentication auth);
+
+    ResponseEntity<byte[]> exportScoreBoard(int event_id);
 }

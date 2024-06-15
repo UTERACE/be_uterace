@@ -149,4 +149,8 @@ public class EventController {
         EventPaginationResponse res = eventService.getEventCreatedByUser(user_id,current_page,per_page,search_name);
         return ResponseEntity.ok(res);
     }
+    @GetMapping("/export-scoreboard/{event_id}")
+    public ResponseEntity<byte[]> exportScoreBoardController(@PathVariable Integer event_id){
+        return eventService.exportScoreBoard(event_id);
+    }
 }

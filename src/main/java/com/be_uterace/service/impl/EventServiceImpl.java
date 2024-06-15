@@ -13,11 +13,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpHeaders;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -55,18 +65,18 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventPaginationResponse getEventPaginationEvent(int current_page, int per_page,String search_name, String ongoing) {
+    public EventPaginationResponse getEventPaginationEvent(int current_page, int per_page, String search_name, String ongoing) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Page<Event> eventPage;
         if (ongoing.equals("1"))
-            eventPage= eventRepository.findEventsWithStatusOnGoing(search_name, pageable);
+            eventPage = eventRepository.findEventsWithStatusOnGoing(search_name, pageable);
         else if (ongoing.equals("0"))
             eventPage = eventRepository.findEventsWithStatusFinished(search_name, pageable);
         else
             eventPage = eventRepository.findEventsWithStatusUpcoming(search_name, pageable);
         List<Event> eventList = eventPage.getContent();
         List<EventResponse> eventResponses = new ArrayList<>();
-        for (Event event : eventList){
+        for (Event event : eventList) {
             EventResponse eventResponse = new EventResponse();
             eventResponse.setEvent_id(event.getEventId());
             eventResponse.setName(event.getTitle());
@@ -89,7 +99,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findEventByEventId(event_id);
         List<RunningCategory> runningCategory = runningCategoryRepository.findRunningCategoriesByEvent_EventId(event_id);
         List<RunningCategoryResponse> categoryResponse = new ArrayList<>();
-        for (RunningCategory item : runningCategory){
+        for (RunningCategory item : runningCategory) {
             RunningCategoryResponse response = new RunningCategoryResponse();
             response.setId(item.getRunningCategoryID());
             response.setName(item.getRunningCategoryName());
@@ -150,14 +160,14 @@ public class EventServiceImpl implements EventService {
                 eventRepository.save(event);
                 em.refresh(event);
                 List<RunningCategoryResponse> runningCategories = req.getDistance();
-                for(RunningCategoryResponse item : runningCategories){
+                for (RunningCategoryResponse item : runningCategories) {
                     RunningCategory runningCategory = runningCategoryRepository.findById(item.getId()).orElse(null);
                     EventRunningCategory eventRunningCategory = new EventRunningCategory();
                     eventRunningCategory.setEvent(event);
                     eventRunningCategory.setRunningCategory(runningCategory);
                     eventRunningCategoryRepository.save(eventRunningCategory);
                 }
-                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS,"Tạo giải chạy thành công");
+                ResponseObject responseObject = new ResponseObject(StatusCode.SUCCESS, "Tạo giải chạy thành công");
                 return responseObject;
 
             }
@@ -167,24 +177,24 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public ResponseObject updateEvent(UpdateEventDto req, Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)){
-            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+            return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
         }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isEmpty()) {
-            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+            return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
         }
         Event event = eventRepository.findEventByEventId(req.getEvent_id());
         if (event == null) {
-            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+            return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy giải chạy");
         }
         event.setTitle(req.getName() != null && !Objects.equals(req.getName(), "") ? req.getName() : event.getTitle());
-        if (!event.getPicturePath().equals(req.getImage()) && !Objects.equals(req.getImage(), "")){
+        if (!event.getPicturePath().equals(req.getImage()) && !Objects.equals(req.getImage(), "")) {
             if (Objects.equals(event.getPicturePath(), ""))
                 event.setPicturePath(fileService.saveImage(req.getImage()));
-            else if (fileService.deleteImage(event.getPicturePath())){
+            else if (fileService.deleteImage(event.getPicturePath())) {
                 event.setPicturePath(fileService.saveImage(req.getImage()));
             }
         }
@@ -199,27 +209,27 @@ public class EventServiceImpl implements EventService {
         event.setIsFree(req.getIs_free() != null ? req.getIs_free() : event.getIsFree());
         event.setRegistrationFee(req.getRegistration_fee() != null ? req.getRegistration_fee() : event.getRegistrationFee());
         eventRepository.save(event);
-        return new ResponseObject(StatusCode.SUCCESS,"Cập nhật giải chạy thành công");
+        return new ResponseObject(StatusCode.SUCCESS, "Cập nhật giải chạy thành công");
     }
 
     @Override
     public ResponseObject deleteEvent(int event_id, Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)){
-            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
+            return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
         }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isEmpty()) {
-            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+            return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
         }
         Optional<Event> eventOptional = eventRepository.findEventByEventIdAndAdminUser_UserId(event_id, userOptional.get().getUserId());
         if (eventOptional.isEmpty()) {
-            return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+            return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy giải chạy");
         }
         eventRunningCategoryRepository.deleteAllByEvent_EventId(event_id);
         eventRepository.deleteById(event_id);
-        return new ResponseObject(StatusCode.SUCCESS,"Xóa giải chạy thành công");
+        return new ResponseObject(StatusCode.SUCCESS, "Xóa giải chạy thành công");
 
     }
 
@@ -229,31 +239,31 @@ public class EventServiceImpl implements EventService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (!userOptional.isPresent()) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
             }
             User user = userOptional.get();
             Event event = eventRepository.findEventByEventId(event_id);
             if (event == null) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy giải chạy");
             }
             if (!Objects.equals(user.getUserId(), event.getAdminUser().getUserId())) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không có quyền thêm khoảng cách");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không có quyền thêm khoảng cách");
             }
             RunningCategory runningCategory = runningCategoryRepository.findById(distance_id).orElse(null);
             if (runningCategory == null) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy khoảng cách");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy khoảng cách");
             }
             EventRunningCategory eventRunningCategory = eventRunningCategoryRepository.findEventRunningCategoryByEventAndRunningCategory(event, runningCategory);
             if (eventRunningCategory != null) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Khoảng cách đã tồn tại");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Khoảng cách đã tồn tại");
             }
             eventRunningCategory = new EventRunningCategory();
             eventRunningCategory.setEvent(event);
             eventRunningCategory.setRunningCategory(runningCategory);
             eventRunningCategoryRepository.save(eventRunningCategory);
-            return new ResponseObject(StatusCode.SUCCESS,"Thêm khoảng cách thành công");
+            return new ResponseObject(StatusCode.SUCCESS, "Thêm khoảng cách thành công");
         }
-        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
     }
 
     @Override
@@ -262,32 +272,32 @@ public class EventServiceImpl implements EventService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (!userOptional.isPresent()) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
             }
             User user = userOptional.get();
             Event event = eventRepository.findEventByEventId(event_id);
             if (event == null) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy giải chạy");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy giải chạy");
             }
             if (!Objects.equals(user.getUserId(), event.getAdminUser().getUserId())) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không có quyền xóa khoảng cách");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không có quyền xóa khoảng cách");
             }
             RunningCategory runningCategory = runningCategoryRepository.findById(distance_id).orElse(null);
             if (runningCategory == null) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy khoảng cách");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy khoảng cách");
             }
             EventRunningCategory eventRunningCategory = eventRunningCategoryRepository.findEventRunningCategoryByEventAndRunningCategory(event, runningCategory);
             if (eventRunningCategory == null) {
-                return new ResponseObject(StatusCode.NOT_FOUND,"Khoảng cách không tồn tại");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Khoảng cách không tồn tại");
             }
             eventRunningCategoryRepository.delete(eventRunningCategory);
-            return new ResponseObject(StatusCode.SUCCESS,"Xóa khoảng cách thành công");
+            return new ResponseObject(StatusCode.SUCCESS, "Xóa khoảng cách thành công");
         }
-        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
     }
 
     @Override
-    public EventPaginationResponse getOwnEventCreated(int current_page, int per_page,String search_name, Authentication authentication) {
+    public EventPaginationResponse getOwnEventCreated(int current_page, int per_page, String search_name, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
@@ -296,7 +306,7 @@ public class EventServiceImpl implements EventService {
                 Page<Event> eventPage = eventRepository.findEventByCreateUserAndTitleContaining(userOptional.get().getUserId(), search_name, pageable);
                 List<Event> eventList = eventPage.getContent();
                 List<EventResponse> eventResponses = new ArrayList<>();
-                for (Event event : eventList){
+                for (Event event : eventList) {
                     EventResponse eventResponse = new EventResponse();
                     eventResponse.setEvent_id(event.getEventId());
                     eventResponse.setName(event.getTitle());
@@ -320,15 +330,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventPaginationResponse getEventJoined(int current_page, int per_page, String search_name, Authentication authentication) {
-        if (authentication !=null && authentication.getPrincipal() instanceof UserDetails userDetails){
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
-            if (userOptional.isPresent()){
+            if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
                 Page<Event> eventPage = eventRepository.findEventByJoinUserUserId(search_name, pageable, userOptional.get().getUserId());
                 List<Event> eventList = eventPage.getContent();
                 List<EventResponse> eventResponses = new ArrayList<>();
-                for (Event event : eventList){
+                for (Event event : eventList) {
                     EventResponse eventResponse = new EventResponse();
                     eventResponse.setEvent_id(event.getEventId());
                     eventResponse.setName(event.getTitle());
@@ -355,7 +365,7 @@ public class EventServiceImpl implements EventService {
         Page<Event> eventPage = eventRepository.findEventByCreateUserAndTitleContaining(user_id, search_name, pageable);
         List<Event> eventList = eventPage.getContent();
         List<EventResponse> eventResponses = new ArrayList<>();
-        for (Event event : eventList){
+        for (Event event : eventList) {
             EventResponse eventResponse = new EventResponse();
             eventResponse.setEvent_id(event.getEventId());
             eventResponse.setName(event.getTitle());
@@ -381,7 +391,7 @@ public class EventServiceImpl implements EventService {
             if (userOptional.isPresent()) {
                 Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
                 if (eventOptional.isEmpty()) {
-                    return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
+                    return new ResponseObject(StatusCode.NOT_FOUND, "Giải chạy chưa diễn ra hoặc đã kết thúc");
                 }
                 Event event = eventOptional.get();
                 event.setNumOfAttendee(event.getNumOfAttendee() + 1);
@@ -394,7 +404,7 @@ public class EventServiceImpl implements EventService {
                 if (userEventOptional.isPresent()) {
                     userEventOptional.get().setStatus("1");
                     userEventRepository.save(userEventOptional.get());
-                    return new ResponseObject(StatusCode.SUCCESS,"Tham gia giải chạy thành công");
+                    return new ResponseObject(StatusCode.SUCCESS, "Tham gia giải chạy thành công");
                 }
                 UserEvent userEvent = new UserEvent();
                 userEvent.setEvent(event);
@@ -406,10 +416,10 @@ public class EventServiceImpl implements EventService {
                 userEvent.setRunningCategory(runningCategoryRepository.findById(1).get());
                 userEvent.setStatus("1");
                 userEventRepository.save(userEvent);
-                return new ResponseObject(StatusCode.SUCCESS,"Tham gia giải chạy thành công");
+                return new ResponseObject(StatusCode.SUCCESS, "Tham gia giải chạy thành công");
             }
         }
-        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
     }
 
     @Override
@@ -420,7 +430,7 @@ public class EventServiceImpl implements EventService {
             if (userOptional.isPresent()) {
                 Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
                 if (eventOptional.isEmpty()) {
-                    return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
+                    return new ResponseObject(StatusCode.NOT_FOUND, "Giải chạy chưa diễn ra hoặc đã kết thúc");
                 }
                 Event event = eventOptional.get();
                 event.setNumOfAttendee(event.getNumOfAttendee() - 1);
@@ -434,12 +444,12 @@ public class EventServiceImpl implements EventService {
                     UserEvent userEvent = userEventOptional.get();
                     userEvent.setStatus("0");
                     userEventRepository.save(userEvent);
-                    return new ResponseObject(StatusCode.SUCCESS,"Rời khỏi giải chạy thành công");
+                    return new ResponseObject(StatusCode.SUCCESS, "Rời khỏi giải chạy thành công");
                 }
-                return new ResponseObject(StatusCode.NOT_FOUND,"Giải chạy chưa diễn ra hoặc đã kết thúc");
+                return new ResponseObject(StatusCode.NOT_FOUND, "Giải chạy chưa diễn ra hoặc đã kết thúc");
             }
         }
-        return new ResponseObject(StatusCode.NOT_FOUND,"Không tìm thấy người dùng");
+        return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
     }
 
     @Override
@@ -448,7 +458,7 @@ public class EventServiceImpl implements EventService {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
-                Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
+                Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventIdAndStatus(userOptional.get().getUserId(), event_id);
                 return userEventOptional.isPresent();
             }
         }
@@ -458,18 +468,17 @@ public class EventServiceImpl implements EventService {
     @Override
     public RankingMemberResponse getScoreBoardEventMember(int event_id, int current_page, int per_page, String search_name) {
 
-        Pageable pageable = PageRequest.of(current_page-1, per_page);
+        Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Event event = eventRepository.findById(event_id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
         Page<UserEvent> userEventPage;
-        if(search_name==null || search_name.equals("")){
-            userEventPage = userEventRepository.findByEventIdAndSearchName(event_id,null,pageable);
-        }
-        else userEventPage = userEventRepository.findByEventIdAndSearchName(event_id, search_name,pageable);
+        if (search_name == null || search_name.equals("")) {
+            userEventPage = userEventRepository.findByEventIdAndSearchName(event_id, null, pageable);
+        } else userEventPage = userEventRepository.findByEventIdAndSearchName(event_id, search_name, pageable);
         List<UserEvent> userEventList = userEventPage.getContent();
 
         List<RankingMemberResponse.RankingUser> rankingUserList = new ArrayList<>();
-        for (UserEvent userEvent : userEventList){
+        for (UserEvent userEvent : userEventList) {
             RankingMemberResponse.RankingUser rankingUser = new RankingMemberResponse.RankingUser();
             User user = userEvent.getUser();
             rankingUser.setUser_id(user.getUserId());
@@ -486,7 +495,7 @@ public class EventServiceImpl implements EventService {
         return RankingMemberResponse.builder()
                 .per_page(userEventPage.getSize())
                 .total_user((int) userEventPage.getTotalElements())
-                .current_page(userEventPage.getNumber()+1)
+                .current_page(userEventPage.getNumber() + 1)
                 .total_page(userEventPage.getTotalPages())
                 .ranking_user(rankingUserList)
                 .build();
@@ -502,27 +511,27 @@ public class EventServiceImpl implements EventService {
         LocalDateTime thresholdDateTime = now.minusHours(hours);
         Timestamp thresholdTimestamp = Timestamp.valueOf(thresholdDateTime);
 
-        if(search==null || search.isEmpty()) {
-            activityPage = ueActivityRepository.findRunsByDateTimeAndName(thresholdTimestamp, null, eventId,pageable);
+        if (search == null || search.isEmpty()) {
+            activityPage = ueActivityRepository.findRunsByDateTimeAndName(thresholdTimestamp, null, eventId, pageable);
         } else {
-            activityPage = ueActivityRepository.findRunsByDateTimeAndName(thresholdTimestamp, search,eventId,pageable);
+            activityPage = ueActivityRepository.findRunsByDateTimeAndName(thresholdTimestamp, search, eventId, pageable);
         }
         List<UserEventActivity> userEventActivityList = activityPage.getContent();
         List<RecentActiveResponse.Activity> arrayList = new ArrayList<>();
-        for (UserEventActivity userEventActivity : userEventActivityList){
+        for (UserEventActivity userEventActivity : userEventActivityList) {
             Run run = userEventActivity.getRun();
             RecentActiveResponse.Activity activityResponse = new RecentActiveResponse.Activity();
             activityResponse.setActivity_id(run.getRunId());
             activityResponse.setMember_id(run.getUser().getUserId());
             activityResponse.setMember_image(run.getUser().getAvatarPath());
-            activityResponse.setMember_name(run.getUser().getFirstName()+" "+run.getUser().getLastName());
+            activityResponse.setMember_name(run.getUser().getFirstName() + " " + run.getUser().getLastName());
             activityResponse.setActivity_start_date(run.getCreatedAt());
             activityResponse.setActivity_distance(run.getDistance());
             activityResponse.setActivity_pace(run.getPace());
             activityResponse.setActivity_duration(run.getDuration());
             activityResponse.setActivity_name(run.getName());
             activityResponse.setActivity_type(run.getType());
-            activityResponse.setActivity_link_strava("https://www.strava.com/activities/"+run.getStravaRunId());
+            activityResponse.setActivity_link_strava("https://www.strava.com/activities/" + run.getStravaRunId());
             activityResponse.setActivity_map(run.getSummaryPolyline());
             activityResponse.setStatus(run.getStatus());
             activityResponse.setReason(run.getReason());
@@ -541,14 +550,13 @@ public class EventServiceImpl implements EventService {
     public EventPaginationResponse getEventCompletedOrNot(Long user_id, int current_page, int per_page, String search_name, boolean complete) {
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
         Page<Event> eventPage;
-        if(complete){
-            eventPage = eventRepository.getEventEnded(pageable, search_name,user_id);
-        }
-        else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name,user_id);
+        if (complete) {
+            eventPage = eventRepository.getEventEnded(pageable, search_name, user_id);
+        } else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name, user_id);
 
         List<Event> eventList = eventPage.getContent();
         List<EventResponse> eventResponses = new ArrayList<>();
-        for (Event event : eventList){
+        for (Event event : eventList) {
             EventResponse eventResponse = new EventResponse();
             eventResponse.setEvent_id(event.getEventId());
             eventResponse.setName(event.getTitle());
@@ -574,14 +582,14 @@ public class EventServiceImpl implements EventService {
             if (userOptional.isPresent()) {
                 Pageable pageable = PageRequest.of(current_page - 1, per_page);
                 Page<Event> eventPage;
-                if(complete){
-                    eventPage = eventRepository.getEventEnded(pageable, search_name,userOptional.get().getUserId());
-                }
-                else eventPage = eventRepository.getEventInCurrentTime(pageable, search_name,userOptional.get().getUserId());
+                if (complete) {
+                    eventPage = eventRepository.getEventEnded(pageable, search_name, userOptional.get().getUserId());
+                } else
+                    eventPage = eventRepository.getEventInCurrentTime(pageable, search_name, userOptional.get().getUserId());
 
                 List<Event> eventList = eventPage.getContent();
                 List<EventResponse> eventResponses = new ArrayList<>();
-                for (Event event : eventList){
+                for (Event event : eventList) {
                     EventResponse eventResponse = new EventResponse();
                     eventResponse.setEvent_id(event.getEventId());
                     eventResponse.setName(event.getTitle());
@@ -600,6 +608,57 @@ public class EventServiceImpl implements EventService {
             }
         }
         return null;
+    }
+
+    @Override
+    public ResponseEntity<byte[]> exportScoreBoard(int event_id) {
+        Pageable pageable = PageRequest.of(0, 99999);
+        Optional<Event> event = eventRepository.findById(event_id);
+        if (event.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Page<UserEvent> userEventPage = userEventRepository.findByEventIdAndSearchName(event_id, null, pageable);
+        List<UserEvent> userEventList = userEventPage.getContent();
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Scoreboard");
+
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            String[] headers_ranking = {"User ID", "Ranking", "First Name", "Last Name", "Gender", "Pace", "Image", "Total Distance", "Join Date"};
+            for (int i = 0; i < headers_ranking.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers_ranking[i]);
+                sheet.setColumnWidth(i, 20 * 256);
+            }
+
+            // Populate data rows
+            int rowNum = 1;
+            for (UserEvent userEvent : userEventList) {
+                Row row = sheet.createRow(rowNum++);
+                User user = userEvent.getUser();
+                row.createCell(0).setCellValue(user.getUserId());
+                row.createCell(1).setCellValue(userEvent.getRanking() == null ? 0 : userEvent.getRanking());
+                row.createCell(2).setCellValue(user.getFirstName());
+                row.createCell(3).setCellValue(user.getLastName());
+                row.createCell(4).setCellValue(user.getGender().name());
+                row.createCell(5).setCellValue(userEvent.getPace());
+                row.createCell(6).setCellValue(user.getAvatarPath());
+                row.createCell(7).setCellValue(userEvent.getTotalDistance());
+                row.createCell(8).setCellValue(userEvent.getJoinDate().toString());
+            }
+
+            workbook.write(out);
+            byte[] excelBytes = out.toByteArray();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "attachment; filename=scoreboard.xlsx");
+
+            return ResponseEntity.ok().headers(headers).body(excelBytes);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 }
