@@ -11,10 +11,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User,Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.email = :email AND u.typeAccount = 'default'")
     Optional<User> findByEmail(String email);
 
@@ -26,6 +27,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     boolean existsByStravaId(Long stravaId);
 
     Boolean existsByUsername(String username);
+
     Boolean existsByEmail(String email);
 
     List<User> findTop8ByOrderByRankingAsc();
@@ -42,8 +44,10 @@ public interface UserRepository extends JpaRepository<User,Long> {
             @Param("searchName") String searchName,
             Pageable pageable
     );
+
     @Query(nativeQuery = true, value = "SELECT * FROM GetRankedUsers(0,0,'') LIMIT 8")
     List<UserRankingProjection> findScoreboardTop8User();
+
     @Query("SELECT new com.be_uterace.payload.response.RankingUserHomeResponse(u.userId,u.ranking, u.firstName, u.lastName, u.avatarPath, u.totalDistance, u.pace) " +
             "FROM User u " +
             "WHERE u.status = '1' " +
@@ -64,6 +68,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     Optional<User> findUserByStravaId(Long stravaId);
 
+    long countByCreatedAtBetween(Date start, Date end);
 //    @Transactional
 //    @Modifying
 //    @Query("UPDATE User u SET u.syncStatus = COALESCE(:syncStatus, u.syncStatus)," +
@@ -79,7 +84,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
 //    void updateSyncStatusForUser(@Param("syncStatus") String syncStatus,
 //                                 @Param("last_sync") String last_sync,
 //                                 @Param("userId") Long userId);
-
 
 
 }

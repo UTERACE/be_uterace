@@ -15,13 +15,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecificationExecutor<Club> {
+public interface ClubRepository extends JpaRepository<Club, Integer>, JpaSpecificationExecutor<Club> {
 
     Optional<Club> findClubByClubIdAndAdminUser_UserId(Integer clubId, Long userId);
+
     Optional<Club> findClubByClubName(String clubName);
+
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubRanking AS clubRanking, " +
             "c.clubName AS clubName, " +
@@ -43,6 +46,7 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             @Param("searchName") String searchName,
             Pageable pageable
     );
+
     @Query(nativeQuery = true, value = "SELECT * FROM GetRankedClubs(0,0,'') LIMIT 8")
     List<ClubRankingProjection> findScoreboardTop8Club();
 
@@ -56,7 +60,7 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId " +
             "ORDER BY c.clubTotalDistance DESC")
-    Page<ClubProjection> findAllClubPagination(@Param("search_name") String search_name,Pageable pageable);
+    Page<ClubProjection> findAllClubPagination(@Param("search_name") String search_name, Pageable pageable);
 
 
     @Query("SELECT c.clubId AS clubId, " +
@@ -98,7 +102,8 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "WHERE c.creatorUser.userId = :creatorId " +
             "AND unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId")
-    Page<ClubProjection> findOwnClubPagination(@Param("search_name") String search_name,Pageable pageable, @Param("creatorId") Long creatorId);
+    Page<ClubProjection> findOwnClubPagination(@Param("search_name") String search_name, Pageable pageable, @Param("creatorId") Long creatorId);
+
     @Query("SELECT c.clubId AS clubId, " +
             "c.clubName AS clubName," +
             "c.picturePath AS picturePath, " +
@@ -109,7 +114,7 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "WHERE c.adminUser.userId = :creatorId " +
             "AND unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId")
-    Page<ClubProjection> findManageClubPagination(@Param("search_name") String search_name,Pageable pageable, @Param("creatorId") Long creatorId);
+    Page<ClubProjection> findManageClubPagination(@Param("search_name") String search_name, Pageable pageable, @Param("creatorId") Long creatorId);
 
 
     @Query("SELECT c.clubId AS clubId, " +
@@ -123,20 +128,14 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
             "AND uc2.user.userId = :userId) " +
             "AND unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId")
-    Page<ClubProjection> findClubJoined(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
+    Page<ClubProjection> findClubJoined(@Param("search_name") String search_name, Pageable pageable, @Param("userId") Long userId);
+
     @Query("SELECT  new com.be_uterace.payload.response.ClubResponse(c.clubId, c.clubName, c.picturePath, c.numOfAttendee, c.clubTotalDistance) " +
             "FROM Club c " +
             "WHERE c.outstanding = '1' AND c.status = '1' AND c.numOfAttendee >=0 " +
             "ORDER BY c.numOfAttendee DESC " +
             "LIMIT 6")
     List<ClubResponse> findTop6ClubsByOutstandingAndStatusAndNumOfAttendeeContaining();
-
-    @Query("SELECT  new com.be_uterace.payload.response.ClubRankingResponse(c.clubId,c.clubRanking, c.clubName, c.picturePath, c.clubTotalDistance,c.numOfAttendee, c.totalActivities) " +
-            "FROM Club c " +
-            "WHERE c.status = '1' " +
-            "ORDER BY c.clubTotalDistance DESC " +
-            "LIMIT 8")
-    List<ClubRankingResponse> findTop8ClubsByTotalDistanceContaining();
 
     @Modifying
     @Transactional
@@ -152,5 +151,16 @@ public interface ClubRepository extends JpaRepository<Club,Integer>, JpaSpecific
     Page<Club> searchClubManage(@Param("searchName") String searchName, Pageable pageable);
 
     boolean existsByCreatorUserUserIdAndClubId(Long userId, Integer clubId);
+
     boolean existsByAdminUserUserIdAndClubId(Long userId, Integer clubId);
+
+    long countByCreatedAtBetween(Date start, Date end);
+
+    @Query(nativeQuery = true,
+            value = "SELECT DATE_TRUNC('month', r.created_at) AS month, COUNT(*) AS count " +
+                    "FROM Club r " +
+                    "WHERE r.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months' " +
+                    "GROUP BY month " +
+                    "ORDER BY month DESC")
+    List<Object[]> chartClubs();
 }

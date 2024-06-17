@@ -13,26 +13,31 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface PostRepository extends JpaRepository<Post,Integer> {
+public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("SELECT p FROM Post p WHERE p.userCreate = (SELECT c.adminUser FROM Club c WHERE c.clubId = :clubId)")
     List<Post> findPostsCreatedByClubAdmin(@Param("clubId") Integer clubId);
+
     @Query("SELECT  new com.be_uterace.payload.response.PostHomeResponse(p.postId, p.title, p.image, p.description) " +
             "FROM Post p " +
             "WHERE p.outstanding = '1' AND p.status = '1' " +
             "ORDER BY p.createdAt DESC " +
             "LIMIT 6")
     List<PostHomeResponse> findTop6ClubsByOutstandingAndCreatedAtContaining();
+
     List<Post> findTop6PostsByOutstanding(String outstanding);
+
     List<Post> getPostsByClubClubId(Integer clubId);
-    Page<Post> getPostsByTitleContainingAndUserCreateUserId(String search_name,Pageable pageable,Integer userId);
+
+    Page<Post> getPostsByTitleContainingAndUserCreateUserId(String search_name, Pageable pageable, Integer userId);
 
     @Query("SELECT p FROM Post p WHERE p.status='1' " +
             "AND unaccent(LOWER(p.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "ORDER BY p.createdAt DESC ")
-    Page<Post> findAllByTitleContaining(String search_name,Pageable pageable);
+    Page<Post> findAllByTitleContaining(String search_name, Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE p.postId = :postId and p.club.clubId=:clubId")
     Optional<Post> findByClubIdAndPostId(@Param("postId") Integer postId, @Param("clubId") Integer clubId);
@@ -54,4 +59,14 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
             (Integer clubId, String search_name, Pageable pageable);
 
     Page<Post> getPostsByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(Integer club_clubId, String title, User userCreate, Pageable pageable);
+
+    long countByCreatedAtBetween(Date start, Date end);
+
+    @Query(nativeQuery = true,
+            value = "SELECT DATE_TRUNC('month', r.created_at) AS month, COUNT(*) AS count " +
+                    "FROM Post r " +
+                    "WHERE r.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months' " +
+                    "GROUP BY month " +
+                    "ORDER BY month DESC")
+    List<Object[]> chartPosts();
 }

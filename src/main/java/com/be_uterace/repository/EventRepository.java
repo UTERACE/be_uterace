@@ -17,35 +17,42 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface EventRepository extends JpaRepository<Event,Integer> {
+public interface EventRepository extends JpaRepository<Event, Integer> {
 
     Optional<Event> findEventByEventIdAndAdminUser_UserId(Integer eventId, Long userId);
+
     @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
-            "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
+            "ORDER BY e.endDate DESC")
+        // Thêm điều kiện tìm kiếm
     List<Event> findEventsWithStatusOnGoing();
 
     List<Event> findTop6EventsByOutstanding(String outstanding);
 
     @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
             " AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
-            " ORDER BY e.createAt DESC ") // Thêm điều kiện tìm kiếm
+            " ORDER BY e.createAt DESC ")
+        // Thêm điều kiện tìm kiếm
     Page<Event> findEventsWithStatusOnGoing(
             @Param("search_name") String search_name,
             Pageable pageable);
+
     @Query("SELECT e FROM Event e WHERE e.startDate < CURRENT_TIMESTAMP AND e.endDate > CURRENT_TIMESTAMP " +
-            " AND e.eventId=:eventId ") // Thêm điều kiện tìm kiếm
+            " AND e.eventId=:eventId ")
+        // Thêm điều kiện tìm kiếm
     Optional<Event> findEventsWithStatusOnGoing(@Param("eventId") Integer eventId);
 
     @Query("SELECT e FROM Event e WHERE e.endDate < CURRENT_TIMESTAMP " +
             "AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) "
-            + "ORDER BY e.endDate DESC") // Thêm điều kiện tìm kiếm
+            + "ORDER BY e.endDate DESC")
+        // Thêm điều kiện tìm kiếm
     Page<Event> findEventsWithStatusFinished(
             @Param("search_name") String search_name,
             Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.startDate > CURRENT_TIMESTAMP " +
             "AND unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) "
-            + "ORDER BY e.startDate ASC") // Thêm điều kiện tìm kiếm
+            + "ORDER BY e.startDate ASC")
+        // Thêm điều kiện tìm kiếm
     Page<Event> findEventsWithStatusUpcoming(
             @Param("search_name") String search_name,
             Pageable pageable);
@@ -59,10 +66,12 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
             @Param("user_id") Long user_id,
             @Param("search_name") String search_name,
             Pageable pageable);
+
     @Query("SELECT e FROM Event e LEFT JOIN UserEvent ue ON e.eventId = ue.event.eventId " +
             "WHERE ue.user.userId = :userId AND " +
             "unaccent(LOWER(e.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) ")
-    Page<Event> findEventByJoinUserUserId(@Param("search_name") String search_name,Pageable pageable, @Param("userId") Long userId);
+    Page<Event> findEventByJoinUserUserId(@Param("search_name") String search_name, Pageable pageable, @Param("userId") Long userId);
+
     @Query("SELECT new com.be_uterace.payload.response.EventResponse(e.eventId, e.title, e.picturePath, e.numOfAttendee, e.totalActivities) " +
             "FROM Event e " +
             "WHERE e.outstanding = '1' AND e.status = '1' AND e.numOfAttendee >= 0 " +
@@ -111,4 +120,28 @@ public interface EventRepository extends JpaRepository<Event,Integer> {
             "ORDER BY e.createAt")
     Page<Event> getEventEnded(Pageable pageable, String searchName, Long userId);
 
+    long countByCreateAtBetween(Date start, Date end);
+
+    @Query(nativeQuery = true,
+            value = "SELECT DATE_TRUNC('month', r.create_at) AS month, COUNT(*) AS count " +
+                    "FROM Event r " +
+                    "WHERE r.create_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months' " +
+                    "GROUP BY month " +
+                    "ORDER BY month DESC")
+    List<Object[]> chartEvents();
+
+    @Query("SELECT COUNT(*) FROM Event e WHERE e.endDate < CURRENT_TIMESTAMP AND e.status = '1'")
+    int countByEndDateAndStatus();
+
+    @Query("SELECT COUNT(*) FROM Event e WHERE e.endDate >= CURRENT_TIMESTAMP AND e.startDate <= CURRENT_TIMESTAMP AND e.status = '1'")
+    int countByStartDateAndEndDateAndStatus();
+
+    @Query("SELECT COUNT(*) FROM Event e WHERE e.startDate > CURRENT_TIMESTAMP AND e.status = '1'")
+    int countByStartDateAndStatus();
+
+    @Query("SELECT COUNT(*) FROM Event e WHERE e.outstanding = '1' AND e.status = '1'")
+    int countByStartDateAndEndDateAndStatusAndOutstanding();
+
+    @Query("SELECT COUNT(*) FROM Event e WHERE e.status = '0'")
+    int countByStatus();
 }

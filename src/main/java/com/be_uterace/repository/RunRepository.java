@@ -15,8 +15,9 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
-public interface RunRepository extends JpaRepository<Run,Long> {
+public interface RunRepository extends JpaRepository<Run, Long> {
     boolean existsByStravaRunId(Long aLong);
+
     List<Run> findAllByUser_UserId(Long userId);
 
     @Query("SELECT r FROM Run r WHERE " +
@@ -43,10 +44,17 @@ public interface RunRepository extends JpaRepository<Run,Long> {
     Optional<Run> findRunByStravaRunId(Long stravaRunId);
 
 
-
-//    @Modifying
+    //    @Modifying
 //    @Query(value = "DELETE FROM Run WHERE user_id = :userId", nativeQuery = true)
 //    void deleteRunsByUserId(@Param("userId") Long userId);
     @Query(value = "SELECT delete_users_data(:userIds)", nativeQuery = true)
     void deleteUsersData(@Param("userIds") Long[] userIds);
+
+    @Query(nativeQuery = true,
+            value = "SELECT DATE_TRUNC('month', r.created_at) AS month, COUNT(*) AS count " +
+                    "FROM Run r " +
+                    "WHERE r.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '3 months' " +
+                    "GROUP BY month " +
+                    "ORDER BY month DESC")
+    List<Object[]> chartActivity();
 }
