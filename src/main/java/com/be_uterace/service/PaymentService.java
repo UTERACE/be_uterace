@@ -61,7 +61,7 @@ public class PaymentService {
         MomoCreateVm momoRequest = new MomoCreateVm();
         momoRequest.setPartnerCode(momoEncoder.getPartnerCode());
         momoRequest.setRequestId(idrandom);
-        momoRequest.setAmount(10000);
+        momoRequest.setAmount(event.getRegistrationFee());
         momoRequest.setOrderId(idrandom);
         momoRequest.setOrderInfo("testthanhtoanmomo");
         momoRequest.setRedirectUrl(paymentCreateDto.getRedirect_url());

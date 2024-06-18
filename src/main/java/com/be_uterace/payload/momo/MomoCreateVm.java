@@ -10,7 +10,7 @@ import lombok.*;
 public class MomoCreateVm {
     private String partnerCode;
     private String requestId;
-    private int amount;
+    private Long amount;
     private String orderId;
     private String orderInfo;
     private String redirectUrl;
