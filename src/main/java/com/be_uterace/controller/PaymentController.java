@@ -1,6 +1,7 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.momo.MomoResponseCreate;
+import com.be_uterace.payload.request.PaymentCreateDto;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.vnpay.VnPayCreateDto;
 import com.be_uterace.service.PaymentService;
@@ -22,14 +23,14 @@ public class PaymentController {
     }
 
     @PostMapping("/momo")
-    public ResponseEntity<MomoResponseCreate> momoController() throws IOException, InterruptedException {
-        MomoResponseCreate responseObject = paymentService.createOrderMOMO(11);
+    public ResponseEntity<ResponseObject> momoController(@RequestBody PaymentCreateDto paymentCreateDto, HttpServletRequest request) throws IOException, InterruptedException {
+        ResponseObject responseObject = paymentService.createOrderMOMO(paymentCreateDto, request);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @PostMapping("/vnpay")
-    public ResponseEntity<ResponseObject> vnPayController(@RequestBody VnPayCreateDto vnPayCreateDto, HttpServletRequest request){
-        ResponseObject responseObject = paymentService.createOrderVNPAY(vnPayCreateDto, request);
+    public ResponseEntity<ResponseObject> vnPayController(@RequestBody PaymentCreateDto paymentCreateDto, HttpServletRequest request){
+        ResponseObject responseObject = paymentService.createOrderVNPAY(paymentCreateDto, request);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 

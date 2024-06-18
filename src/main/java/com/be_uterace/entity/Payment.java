@@ -3,10 +3,7 @@ package com.be_uterace.entity;
 
 import com.be_uterace.entity.enumeration.EPaymentStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,6 +14,7 @@ import java.time.ZonedDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "PAYMENT")
 public class Payment {
@@ -33,6 +31,10 @@ public class Payment {
     @JoinColumn(name = "EVENT_ID", referencedColumnName = "EVENT_ID")
     private Event event;
 
+    @ManyToOne
+    @JoinColumn(name = "SHIRT_SIZE_ID", referencedColumnName = "SIZE_ID")
+    private ShirtSize shirtSize;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "PAYMENT_PROVIDER_ID", referencedColumnName = "ID")
     private PaymentProvider paymentProvider;
@@ -47,6 +49,15 @@ public class Payment {
 
     @Column(name = "TRANSACTION_ID")
     private Long transactionId;
+
+    @Column(name = "ADDRESS")
+    private String address;
+
+    @Column(name = "PHONE_NUMBER")
+    private String phoneNumber;
+
+    @Column(name = "EMAIL")
+    private String email;
 
     @Enumerated(EnumType.STRING)
     private EPaymentStatus paymentStatus;

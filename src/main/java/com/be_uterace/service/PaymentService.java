@@ -1,13 +1,18 @@
 package com.be_uterace.service;
 
-import com.be_uterace.entity.Event;
+import com.be_uterace.entity.*;
+import com.be_uterace.entity.enumeration.EPaymentStatus;
 import com.be_uterace.exception.BadRequestException;
 import com.be_uterace.payload.momo.MomoCreateVm;
 import com.be_uterace.payload.momo.MomoResponseCreate;
+import com.be_uterace.payload.request.PaymentCreateDto;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.vnpay.PaymentReturnVNPAY;
 import com.be_uterace.payload.vnpay.VnPayCreateDto;
 import com.be_uterace.repository.EventRepository;
+import com.be_uterace.repository.PaymentProviderRepository;
+import com.be_uterace.repository.PaymentRepository;
+import com.be_uterace.repository.ShirtSizeRepository;
 import com.be_uterace.utils.MomoEncoder;
 import com.be_uterace.utils.VNPay;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,9 +39,23 @@ import java.util.*;
 public class PaymentService {
     private final MomoEncoder momoEncoder;
     private final EventRepository eventRepository;
+    private final PaymentRepository paymentRepository;
+    private final UserService userService;
+    private final ShirtSizeRepository shirtSizeRepository;
+    private final PaymentProviderRepository paymentProviderRepository;
 
 
-    public MomoResponseCreate createOrderMOMO(Integer event_id) throws IOException, InterruptedException {
+    public ResponseObject createOrderMOMO(PaymentCreateDto paymentCreateDto, HttpServletRequest servletRequest) throws IOException, InterruptedException {
+        Event event = eventRepository.findEventByEventId(paymentCreateDto.getEvent_id());
+        ShirtSize shirtSize = shirtSizeRepository.getReferenceById(paymentCreateDto.getSize_id());
+        Optional<PaymentProvider> paymentProviderOptional = paymentProviderRepository.findById(1);
+        PaymentProvider paymentProvider = paymentProviderOptional.get();
+        if(event.getIsFree()){
+            throw new BadRequestException(HttpStatus.BAD_REQUEST, "This event is free of charge.");
+        }
+        if(shirtSize.getSizeId()==null){
+            throw new BadRequestException(HttpStatus.BAD_REQUEST, "Shirt Size not found");
+        }
         String idrandom = MomoEncoder.generateRequestId();
 
         MomoCreateVm momoRequest = new MomoCreateVm();
@@ -45,7 +64,7 @@ public class PaymentService {
         momoRequest.setAmount(10000);
         momoRequest.setOrderId(idrandom);
         momoRequest.setOrderInfo("testthanhtoanmomo");
-        momoRequest.setRedirectUrl("http://localhost:3000/events/payment/success/"+event_id);
+        momoRequest.setRedirectUrl(paymentCreateDto.getRedirect_url());
         momoRequest.setIpnUrl("http://localhost:8080/api/payment/momo-payment");
         momoRequest.setRequestType("captureWallet");
         momoRequest.setExtraData("eyJ1c2VybmFtZSI6ICJtb21vIn0");
@@ -80,19 +99,27 @@ public class PaymentService {
         // Send request and get response
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         MomoResponseCreate momoResponse = objectMapper.readValue(response.body(), MomoResponseCreate.class);
-        return momoResponse;
+        createPayment(paymentCreateDto,event,shirtSize,paymentProvider);
+        return new ResponseObject(200,momoResponse.getPayUrl());
     }
 
-    public ResponseObject createOrderVNPAY(VnPayCreateDto vnPayCreateDto, HttpServletRequest request){
+    public ResponseObject createOrderVNPAY(PaymentCreateDto paymentCreateDto, HttpServletRequest servletRequest){
 
-        Event event = eventRepository.findEventByEventId(vnPayCreateDto.getEvent_id());
+        Event event = eventRepository.findEventByEventId(paymentCreateDto.getEvent_id());
+        ShirtSize shirtSize = shirtSizeRepository.getReferenceById(paymentCreateDto.getSize_id());
+        Optional<PaymentProvider> paymentProviderOptional = paymentProviderRepository.findById(2);
+        PaymentProvider paymentProvider = paymentProviderOptional.get();
         if(event.getIsFree()){
             throw new BadRequestException(HttpStatus.BAD_REQUEST, "This event is free of charge.");
+        }
+
+        if(shirtSize.getSizeId()==null){
+            throw new BadRequestException(HttpStatus.BAD_REQUEST, "Shirt Size not found");
         }
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String vnp_TxnRef = VNPay.getRandomNumber(8);
-        String vnp_IpAddr = VNPay.getIpAddress(request);
+        String vnp_IpAddr = VNPay.getIpAddress(servletRequest);
         String vnp_TmnCode = VNPay.vnp_TmnCode;
         String orderType = "order-type";
 
@@ -111,7 +138,7 @@ public class PaymentService {
         vnp_Params.put("vnp_Locale", locate);
 
         //urlReturn += VNPay.vnp_Returnurl;
-        vnp_Params.put("vnp_ReturnUrl", vnPayCreateDto.getRedirect_url());
+        vnp_Params.put("vnp_ReturnUrl", paymentCreateDto.getRedirect_url());
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -150,6 +177,7 @@ public class PaymentService {
         String queryUrl = query.toString();
         String vnp_SecureHash = VNPay.hmacSHA512(VNPay.vnp_HashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        createPayment(paymentCreateDto,event,shirtSize,paymentProvider);
         return new ResponseObject(200,VNPay.vnp_PayUrl + "?" + queryUrl);
     }
 
@@ -263,5 +291,20 @@ public class PaymentService {
         System.out.println(response.statusCode());
         System.out.println(response.body());
         return response.body().toString();
+    }
+
+    private void createPayment(PaymentCreateDto paymentCreateDto, Event event,ShirtSize shirtSize, PaymentProvider paymentProvider){
+
+        User userCurrent = userService.getCurrentLogin();
+        Payment payment = new Payment();
+        payment.setEvent(event);
+        payment.setShirtSize(shirtSize);
+        payment.setEmail(paymentCreateDto.getEmail());
+        payment.setAddress(paymentCreateDto.getAddress());
+        payment.setPaymentStatus(EPaymentStatus.PENDING);
+        payment.setUser(userCurrent);
+        payment.setPhoneNumber(paymentCreateDto.getPhone_number());
+        payment.setPaymentProvider(paymentProvider);
+        paymentRepository.save(payment);
     }
 }

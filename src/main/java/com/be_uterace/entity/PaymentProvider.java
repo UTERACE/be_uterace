@@ -14,7 +14,7 @@ import lombok.Setter;
 @Table(name = "PAYMENT_PROVIDER")
 public class PaymentProvider {
     @Id
-    private String id;
+    private Integer id;
     private boolean isEnabled;
     private String name;
     private String configureUrl;
