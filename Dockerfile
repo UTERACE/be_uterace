@@ -7,4 +7,4 @@ WORKDIR /app
 COPY target/be_uterace-0.0.1-SNAPSHOT.jar /app/be_uterace.jar
 
 # Chạy ứng dụng Spring Boot
-ENTRYPOINT ["java", "-jar", "demo.jar"]
+ENTRYPOINT ["java", "-jar", "be_uterace.jar"]
