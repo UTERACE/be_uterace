@@ -1,9 +1,10 @@
-FROM maven:3.9.2-eclipse-temurin-20-alpine as builder
-COPY ./src src/
-COPY ./pom.xml pom.xml
-RUN mvn clean package -DskipTests
-FROM eclipse-temurin:20-jre-alpine
-COPY --from=builder target/*.jar app.jar
-RUN mkdir -p /app/src/main/resources/static/images && chmod 777 /app/src/main/resources/static/images
-EXPOSE 10000
-CMD ["java","-jar","app.jar"]
+FROM openjdk:17-jdk-slim
+
+# Đặt thư mục làm việc trong container
+WORKDIR /app
+
+# Sao chép file jar từ thư mục hiện tại vào thư mục làm việc trong container
+COPY target/demo-0.0.1-SNAPSHOT.jar /app/demo.jar
+
+# Chạy ứng dụng Spring Boot
+ENTRYPOINT ["java", "-jar", "demo.jar"]
