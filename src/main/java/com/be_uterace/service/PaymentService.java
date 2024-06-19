@@ -4,7 +4,9 @@ import com.be_uterace.entity.*;
 import com.be_uterace.entity.enumeration.EPaymentStatus;
 import com.be_uterace.exception.BadRequestException;
 import com.be_uterace.payload.momo.MomoCreateVm;
+import com.be_uterace.payload.momo.MomoPostINP;
 import com.be_uterace.payload.momo.MomoResponseCreate;
+import com.be_uterace.payload.momo.MomoResponseINP;
 import com.be_uterace.payload.request.PaymentCreateDto;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.vnpay.PaymentReturnVNPAY;
@@ -43,6 +45,7 @@ public class PaymentService {
     private final UserService userService;
     private final ShirtSizeRepository shirtSizeRepository;
     private final PaymentProviderRepository paymentProviderRepository;
+    private final EventService eventService;
 
 
     public ResponseObject createOrderMOMO(PaymentCreateDto paymentCreateDto, HttpServletRequest servletRequest) throws IOException, InterruptedException {
@@ -65,7 +68,7 @@ public class PaymentService {
         momoRequest.setOrderId(idrandom);
         momoRequest.setOrderInfo("testthanhtoanmomo");
         momoRequest.setRedirectUrl(paymentCreateDto.getRedirect_url());
-        momoRequest.setIpnUrl("http://localhost:8080/api/payment/momo-payment");
+        momoRequest.setIpnUrl("https://a5ff-103-199-57-78.ngrok-free.app/api/payment/momo-payment");
         momoRequest.setRequestType("captureWallet");
         momoRequest.setExtraData("eyJ1c2VybmFtZSI6ICJtb21vIn0");
         momoRequest.setLang("vi");
@@ -99,7 +102,7 @@ public class PaymentService {
         // Send request and get response
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         MomoResponseCreate momoResponse = objectMapper.readValue(response.body(), MomoResponseCreate.class);
-        createPayment(paymentCreateDto,event,shirtSize,paymentProvider);
+        createPayment(paymentCreateDto,event,shirtSize,paymentProvider,null, idrandom);
         return new ResponseObject(200,momoResponse.getPayUrl());
     }
 
@@ -118,7 +121,7 @@ public class PaymentService {
         }
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
-        String vnp_TxnRef = VNPay.getRandomNumber(8);
+        String vnp_TxnRef = VNPay.generateRequestId();
         String vnp_IpAddr = VNPay.getIpAddress(servletRequest);
         String vnp_TmnCode = VNPay.vnp_TmnCode;
         String orderType = "order-type";
@@ -130,6 +133,7 @@ public class PaymentService {
         vnp_Params.put("vnp_Amount", String.valueOf(event.getRegistrationFee()*100));
         vnp_Params.put("vnp_CurrCode", "VND");
 
+        System.out.println("vnp_TxnRef: "+vnp_TxnRef);
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
         vnp_Params.put("vnp_OrderInfo", "orderInfor");
         vnp_Params.put("vnp_OrderType", orderType);
@@ -177,11 +181,84 @@ public class PaymentService {
         String queryUrl = query.toString();
         String vnp_SecureHash = VNPay.hmacSHA512(VNPay.vnp_HashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
-        createPayment(paymentCreateDto,event,shirtSize,paymentProvider);
+        createPayment(paymentCreateDto,event,shirtSize,paymentProvider, vnp_TxnRef,null);
         return new ResponseObject(200,VNPay.vnp_PayUrl + "?" + queryUrl);
     }
 
-    public int orderReturnVNPAY(HttpServletRequest request){
+    public MomoResponseINP updatePaymentMomo(MomoPostINP momoPostINP){
+        Payment payment = paymentRepository.findByRequestIdMomo(momoPostINP.getRequestId());
+        if(momoPostINP.getResultCode()==0){
+            payment.setPaymentStatus(EPaymentStatus.COMPLETED);
+            eventService.joinEvent(payment.getEvent().getEventId(),payment.getUser());
+        }else{
+            payment.setPaymentStatus(EPaymentStatus.CANCELLED);
+        }
+
+        String decode = "accessKey=" + momoEncoder.getAccessKey()
+                + "&extraData=" + momoPostINP.getExtraData()
+                + "&message=" + momoPostINP.getMessage()
+                + "&partnerCode=" + momoEncoder.getPartnerCode()
+                + "&requestId=" + momoPostINP.getRequestId()
+                + "&responseTime=" + momoPostINP.getResponseTime()
+                + "&resultCode=" + momoPostINP.getResultCode();
+        String signature = momoEncoder.encode(decode);
+
+        paymentRepository.save(payment);
+        MomoResponseINP momoResponseINP = new MomoResponseINP();
+        momoResponseINP.setPartnerCode(momoEncoder.getPartnerCode());
+        momoResponseINP.setOrderId(momoPostINP.getOrderId());
+        momoResponseINP.setResponseTime(momoPostINP.getResponseTime());
+        momoResponseINP.setResultCode(0);
+        momoResponseINP.setExtraData("");
+        momoResponseINP.setMessage("Thanh cong");
+        momoResponseINP.setSignature(signature);
+        return momoResponseINP;
+    }
+
+    public void updatePaymentVNPay(HttpServletRequest request){
+        String vnpTxnRef = request.getParameter("vnp_TxnRef");
+        System.out.println("updatePaymentVNPay:" + vnpTxnRef);
+        Payment payment = paymentRepository.findByvnpTxnRef(vnpTxnRef);
+        if(checkStatusPaymentVNPAY(request)==1){
+            payment.setPaymentStatus(EPaymentStatus.COMPLETED);
+            payment.setTransactionId(Long.parseLong(request.getParameter("vnp_TransactionNo")));
+            eventService.joinEvent(payment.getEvent().getEventId(),payment.getUser());
+        }else{
+            payment.setPaymentStatus(EPaymentStatus.CANCELLED);
+        }
+        paymentRepository.save(payment);
+    }
+
+
+    public int checkStatusPaymentMomo(MomoPostINP momoPostINP){
+
+        String decode = "accessKey=" + momoEncoder.getAccessKey()
+                + "&amount=" + momoPostINP.getAmount()
+                + "&extraData=" + momoPostINP.getExtraData()
+                + "&message=" + momoPostINP.getMessage()
+                + "&orderId=" + momoPostINP.getOrderId()
+                + "&orderInfo=" + momoPostINP.getOrderInfo()
+                + "&orderType=" + momoPostINP.getOrderType()
+                + "&partnerCode=" + momoEncoder.getPartnerCode()
+                + "&payType=" + momoPostINP.getPayType()
+                + "&requestId=" + momoPostINP.getRequestId()
+                + "&responseTime=" + momoPostINP.getResponseTime()
+                + "&resultCode=" + momoPostINP.getResultCode()
+                + "&transId=" + momoPostINP.getResultCode();
+
+        String signature = momoEncoder.encode(decode);
+        if (signature.equals(momoPostINP.getSignature())) {
+            if (momoPostINP.getResultCode()==0) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    public int checkStatusPaymentVNPAY(HttpServletRequest request){
         Map fields = new HashMap();
         for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
             String fieldName = null;
@@ -216,25 +293,25 @@ public class PaymentService {
         }
     }
 
-    public PaymentReturnVNPAY paymentReturnVNPAY (HttpServletRequest request){
-//        System.out.println("requet   :"+request.getParameter());
-        int paymentStatus = orderReturnVNPAY(request);
-        PaymentReturnVNPAY paymentReturnVNPAY = new PaymentReturnVNPAY();
-        String orderInfo = request.getParameter("vnp_OrderInfo");
-        String paymentTime = request.getParameter("vnp_PayDate");
-        String transactionId = request.getParameter("vnp_TransactionNo");
-        String totalPrice = request.getParameter("vnp_Amount");
-        if(paymentStatus==1){
-            paymentReturnVNPAY.builder()
-                    .orderInfo(orderInfo)
-                    .paymentTime(paymentTime)
-                    .transactionId(transactionId)
-                    .totalPrice(totalPrice)
-                    .build();
-            return paymentReturnVNPAY;
-        }
-        return paymentReturnVNPAY;
-    }
+//    public PaymentReturnVNPAY paymentReturnVNPAY (HttpServletRequest request){
+////        System.out.println("requet   :"+request.getParameter());
+//        int paymentStatus = orderReturnVNPAY(request);
+//        PaymentReturnVNPAY paymentReturnVNPAY = new PaymentReturnVNPAY();
+//        String orderInfo = request.getParameter("vnp_OrderInfo");
+//        String paymentTime = request.getParameter("vnp_PayDate");
+//        String transactionId = request.getParameter("vnp_TransactionNo");
+//        String totalPrice = request.getParameter("vnp_Amount");
+//        if(paymentStatus==1){
+//            paymentReturnVNPAY.builder()
+//                    .orderInfo(orderInfo)
+//                    .paymentTime(paymentTime)
+//                    .transactionId(transactionId)
+//                    .totalPrice(totalPrice)
+//                    .build();
+//            return paymentReturnVNPAY;
+//        }
+//        return paymentReturnVNPAY;
+//    }
 
     public String queryTransactionVNPAY() throws IOException, InterruptedException, IOException {
         String vnp_Version = "2.1.0";
@@ -293,7 +370,7 @@ public class PaymentService {
         return response.body().toString();
     }
 
-    private void createPayment(PaymentCreateDto paymentCreateDto, Event event,ShirtSize shirtSize, PaymentProvider paymentProvider){
+    private void createPayment(PaymentCreateDto paymentCreateDto, Event event,ShirtSize shirtSize, PaymentProvider paymentProvider, String vnp_TxnRef, String request_id){
 
         User userCurrent = userService.getCurrentLogin();
         Payment payment = new Payment();
@@ -305,6 +382,8 @@ public class PaymentService {
         payment.setUser(userCurrent);
         payment.setPhoneNumber(paymentCreateDto.getPhone_number());
         payment.setPaymentProvider(paymentProvider);
+        payment.setVnpTxnRef(vnp_TxnRef);
+        payment.setRequestId(request_id);
         paymentRepository.save(payment);
     }
 }

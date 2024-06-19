@@ -3,6 +3,7 @@ package com.be_uterace.service.impl;
 import com.be_uterace.entity.Post;
 import com.be_uterace.entity.Run;
 import com.be_uterace.entity.User;
+import com.be_uterace.exception.BadRequestException;
 import com.be_uterace.payload.request.ChangePasswordDto;
 import com.be_uterace.payload.request.UpdateDto;
 import com.be_uterace.payload.response.*;
@@ -70,8 +71,11 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Optional<User> userOptional = userRepository.findByUsername(username);
+        if(userOptional.isPresent()){
+            return userOptional.get();
+        }
         System.out.println("Curent User: "+ username);
-        return userOptional.get();
+        throw new BadRequestException(HttpStatus.BAD_REQUEST, "User not found");
     }
 
     @Override

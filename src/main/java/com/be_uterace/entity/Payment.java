@@ -50,6 +50,12 @@ public class Payment {
     @Column(name = "TRANSACTION_ID")
     private Long transactionId;
 
+    @Column(name = "vnp_txn_ref")
+    private String vnpTxnRef;
+
+    @Column(name = "request_id")
+    private String requestId;
+
     @Column(name = "ADDRESS")
     private String address;
 

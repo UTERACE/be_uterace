@@ -1,9 +1,13 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.entity.Payment;
+import com.be_uterace.payload.momo.MomoPostINP;
 import com.be_uterace.payload.momo.MomoResponseCreate;
+import com.be_uterace.payload.momo.MomoResponseINP;
 import com.be_uterace.payload.request.PaymentCreateDto;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.payload.vnpay.VnPayCreateDto;
+import com.be_uterace.repository.PaymentRepository;
 import com.be_uterace.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -16,10 +20,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
-    private PaymentService paymentService;
+    private final PaymentService paymentService;
+    private final PaymentRepository paymentRepository;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, PaymentRepository paymentRepository) {
         this.paymentService = paymentService;
+        this.paymentRepository = paymentRepository;
     }
 
     @PostMapping("/momo")
@@ -40,23 +46,21 @@ public class PaymentController {
 //        return ResponseEntity.status(HttpStatus.OK).body(returnVNPAY);
 //    }
     @GetMapping("/vnpay-payment")
-    public String checkParams(@RequestParam Map<String, String> allParams) {
-        StringBuilder response = new StringBuilder();
-        allParams.forEach((key, value) -> response.append(key).append(" = ").append(value).append("<br>"));
-        return response.toString();
+    public void checkPaymentController(HttpServletRequest request) {
+        System.out.println("goi ne");
+
+        paymentService.updatePaymentVNPay(request);
     }
 
-    @GetMapping("/momo-payment")
-    public String checkParamsMomo(@RequestParam Map<String, String> allParams) {
-        StringBuilder response = new StringBuilder();
-        allParams.forEach((key, value) -> response.append(key).append(" = ").append(value).append("<br>"));
-        return response.toString();
+    @PostMapping("/momo-payment")
+    public ResponseEntity<MomoResponseINP> checkParamsMomo(@RequestBody MomoPostINP momoPostINP) {
+        MomoResponseINP momoResponseINP = paymentService.updatePaymentMomo(momoPostINP);
+        return ResponseEntity.status(HttpStatus.OK).body(momoResponseINP);
     }
 
     @GetMapping("/vnpay-query")
-    public ResponseEntity<String> VNPAYQueryController() throws IOException, InterruptedException {
-        String returnVNPAY = paymentService.queryTransactionVNPAY();
-        return ResponseEntity.status(HttpStatus.OK).body(returnVNPAY);
+    public ResponseEntity<Payment> VNPAYQueryController() throws IOException, InterruptedException {
+        return ResponseEntity.status(HttpStatus.OK).body(paymentRepository.findByvnpTxnRef("0f94581b50cc40ddbc54dae0d5bff7e3"));
     }
 
 

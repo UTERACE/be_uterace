@@ -1,5 +1,6 @@
 package com.be_uterace.service;
 
+import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
@@ -25,7 +26,7 @@ public interface EventService {
 
     EventPaginationResponse getEventCreatedByUser(Long user_id, int current_page, int per_page,String search_name);
 
-    ResponseObject joinEvent(int event_id, Authentication auth);
+    ResponseObject joinEvent(int event_id, User user);
 
     ResponseObject leaveEvent(int event_id, Authentication auth);
 

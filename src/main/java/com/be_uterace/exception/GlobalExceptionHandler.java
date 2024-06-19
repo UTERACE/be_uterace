@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -82,6 +83,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ResponseObject> handleResourceNotFoundException(AuthenticationException exception,
+                                                                          WebRequest webRequest){
+        ResponseObject responseObject = new ResponseObject(StatusCode.UNAUTHORIZED, exception.getMessage());
+        return new ResponseEntity<>(responseObject, HttpStatus.UNAUTHORIZED);
+    }
+
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ResponseObject> badCredentialsException(AuthenticationException exception,
                                                                           WebRequest webRequest){
         ResponseObject responseObject = new ResponseObject(StatusCode.UNAUTHORIZED, exception.getMessage());
         return new ResponseEntity<>(responseObject, HttpStatus.UNAUTHORIZED);

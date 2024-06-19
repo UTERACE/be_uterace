@@ -7,6 +7,7 @@ import com.be_uterace.payload.response.*;
 import com.be_uterace.repository.*;
 import com.be_uterace.service.EventService;
 import com.be_uterace.service.FileService;
+import com.be_uterace.service.UserService;
 import com.be_uterace.utils.StatusCode;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,7 @@ public class EventServiceImpl implements EventService {
 
     private RunningCategoryRepository runningCategoryRepository;
     private EventRunningCategoryRepository eventRunningCategoryRepository;
+    private final UserService userService;
 
     private UserRepository userRepository;
     private UserEventRepository userEventRepository;
@@ -50,13 +52,14 @@ public class EventServiceImpl implements EventService {
 
 
     public EventServiceImpl(EventRepository eventRepository, RunningCategoryRepository runningCategoryRepository,
-                            EventRunningCategoryRepository eventRunningCategoryRepository, UserEventRepository userEventRepository,
+                            EventRunningCategoryRepository eventRunningCategoryRepository, UserService userService, UserEventRepository userEventRepository,
                             UserRepository userRepository, EntityManager em,
                             FileService fileService,
                             UEActivityRepository ueActivityRepository) {
         this.eventRepository = eventRepository;
         this.runningCategoryRepository = runningCategoryRepository;
         this.eventRunningCategoryRepository = eventRunningCategoryRepository;
+        this.userService = userService;
         this.userRepository = userRepository;
         this.userEventRepository = userEventRepository;
         this.em = em;
@@ -384,42 +387,35 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ResponseObject joinEvent(int event_id, Authentication auth) {
-        if (auth != null && auth.getPrincipal() instanceof UserDetails userDetails) {
-            String username = userDetails.getUsername();
-            Optional<User> userOptional = userRepository.findByUsername(username);
-            if (userOptional.isPresent()) {
-                Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
-                if (eventOptional.isEmpty()) {
-                    return new ResponseObject(StatusCode.NOT_FOUND, "Giải chạy chưa diễn ra hoặc đã kết thúc");
-                }
-                Event event = eventOptional.get();
-                event.setNumOfAttendee(event.getNumOfAttendee() + 1);
-                if (Objects.equals(userOptional.get().getGender(), "Nam"))
-                    event.setNumOfMales(event.getNumOfMales() + 1);
-                else
-                    event.setNumOfFemales(event.getNumOfFemales() + 1);
-                eventRepository.save(event);
-                Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userOptional.get().getUserId(), event_id);
-                if (userEventOptional.isPresent()) {
-                    userEventOptional.get().setStatus("1");
-                    userEventRepository.save(userEventOptional.get());
-                    return new ResponseObject(StatusCode.SUCCESS, "Tham gia giải chạy thành công");
-                }
-                UserEvent userEvent = new UserEvent();
-                userEvent.setEvent(event);
-                userEvent.setUser(userOptional.get());
-                userEvent.setJoinDate(new Timestamp(System.currentTimeMillis()));
-                userEvent.setTotalDistance(0.0);
-                userEvent.setPace(0.0);
-                userEvent.setStatus_complete("0");
-                userEvent.setRunningCategory(runningCategoryRepository.findById(1).get());
-                userEvent.setStatus("1");
-                userEventRepository.save(userEvent);
-                return new ResponseObject(StatusCode.SUCCESS, "Tham gia giải chạy thành công");
-            }
+    public ResponseObject joinEvent(int event_id, User user) {
+        Optional<Event> eventOptional = eventRepository.findEventsWithStatusOnGoing(event_id);
+        if (eventOptional.isEmpty()) {
+            return new ResponseObject(StatusCode.NOT_FOUND, "Giải chạy chưa diễn ra hoặc đã kết thúc");
         }
-        return new ResponseObject(StatusCode.NOT_FOUND, "Không tìm thấy người dùng");
+        Event event = eventOptional.get();
+        event.setNumOfAttendee(event.getNumOfAttendee() + 1);
+        if (Objects.equals(user.getGender(), "Nam"))
+            event.setNumOfMales(event.getNumOfMales() + 1);
+        else
+            event.setNumOfFemales(event.getNumOfFemales() + 1);
+        eventRepository.save(event);
+        Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(user.getUserId(), event_id);
+        if (userEventOptional.isPresent()) {
+            userEventOptional.get().setStatus("1");
+            userEventRepository.save(userEventOptional.get());
+            return new ResponseObject(StatusCode.SUCCESS, "Tham gia giải chạy thành công");
+        }
+        UserEvent userEvent = new UserEvent();
+        userEvent.setEvent(event);
+        userEvent.setUser(user);
+        userEvent.setJoinDate(new Timestamp(System.currentTimeMillis()));
+        userEvent.setTotalDistance(0.0);
+        userEvent.setPace(0.0);
+        userEvent.setStatus_complete("0");
+        userEvent.setRunningCategory(runningCategoryRepository.findById(1).get());
+        userEvent.setStatus("1");
+        userEventRepository.save(userEvent);
+        return new ResponseObject(StatusCode.SUCCESS, "Tham gia giải chạy thành công");
     }
 
     @Override

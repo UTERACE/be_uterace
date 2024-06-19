@@ -1,11 +1,13 @@
 package com.be_uterace.controller;
 
+import com.be_uterace.entity.User;
 import com.be_uterace.payload.request.CreateEventDto;
 import com.be_uterace.payload.request.DeleteActivityEvent;
 import com.be_uterace.payload.request.UpdateEventDto;
 import com.be_uterace.payload.response.*;
 import com.be_uterace.service.EventService;
 import com.be_uterace.service.UEActivityService;
+import com.be_uterace.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,10 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class EventController {
     private EventService eventService;
     private UEActivityService ueActivityService;
+    private final UserService userService;
 
-    public EventController(EventService eventService, UEActivityService ueActivityService) {
+    public EventController(EventService eventService, UEActivityService ueActivityService, UserService userService) {
         this.eventService = eventService;
         this.ueActivityService = ueActivityService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -103,7 +107,8 @@ public class EventController {
 
     @PostMapping(value = {"/join-event/{event_id}"})
     public ResponseEntity<ResponseObject> joinEventController(@PathVariable Integer event_id, Authentication auth){
-        ResponseObject res = eventService.joinEvent(event_id, auth);
+        User user = userService.getCurrentLogin();
+        ResponseObject res = eventService.joinEvent(event_id, user);
         return ResponseEntity.ok(res);
     }
 
