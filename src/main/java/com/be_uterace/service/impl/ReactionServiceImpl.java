@@ -2,6 +2,7 @@ package com.be_uterace.service.impl;
 
 import com.be_uterace.entity.*;
 import com.be_uterace.payload.request.ReactionDto;
+import com.be_uterace.payload.response.ReactionResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.repository.*;
 import com.be_uterace.service.ReactionService;
@@ -80,7 +81,8 @@ public class ReactionServiceImpl implements ReactionService {
     public ResponseObject deleteReactionClub(Integer clubId) {
         Optional<User> user = authenticatedUser();
         if (reactionClubRepository.existsByClubClubIdAndUserUserId(clubId, user.orElseThrow().getUserId())) {
-            reactionClubRepository.deleteByClubClubIdAndUserUserId(clubId, user.orElseThrow().getUserId());
+            ReactionClub reactionClub = reactionClubRepository.findByClubClubIdAndUserUserId(clubId, user.orElseThrow().getUserId());
+            reactionClubRepository.delete(reactionClub);
             return new ResponseObject(200, "Reaction deleted successfully");
         }
         return new ResponseObject(400, "Reaction does not exist");
@@ -109,6 +111,23 @@ public class ReactionServiceImpl implements ReactionService {
             return new ResponseObject(200, "Reaction deleted successfully");
         }
         return new ResponseObject(400, "Reaction does not exist");
+    }
+
+    @Override
+    public ReactionResponse getReactions(Integer clubId) {
+        Optional<User> user = authenticatedUser();
+        if (user.isEmpty()) {
+            return ReactionResponse.builder()
+                    .liked(false)
+                    .likes(0L)
+                    .build();
+        }
+        boolean liked = reactionClubRepository.existsByClubClubIdAndUserUserId(clubId, user.get().getUserId());
+        long likes = reactionClubRepository.countByClubClubId(clubId);
+        return ReactionResponse.builder()
+                .liked(liked)
+                .likes(likes)
+                .build();
     }
 
     private Optional<User> authenticatedUser() {

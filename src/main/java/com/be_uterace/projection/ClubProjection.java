@@ -6,4 +6,5 @@ public interface ClubProjection {
     String getPicturePath();
     Double getClubTotalDistance();
     Long getMemberCount();
+    Long getReactionCount();
 }

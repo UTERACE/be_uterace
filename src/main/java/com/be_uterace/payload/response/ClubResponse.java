@@ -13,4 +13,5 @@ public class ClubResponse {
     private String image;
     private Long total_member;
     private Double total_distance;
+    private Long total_like;
 }

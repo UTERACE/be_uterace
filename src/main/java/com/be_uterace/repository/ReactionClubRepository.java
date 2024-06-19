@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReactionClubRepository extends JpaRepository<ReactionClub, Integer> {
     boolean existsByClubClubIdAndUserUserId(Integer clubId, Long userId);
-    void deleteByClubClubIdAndUserUserId(Integer clubId, Long userId);
+    ReactionClub findByClubClubIdAndUserUserId(Integer clubId, Long userId);
     int countByClubClubId(Integer clubId);
 }

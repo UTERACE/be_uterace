@@ -1,6 +1,7 @@
 package com.be_uterace.controller;
 
 import com.be_uterace.payload.request.ReactionDto;
+import com.be_uterace.payload.response.ReactionResponse;
 import com.be_uterace.payload.response.ResponseObject;
 import com.be_uterace.service.ReactionService;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,11 @@ public class ReactionController {
 
     public ReactionController(ReactionService reactionService) {
         this.reactionService = reactionService;
+    }
+
+    @GetMapping("/club/{club_id}")
+    public ReactionResponse getReactions(@PathVariable Integer club_id) {
+        return reactionService.getReactions(club_id);
     }
 
     @PostMapping("/club")

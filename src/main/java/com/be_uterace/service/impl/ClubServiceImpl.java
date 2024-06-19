@@ -68,6 +68,7 @@ public class ClubServiceImpl implements ClubService {
             clubResponse.setImage(item.getPicturePath());
             clubResponse.setTotal_member(item.getMemberCount());
             clubResponse.setTotal_distance(item.getClubTotalDistance());
+            clubResponse.setTotal_like(item.getReactionCount());
             clubResponseList.add(clubResponse);
         }
 

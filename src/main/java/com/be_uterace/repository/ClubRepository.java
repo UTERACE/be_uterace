@@ -54,9 +54,11 @@ public interface ClubRepository extends JpaRepository<Club, Integer>, JpaSpecifi
             "c.clubName AS clubName," +
             "c.picturePath AS picturePath, " +
             "c.clubTotalDistance as clubTotalDistance, " +
-            "COUNT(uc.user.userId) AS memberCount " +
+            "COUNT(uc.user.userId) AS memberCount, " +
+            "COUNT(rc.user.userId) AS reactionCount " +
             "FROM Club c " +
             "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "LEFT JOIN ReactionClub rc ON c.clubId = rc.club.clubId " +
             "WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId " +
             "ORDER BY c.clubTotalDistance DESC")
@@ -130,9 +132,17 @@ public interface ClubRepository extends JpaRepository<Club, Integer>, JpaSpecifi
             "GROUP BY c.clubId")
     Page<ClubProjection> findClubJoined(@Param("search_name") String search_name, Pageable pageable, @Param("userId") Long userId);
 
-    @Query("SELECT  new com.be_uterace.payload.response.ClubResponse(c.clubId, c.clubName, c.picturePath, c.numOfAttendee, c.clubTotalDistance) " +
+    @Query("SELECT  new com.be_uterace.payload.response.ClubResponse(" +
+            "c.clubId, " +
+            "c.clubName, " +
+            "c.picturePath, " +
+            "c.numOfAttendee, " +
+            "c.clubTotalDistance, " +
+            "COUNT(rc.user.userId)) " +
             "FROM Club c " +
+            "LEFT JOIN ReactionClub rc ON c.clubId = rc.club.clubId " +
             "WHERE c.outstanding = '1' AND c.status = '1' AND c.numOfAttendee >=0 " +
+            "GROUP BY c.clubId, c.clubName, c.picturePath, c.numOfAttendee, c.clubTotalDistance " +
             "ORDER BY c.numOfAttendee DESC " +
             "LIMIT 6")
     List<ClubResponse> findTop6ClubsByOutstandingAndStatusAndNumOfAttendeeContaining();
