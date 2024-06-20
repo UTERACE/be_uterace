@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseObject updateUser(UpdateDto updateDto, Authentication authentication) {
+    public UserUpdateResponse updateUser(UpdateDto updateDto, Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
             String username = userDetails.getUsername();
             Optional<User> userOptional = userRepository.findByUsername(username);
@@ -121,14 +121,10 @@ public class UserServiceImpl implements UserService {
                 user.setEmail(!Objects.equals(updateDto.getEmail(), "") ? updateDto.getEmail() : user.getEmail());
                 user.setTelNum(!Objects.equals(updateDto.getTelNumber(), "") ? updateDto.getTelNumber() : user.getTelNum());
                 user.setDateOfBirth(!Objects.equals(updateDto.getBirthday(), "") ? convertStringToDate(updateDto.getBirthday()) : user.getDateOfBirth());
-                user.setGender(!Objects.equals(updateDto.getGender(), "") ? updateDto.getGender() : user.getGender());
                 user.setHomeNumber(!Objects.equals(updateDto.getAddress(), "") ? updateDto.getAddress() : user.getHomeNumber());
                 user.setArea(!Objects.equals(updateDto.getProvince(), "") && !Objects.equals(updateDto.getDistrict(), "") && !Objects.equals(updateDto.getWard(), "") ? areaRepository.findArea(updateDto.getProvince(),
                         updateDto.getDistrict(),
                         updateDto.getWard()) : user.getArea());
-//                user.setArea(areaRepository.findArea(updateDto.getProvince(),
-//                        updateDto.getDistrict(),
-//                        updateDto.getWard()));
                 if (!user.getAvatarPath().equals(updateDto.getImage()) && !Objects.equals(updateDto.getImage(), "")){
                     if (Objects.equals(user.getAvatarPath(), "")){
                         user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
@@ -136,17 +132,20 @@ public class UserServiceImpl implements UserService {
                         System.out.println("Delete image success");
                         user.setAvatarPath(fileService.saveImage(updateDto.getImage()));
                     }
+                } else {
+                    user.setGender(!Objects.equals(updateDto.getGender().name(), "") ? updateDto.getGender() : user.getGender());
                 }
 
                 userRepository.save(user);
-                return ResponseObject.builder()
+                return UserUpdateResponse.builder()
                         .status(200)
                         .message("Cập nhật thông tin ngừoi dùng \n" +
                                 " thành công!")
+                        .image(user.getAvatarPath())
                         .build();
             }
         }
-        return ResponseObject.builder()
+        return UserUpdateResponse.builder()
                 .status(400)
                 .message("Cập nhật thông tin ngừoi dùng \n" +
                         " thất bại!")

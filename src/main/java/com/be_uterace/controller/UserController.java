@@ -41,8 +41,8 @@ public class UserController {
     }
 
     @PutMapping(value = {"/update"})
-    public ResponseEntity<ResponseObject> updateUserController(@RequestBody UpdateDto updateDto, Authentication authentication) {
-        ResponseObject userResponse = userService.updateUser(updateDto,authentication);
+    public ResponseEntity<UserUpdateResponse> updateUserController(@RequestBody UpdateDto updateDto, Authentication authentication) {
+        UserUpdateResponse userResponse = userService.updateUser(updateDto,authentication);
         return ResponseEntity.ok(userResponse);
     }
 
