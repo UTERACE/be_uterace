@@ -30,7 +30,7 @@ public class Event {
 
     @CreationTimestamp
     @Column(name = "CREATE_AT")
-    private Timestamp createAt;
+    private Timestamp createAt = new Timestamp(new Date().getTime());
 
     @Column(name = "PICTURE_PATH")
     private String picturePath;
@@ -42,25 +42,25 @@ public class Event {
     private Date endDate;
 
     @Column(name = "STATUS")
-    private String status="1";
+    private String status = "1";
 
     @Column(name = "NUM_OF_ATTENDEE")
-    private Integer numOfAttendee=0;
+    private Integer numOfAttendee = 0;
 
     @Column(name = "NUM_OF_RUNNER")
-    private Integer numOfRunner=0;
+    private Integer numOfRunner = 0;
 
     @Column(name = "NUM_OF_CLUBS")
-    private Integer numOfClubs=0;
+    private Integer numOfClubs = 0;
 
     @Column(name = "NUM_OF_COMPLETED")
-    private Integer completed=0;
+    private Integer completed = 0;
 
     @Column(name = "NUM_OF_NOT_COMPLETED")
-    private Integer notCompleted=0;
+    private Integer notCompleted = 0;
 
     @Column(name = "TOTAL_DISTANCE")
-    private Double totalDistance=0.0;
+    private Double totalDistance = 0.0;
 
     @Column(name = "CONTENT")
     private String content;
@@ -83,13 +83,13 @@ public class Event {
     private User adminUser;
 
     @Column(name = "NUM_OF_MALES")
-    private Integer numOfMales=0;
+    private Integer numOfMales = 0;
 
     @Column(name = "NUM_OF_FEMALES")
-    private Integer numOfFemales=0;
+    private Integer numOfFemales = 0;
 
     @Column(name = "TOTAL_ACTIVITIES")
-    private Integer totalActivities=0;
+    private Integer totalActivities = 0;
 
     @Column(name = "DETAILS", columnDefinition = "TEXT")
     private String details;

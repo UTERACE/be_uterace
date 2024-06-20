@@ -31,7 +31,7 @@ public class Post {
 
     @CreationTimestamp
     @Column(name = "CREATED_AT")
-    private Timestamp createdAt;
+    private Timestamp createdAt = new Timestamp(new Date().getTime());
 
     @Column(name = "HTML_CONTENT", columnDefinition = "TEXT")
     private String htmlContent;
@@ -47,7 +47,7 @@ public class Post {
 
     @CreationTimestamp
     @Column(name = "UPDATED_AT")
-    private Timestamp updatedAt;
+    private Timestamp updatedAt = new Timestamp(new Date().getTime());
 
     @Column(name = "STATUS")
     private String status;

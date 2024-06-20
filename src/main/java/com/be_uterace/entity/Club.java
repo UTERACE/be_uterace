@@ -31,7 +31,7 @@ public class Club {
 
     @CreationTimestamp
     @Column(name = "CREATED_AT")
-    private Timestamp createdAt;
+    private Timestamp createdAt = new Timestamp(new Date().getTime());
 
     @Column(name = "CLUB_TOTAL_DISTANCE")
     private Double clubTotalDistance = 0.0;
@@ -60,13 +60,13 @@ public class Club {
     private User creatorUser;
 
     @Column(name = "NUM_OF_ATTENDEE")
-    private Long numOfAttendee=0L;
+    private Long numOfAttendee = 0L;
 
     @Column(name = "NUM_OF_MALES")
-    private Integer numOfMales=0;
+    private Integer numOfMales = 0;
 
     @Column(name = "NUM_OF_FEMALES")
-    private Integer numOfFemales=0;
+    private Integer numOfFemales = 0;
 
     @Column(name = "TOTAL_ACTIVITIES")
     private Long totalActivities = 0L;

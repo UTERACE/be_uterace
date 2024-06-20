@@ -34,7 +34,7 @@ public class User {
 
     @CreationTimestamp
     @Column(name = "CREATED_AT")
-    private Timestamp createdAt;
+    private Timestamp createdAt = new Timestamp(new Date().getTime());
 
     @Column(name = "NAME")
     private String name;
