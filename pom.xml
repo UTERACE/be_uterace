@@ -191,6 +191,7 @@
 <!--                            </configuration>-->
 <!--                        </plugin>-->
         </plugins>
+        <finalName>be_uterace</finalName>
     </build>
 
 </project>
