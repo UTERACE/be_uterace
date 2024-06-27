@@ -39,6 +39,9 @@ jobs:
         dockerfile: Dockerfile
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+        
+    - name: Trigger deployment
+      run: curl -X POST https://api.render.com/deploy/srv-cpphrgmehbks73c32040?key=orT-wemzBO4
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
    # - name: Update dependency graph
