@@ -147,24 +147,24 @@ public class PaymentService {
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-//        String vnp_CreateDate = formatter.format(cld.getTime());
-//        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        String vnp_CreateDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+        cld.add(Calendar.MINUTE, 1000);
+        String vnp_ExpireDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+
+//        cld.setTimeZone(TimeZone.getTimeZone("UTC"));
+//        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+//
+//        // Định dạng lại thời gian trong múi giờ UTC
+//        String utc_CreateDate = formatter.format(cld.getTime());
+//        System.out.println("vnp_CreateDate (UTC): " + utc_CreateDate);
+//        vnp_Params.put("vnp_CreateDate", utc_CreateDate);
+//
 //        cld.add(Calendar.MINUTE, 15);
-//        String vnp_ExpireDate = formatter.format(cld.getTime());
-//        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
-
-
-        cld.setTimeZone(TimeZone.getTimeZone("UTC"));
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        // Định dạng lại thời gian trong múi giờ UTC
-        String utc_CreateDate = formatter.format(cld.getTime());
-        System.out.println("vnp_CreateDate (UTC): " + utc_CreateDate);
-        vnp_Params.put("vnp_CreateDate", utc_CreateDate);
-
-        cld.add(Calendar.MINUTE, 15);
-        String utc_ExpireDate = formatter.format(cld.getTime());
-        vnp_Params.put("vnp_ExpireDate", utc_ExpireDate);
+//        String utc_ExpireDate = formatter.format(cld.getTime());
+//        vnp_Params.put("vnp_ExpireDate", utc_ExpireDate);
         List fieldNames = new ArrayList(vnp_Params.keySet());
         Collections.sort(fieldNames);
         StringBuilder hashData = new StringBuilder();
