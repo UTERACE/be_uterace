@@ -24,7 +24,7 @@ public interface UEActivityRepository extends JpaRepository<UserEventActivity,Lo
             "(:searchName IS NULL OR unaccent(LOWER(uea.name)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))) " +
             "AND uea.createdAt >= :thresholdDateTime " +
             "AND uea.event.eventId = :eventId " +
-            "ORDER BY uea.id DESC")
+            "ORDER BY uea.createdAt DESC")
     Page<UserEventActivity> findRunsByDateTimeAndName(
             @Param("thresholdDateTime") Timestamp thresholdDateTime,
             @Param("searchName") String searchName,

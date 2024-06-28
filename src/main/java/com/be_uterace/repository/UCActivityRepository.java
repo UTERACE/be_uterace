@@ -25,7 +25,7 @@ public interface UCActivityRepository extends JpaRepository<UserClubActivity,Lon
             "(:searchName IS NULL OR unaccent(LOWER(uca.name)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))) " +
             "AND uca.createdAt >= :thresholdDateTime " +
             "AND uca.club.clubId = :clubId " +
-            "ORDER BY uca.id DESC")
+            "ORDER BY uca.createdAt DESC")
     Page<UserClubActivity> findActivityByDateTimeAndName(
             @Param("thresholdDateTime") Timestamp thresholdDateTime,
             @Param("searchName") String searchName,

@@ -68,7 +68,7 @@ public class PaymentService {
         momoRequest.setOrderId(idrandom);
         momoRequest.setOrderInfo("testthanhtoanmomo");
         momoRequest.setRedirectUrl(paymentCreateDto.getRedirect_url());
-        momoRequest.setIpnUrl("https://be-uterace-ltf2.onrender.com/api/payment/momo-payment");
+        momoRequest.setIpnUrl("https://be-uterace.onrender.com/api/payment/momo-payment");
         momoRequest.setRequestType("captureWallet");
         momoRequest.setExtraData("eyJ1c2VybmFtZSI6ICJtb21vIn0");
         momoRequest.setLang("vi");
