@@ -59,7 +59,7 @@ public class ManagePostServiceImpl implements ManagePostService {
         Page<Post> postPage;
         Pageable pageable = PageRequest.of(current_page - 1, per_page);
         if(search==null || search.equals("")) {
-            postPage = postRepository.findAll(pageable);
+            postPage = postRepository.findAllPost(pageable);
         } else {
             postPage = postRepository.searchPostManage(search,pageable);
         }

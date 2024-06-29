@@ -40,7 +40,7 @@ public class Post {
     private String image;
 
     @Column(name = "OUTSTANDING")
-    private String outstanding;
+    private String outstanding = "0";
 
     @Column(name = "DESCRIPTION", columnDefinition = "TEXT")
     private String description;
@@ -58,6 +58,12 @@ public class Post {
 
     @Column(name = "REASON")
     private String reason;
+
+    @Column(name = "DELETED_AT")
+    private Timestamp deletedAt = null;
+
+    @Column(name = "IS_NEWFEED")
+    private String isNewfeed = "1";
 
     // Getters and setters
 }

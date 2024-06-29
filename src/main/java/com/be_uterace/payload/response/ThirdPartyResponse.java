@@ -11,7 +11,7 @@ import java.util.Map;
 @Setter
 @Builder
 public class ThirdPartyResponse {
-    private String id;
+    private Long id;
     private String accessToken;
     private String refreshToken;
     private boolean isNewUser;

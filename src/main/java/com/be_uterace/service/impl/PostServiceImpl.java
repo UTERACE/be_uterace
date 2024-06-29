@@ -133,14 +133,18 @@ public class PostServiceImpl implements PostService {
 
                 post.setTitle(createPostDto.getTitle());
                 post.setDescription(createPostDto.getDescription());
-                if (!Objects.equals(createPostDto.getImage(), ""))
+                if (!Objects.equals(createPostDto.getImage(), "")) {
                     post.setImage(fileService.saveImage(createPostDto.getImage()));
-                else
+                    post.setIsNewfeed("0");
+                    post.setStatus("1");
+                } else {
                     post.setImage("");
+                    post.setIsNewfeed("1");
+                    post.setStatus("0");
+                }
                 post.setHtmlContent(createPostDto.getContent());
                 post.setUserCreate(userOptional.get());
-                post.setOutstanding("0");
-                post.setStatus("1");
+
                 postRepository.save(post);
                 return new ResponseObject(StatusCode.SUCCESS, "Tạo bài viết thành công");
 
@@ -195,7 +199,8 @@ public class PostServiceImpl implements PostService {
                 if (postOptional.isPresent()) {
                     Post post = postOptional.get();
                     if (post.getUserCreate().getUserId().equals(userOptional.get().getUserId())) {
-                        postRepository.delete(post);
+                        post.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
+                        postRepository.save(post);
                         return new ResponseObject(StatusCode.SUCCESS, "Xóa bài viết thành công");
                     }
                 }
@@ -223,8 +228,29 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public ResponseObject activePost(Integer post_id, Integer club_id, Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            Optional<Club> clubOptional = clubRepository.findClubByClubIdAndAdminUser_UserId(club_id, userOptional.orElseThrow().getUserId());
+            if (clubOptional.isPresent()) {
+                Optional<Post> postOptional = postRepository.findById(post_id);
+                if (postOptional.isPresent()) {
+                    Post post = postOptional.get();
+                    post.setStatus("1");
+                    postRepository.save(post);
+                    return new ResponseObject(StatusCode.SUCCESS, "Hiện bài viết thành công");
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<PostClubPaginationResponse> getPostClub(int club_id, int current_page, int per_page, String search_name) {
         Optional<User> userOptional = authenticatedUser();
+        if (Objects.equals(search_name, ""))
+            search_name = null;
         List<Post> postList = postRepository.getPostsByClubClubIdAndTitleContainingOrderByCreatedAtDesc(club_id, search_name, PageRequest.of(current_page - 1, per_page)).getContent();
         List<PostClubPaginationResponse> postClubPaginationResponses = new ArrayList<>();
         for (Post post : postList) {
@@ -243,8 +269,8 @@ public class PostServiceImpl implements PostService {
             postClubPaginationResponse.setCount_likes(countLikes);
             int countComments = commentPostRepository.countByPostPostId(post.getPostId());
             postClubPaginationResponse.setCount_comments(countComments);
-            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
-            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
+            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(post.getUserCreate().getUserId(), club_id);
+            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(post.getUserCreate().getUserId(), club_id);
             postClubPaginationResponse.setUser_id(post.getUserCreate().getUserId());
             postClubPaginationResponse.setUser_name(post.getUserCreate().getFirstName() + " " + post.getUserCreate().getLastName());
             postClubPaginationResponse.setUser_avatar(post.getUserCreate().getAvatarPath());
@@ -257,6 +283,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostClubPaginationResponse> getMyPostClub(int club_id, int current_page, int per_page, String search_name) {
         Optional<User> userOptional = authenticatedUser();
+        if (Objects.equals(search_name, ""))
+            search_name = null;
         List<Post> postList = postRepository.getPostsByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(club_id, search_name, userOptional.orElseThrow(), PageRequest.of(current_page - 1, per_page)).getContent();
         List<PostClubPaginationResponse> postClubPaginationResponses = new ArrayList<>();
         for (Post post : postList) {
@@ -275,8 +303,39 @@ public class PostServiceImpl implements PostService {
             postClubPaginationResponse.setCount_likes(countLikes);
             int countComments = commentPostRepository.countByPostPostId(post.getPostId());
             postClubPaginationResponse.setCount_comments(countComments);
-            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
-            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(userOptional.orElseThrow().getUserId(), club_id);
+            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(post.getUserCreate().getUserId(), club_id);
+            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(post.getUserCreate().getUserId(), club_id);
+            postClubPaginationResponse.setUser_id(post.getUserCreate().getUserId());
+            postClubPaginationResponse.setUser_name(post.getUserCreate().getFirstName() + " " + post.getUserCreate().getLastName());
+            postClubPaginationResponse.setUser_avatar(post.getUserCreate().getAvatarPath());
+            postClubPaginationResponse.setUser_role(isAdmin ? "admin" : isOwner ? "owner" : "member");
+            postClubPaginationResponses.add(postClubPaginationResponse);
+        }
+        return postClubPaginationResponses;
+    }
+
+    @Override
+    public List<PostClubPaginationResponse> getActivePostClub(int club_id, int current_page, int per_page, String search_name) {
+        Optional<User> userOptional = authenticatedUser();
+        if (Objects.equals(search_name, ""))
+            search_name = null;
+        List<Post> postList = postRepository.getPostsActiveByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(club_id, search_name, PageRequest.of(current_page - 1, per_page)).getContent();
+        List<PostClubPaginationResponse> postClubPaginationResponses = new ArrayList<>();
+        for (Post post : postList) {
+            PostClubPaginationResponse postClubPaginationResponse = new PostClubPaginationResponse();
+            postClubPaginationResponse.setPost_id(post.getPostId());
+            postClubPaginationResponse.setPost_title(post.getTitle());
+            postClubPaginationResponse.setPost_content(post.getDescription());
+            postClubPaginationResponse.setPost_description(post.getHtmlContent());
+            postClubPaginationResponse.setPost_image(post.getImage());
+            postClubPaginationResponse.setPost_date(post.getCreatedAt().toString());
+            postClubPaginationResponse.setPost_outstanding(post.getOutstanding());
+            postClubPaginationResponse.setPost_status(post.getStatus());
+            postClubPaginationResponse.set_liked(false);
+            postClubPaginationResponse.setCount_likes(0);
+            postClubPaginationResponse.setCount_comments(0);
+            boolean isAdmin = clubRepository.existsByAdminUserUserIdAndClubId(post.getUserCreate().getUserId(), club_id);
+            boolean isOwner = clubRepository.existsByCreatorUserUserIdAndClubId(post.getUserCreate().getUserId(), club_id);
             postClubPaginationResponse.setUser_id(post.getUserCreate().getUserId());
             postClubPaginationResponse.setUser_name(post.getUserCreate().getFirstName() + " " + post.getUserCreate().getLastName());
             postClubPaginationResponse.setUser_avatar(post.getUserCreate().getAvatarPath());

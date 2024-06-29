@@ -37,6 +37,14 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @GetMapping("/active-news/{club_id}")
+    public ResponseEntity<List<PostClubPaginationResponse>> getActivePostClubController(@PathVariable Integer club_id,
+                                                                                  @RequestParam int current_page,
+                                                                                  @RequestParam int per_page, @RequestParam String search_name) {
+        List<PostClubPaginationResponse> res = postService.getActivePostClub(club_id, current_page, per_page, search_name);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
     @GetMapping()
     public ResponseEntity<PostPaginationResponse> getPostPaginationController(@RequestParam int current_page,
                                                                               @RequestParam int per_page, @RequestParam String search_name) {
@@ -78,6 +86,12 @@ public class PostController {
     @PutMapping("/hide/{post_id}")
     public ResponseEntity<ResponseObject> hidePostController(@PathVariable Integer post_id, Authentication auth) {
         ResponseObject responseObject = postService.hidePost(post_id, auth);
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
+
+    @PutMapping("/active/{post_id}/club/{club_id}")
+    public ResponseEntity<ResponseObject> activePostController(@PathVariable Integer post_id, @PathVariable Integer club_id, Authentication auth) {
+        ResponseObject responseObject = postService.activePost(post_id, club_id, auth);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 }

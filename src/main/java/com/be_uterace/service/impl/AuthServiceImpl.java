@@ -122,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
             User user = userRepository.findByUsername(response.getEmail()).orElse(null);
             if (user == null) {
                 return ThirdPartyResponse.builder()
-                        .id(response.getId())
+                        .id(Long.valueOf(response.getId()))
                         .accessToken(null)
                         .refreshToken(null)
                         .isNewUser(true)
@@ -144,7 +144,7 @@ public class AuthServiceImpl implements AuthService {
                         .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
                         .collect(Collectors.toList());
                 return ThirdPartyResponse.builder()
-                        .id(String.valueOf(user.getUserId()))
+                        .id(user.getUserId())
                         .accessToken(jwtTokenProvider.generateAccessToken(user.getUsername()))
                         .refreshToken(jwtTokenProvider.generateRefreshToken(user.getUsername()))
                         .isNewUser(false)
@@ -161,7 +161,7 @@ public class AuthServiceImpl implements AuthService {
             User user = userRepository.findByUsername(response.getId()+"-fb").orElse(null);
             if (user == null) {
                 return ThirdPartyResponse.builder()
-                        .id(response.getId())
+                        .id(Long.valueOf(response.getId()))
                         .accessToken(null)
                         .refreshToken(null)
                         .isNewUser(true)
@@ -183,7 +183,7 @@ public class AuthServiceImpl implements AuthService {
                         .sorted(Comparator.comparingLong(roleInfo -> (Long) roleInfo.get("roleId"))) // Sắp xếp theo roleId
                         .collect(Collectors.toList());
                 return ThirdPartyResponse.builder()
-                        .id(String.valueOf(user.getUserId()))
+                        .id(user.getUserId())
                         .accessToken(jwtTokenProvider.generateAccessToken(user.getUsername()))
                         .refreshToken(jwtTokenProvider.generateRefreshToken(user.getUsername()))
                         .isNewUser(false)

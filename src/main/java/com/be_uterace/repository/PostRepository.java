@@ -30,11 +30,15 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     List<Post> findTop6PostsByOutstanding(String outstanding);
 
+    @Query("SELECT p FROM Post p WHERE p.status='1' AND p.isNewfeed='0' " +
+            "AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
     List<Post> getPostsByClubClubId(Integer clubId);
 
     Page<Post> getPostsByTitleContainingAndUserCreateUserId(String search_name, Pageable pageable, Integer userId);
 
     @Query("SELECT p FROM Post p WHERE p.status='1' " +
+            "AND p.isNewfeed='0' " +
+            "AND p.deletedAt IS NULL " +
             "AND unaccent(LOWER(p.title)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "ORDER BY p.createdAt DESC ")
     Page<Post> findAllByTitleContaining(String search_name, Pageable pageable);
@@ -52,13 +56,49 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("UPDATE Post p SET p.outstanding = :mark WHERE p.postId = :postId")
     void markOutstandingPost(@Param("mark") String mark, @Param("postId") Integer postId);
 
-    @Query("SELECT p FROM Post p WHERE unaccent(LOWER(p.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
+    @Query("SELECT p FROM Post p WHERE p.isNewfeed='0' " +
+            "AND p.deletedAt IS NULL " +
+            "AND unaccent(LOWER(p.title)) LIKE unaccent(LOWER(concat('%', :searchName, '%')))")
     Page<Post> searchPostManage(@Param("searchName") String searchName, Pageable pageable);
 
-    Page<Post> getPostsByClubClubIdAndTitleContainingOrderByCreatedAtDesc
-            (Integer clubId, String search_name, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.isNewfeed='0' " +
+            "AND p.deletedAt IS NULL ")
+    Page<Post> findAllPost(Pageable pageable);
 
-    Page<Post> getPostsByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(Integer club_clubId, String title, User userCreate, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL " +
+            "AND p.status = '1' " +
+            "AND p.club.clubId = :clubId " +
+            "AND (:searchName IS NULL OR p.title LIKE %:searchName%) " +
+            "ORDER BY p.createdAt DESC ")
+    Page<Post> getPostsByClubClubIdAndTitleContainingOrderByCreatedAtDesc(
+            @Param("clubId") Integer clubId,
+            @Param("searchName") String searchName,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL " +
+            "AND p.club.clubId = :clubId " +
+            "AND (:searchName IS NULL OR p.title LIKE %:searchName%) " +
+            "AND p.userCreate = :userCreate " +
+            "ORDER BY p.createdAt DESC ")
+    Page<Post> getPostsByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(
+            @Param("clubId") Integer clubId,
+            @Param("searchName") String searchName,
+            @Param("userCreate") User userCreate,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL " +
+            "AND p.status = '0' " +
+            "AND p.isNewfeed = '1' " +
+            "AND p.club.clubId = :clubId " +
+            "AND (:searchName IS NULL OR p.title LIKE %:searchName%) " +
+            "ORDER BY p.createdAt DESC ")
+    Page<Post> getPostsActiveByClubClubIdAndTitleContainingAndUserCreateOrderByCreatedAtDesc(
+            @Param("clubId") Integer clubId,
+            @Param("searchName") String searchName,
+            Pageable pageable
+    );
 
     long countByCreatedAtBetween(Date start, Date end);
 
