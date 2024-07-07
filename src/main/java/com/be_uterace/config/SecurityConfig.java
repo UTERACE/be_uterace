@@ -93,7 +93,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/payment/**").permitAll()
                         .requestMatchers("/api/admin", "/api/manage-news", "/api/manage-club", "/api/manage-user", "/api/manage-event",
                                 "/api/distance", "/api/manage-news/**", "/api/manage-club/**", "/api/manage-user/**", "/api/manage-event/**",
-                                "/api/distance/**", "/api/dashboard").hasRole("ADMIN")
+                                "/api/distance/**", "/api/dashboard","manage-payment/**").hasRole("ADMIN")
 
 
                         .anyRequest().authenticated()

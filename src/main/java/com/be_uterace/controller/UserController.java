@@ -115,4 +115,13 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/payment")
+    public ResponseEntity<ManagePaymentSearchResponse> paymentSearch(
+            @RequestParam (defaultValue = "1" )int current_page,
+            @RequestParam (defaultValue = "5" ) int per_page,
+            @RequestParam(required = false) String transaction_id) {
+
+        return null;
+    }
+
 }
