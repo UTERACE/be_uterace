@@ -19,7 +19,13 @@
    cd be_uterace
     mvn clean install
     mvn spring-boot:run
-3. **Truy cập ứng dụng**
+3. **Chạy ứng dụng bằng Docker**
+   ```bash
+   cd be_uterace
+    mvn clean install
+    docker build -t your-docker-image-name .
+   docker run -p 8080:8080 your-docker-image-name
+5.  **Truy cập ứng dụng**
   http://localhost:8080
 
 
