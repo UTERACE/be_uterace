@@ -4,7 +4,7 @@
 
 ## Yêu cầu
 
-- JDK (Java Development Kit) - phiên bản 17 trở lên
+- JDK (Java Development Kit) - phiên bản 17
 - Maven - phiên bản 3 trở lên
 - Spring boot - phiên bản 3.1.3
 
