@@ -14,5 +14,12 @@
 
    ```bash
    git clone https://github.com/UTERACE/be_uterace
-   cd your_project
+2. **Chạy ứng dụng bằng Maven**
+    ```bash
+   cd be_uterace
+    mvn clean install
+    mvn spring-boot:run
+3. **Truy cập ứng dụng**
+  http://localhost:8080
+
 
