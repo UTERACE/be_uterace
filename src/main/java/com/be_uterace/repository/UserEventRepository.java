@@ -32,7 +32,9 @@ public interface UserEventRepository extends JpaRepository<UserEvent, UserEventI
             "AND ue.status = '1' " +
             "AND (:searchName IS NULL " +
             "OR (unaccent(LOWER(u.firstName)) ILIKE unaccent(LOWER(:searchName)) " +
-            "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName))))")
+            "OR unaccent(LOWER(u.lastName)) ILIKE unaccent(LOWER(:searchName)))) " +
+            "ORDER BY ue.ranking ASC" // Sắp xếp theo ranking tăng dần (ASC) hoặc giảm dần (DESC)
+    )
     Page<UserEvent> findByEventIdAndSearchName(
             @Param("eventId") Integer eventId,
             @Param("searchName") String searchName,
