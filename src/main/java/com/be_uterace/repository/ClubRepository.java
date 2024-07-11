@@ -54,11 +54,11 @@ public interface ClubRepository extends JpaRepository<Club, Integer>, JpaSpecifi
             "c.clubName AS clubName," +
             "c.picturePath AS picturePath, " +
             "c.clubTotalDistance as clubTotalDistance, " +
-            "COUNT(uc.user.userId) AS memberCount, " +
-            "COUNT(rc.user.userId) AS reactionCount " +
+            "COUNT(distinct uc.user.userId) AS memberCount, " +
+            "COUNT(distinct rc.user.userId) AS reactionCount " +
             "FROM Club c " +
-            "LEFT JOIN UserClub uc ON c.clubId = uc.club.clubId " +
-            "LEFT JOIN ReactionClub rc ON c.clubId = rc.club.clubId " +
+            "inner JOIN UserClub uc ON c.clubId = uc.club.clubId " +
+            "left JOIN ReactionClub rc ON c.clubId = rc.club.clubId and rc.reactionType='like'" +
             "WHERE unaccent(LOWER(c.clubName)) LIKE unaccent(LOWER(concat('%', :search_name, '%'))) " +
             "GROUP BY c.clubId " +
             "ORDER BY c.clubTotalDistance DESC")
