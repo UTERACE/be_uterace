@@ -45,7 +45,7 @@ public interface UserClubRepository extends JpaRepository<UserClub, UserClubId> 
 
     boolean existsByClubAndUser(Club club, User user);
     @Query("SELECT new com.be_uterace.payload.response.UserFindResponse(uc.user.userId, uc.user.email, uc.user.firstName, " +
-            "uc.user.lastName, uc.user.dateOfBirth, uc.user.gender) " +
+            "uc.user.lastName, uc.user.dateOfBirth, uc.user.gender, uc.user.avatarPath) " +
             "FROM UserClub uc WHERE uc.club.clubId = :clubId AND " +
             "(uc.user.email = :search OR uc.user.name LIKE %:search%)")
     List<UserFindResponse> findUserByClub(int clubId, String search);
