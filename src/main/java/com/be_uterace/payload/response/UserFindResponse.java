@@ -18,4 +18,5 @@ public class UserFindResponse {
     private String lastName;
     private Date dateOfBirth;
     private Gender gender;
+    private String avatar;
 }

@@ -31,7 +31,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Post> findTop6PostsByOutstanding(String outstanding);
 
     @Query("SELECT p FROM Post p WHERE p.status='1' AND p.isNewfeed='0' " +
-            "AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
+            "AND p.deletedAt IS NULL " +
+            "AND p.club.clubId = :clubId " +
+            "ORDER BY p.createdAt DESC")
     List<Post> getPostsByClubClubId(Integer clubId);
 
     Page<Post> getPostsByTitleContainingAndUserCreateUserId(String search_name, Pageable pageable, Integer userId);
