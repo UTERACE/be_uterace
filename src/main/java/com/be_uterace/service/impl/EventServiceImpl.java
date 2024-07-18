@@ -8,6 +8,7 @@ import com.be_uterace.repository.*;
 import com.be_uterace.service.EventService;
 import com.be_uterace.service.FileService;
 import com.be_uterace.service.UserService;
+import com.be_uterace.utils.MomoEncoder;
 import com.be_uterace.utils.StatusCode;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
@@ -414,6 +415,7 @@ public class EventServiceImpl implements EventService {
         userEvent.setStatus_complete("0");
         userEvent.setRunningCategory(runningCategoryRepository.findById(1).get());
         userEvent.setStatus("1");
+        userEvent.setEntryCode(MomoEncoder.generateRequestId());
         userEventRepository.save(userEvent);
         return new ResponseObject(StatusCode.SUCCESS, "Tham gia giải chạy thành công");
     }
@@ -655,6 +657,14 @@ public class EventServiceImpl implements EventService {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @Override
+    public EntryCodeResponse getEntryCode(Integer event_id) {
+        User userCurrent = userService.getCurrentLogin();
+        Optional<UserEvent> userEventOptional = userEventRepository.findByUserUserIdAndEventEventId(userCurrent.getUserId(), event_id);
+        UserEvent userEvent = userEventOptional.get();
+        return new EntryCodeResponse(userEvent.getEntryCode());
     }
 
 }

@@ -158,4 +158,9 @@ public class EventController {
     public ResponseEntity<byte[]> exportScoreBoardController(@PathVariable Integer event_id){
         return eventService.exportScoreBoard(event_id);
     }
+
+    @GetMapping("/entry-code/{event_id}")
+    public ResponseEntity<EntryCodeResponse> getEntryCode(@PathVariable Integer event_id){
+        return ResponseEntity.ok(eventService.getEntryCode(event_id));
+    }
 }

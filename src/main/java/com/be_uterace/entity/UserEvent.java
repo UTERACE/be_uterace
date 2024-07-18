@@ -48,6 +48,9 @@ public class UserEvent {
 
     @Column(name = "STATUS")
     private String status = "1";
+
+    @Column(name = "ENTRY_CODE")
+    private String entryCode;
     // Getters and setters
 }
 

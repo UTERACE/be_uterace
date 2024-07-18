@@ -41,4 +41,6 @@ public interface EventService {
     EventPaginationResponse getEventCompletedOrNot(int current_page, int per_page, String search_name, boolean complete, Authentication auth);
 
     ResponseEntity<byte[]> exportScoreBoard(int event_id);
+
+    EntryCodeResponse getEntryCode(Integer event_id);
 }
