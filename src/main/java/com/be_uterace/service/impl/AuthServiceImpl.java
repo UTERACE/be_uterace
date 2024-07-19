@@ -312,11 +312,11 @@ public class AuthServiceImpl implements AuthService {
         Optional<User> userOptional = userRepository.findByUsername(registerDto.getUsername());
         User user = userOptional.get();
         user.setPassword(randomPasswordEncoder);
-        userRepository.save(user);
+
 
         EmailDetails emailDetails = EmailDetails.builder()
                 .recipient(registerDto.getEmail())
-                .subject("Password Reset Request")
+                .subject("Password Reset Request - UTE RACE")
                 .msgBody("New password: " + randomPassword)
                 .build();
         Boolean status
@@ -327,6 +327,9 @@ public class AuthServiceImpl implements AuthService {
                     .status(409)
                     .message("Reset password failed")
                     .build();
+        }
+        else{
+            userRepository.save(user);
         }
 
         return ResponseObject.builder()
